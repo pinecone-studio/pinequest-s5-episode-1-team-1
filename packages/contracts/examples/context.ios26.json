@@ -1,0 +1,26 @@
+{
+  "conversation_id": null,
+  "client_now": "2026-10-06T14:00:00+08:00",
+  "timezone": "Asia/Ulaanbaatar",
+  "response_language": "mn",
+  "device": {
+    "platform": "ios",
+    "os_version": "26.1",
+    "app_version": "0.1.0",
+    "permissions": {
+      "microphone": "granted",
+      "contacts": "limited",
+      "calendar": "write_only",
+      "reminders": "granted",
+      "notifications": "granted",
+      "alarms": "not_determined"
+    },
+    "features": {
+      "alarmkit": true,
+      "app_intents": true,
+      "shortcuts": true,
+      "message_compose": true,
+      "google_maps_installed": false
+    }
+  }
+}

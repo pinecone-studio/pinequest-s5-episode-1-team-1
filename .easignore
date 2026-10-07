@@ -1,0 +1,41 @@
+# What EAS Build uploads from this monorepo: only the app and its workspace packages.
+# EAS uses this file instead of .gitignore, so the secret and build-output rules are repeated here.
+
+# Not needed to build the app
+apps/api/
+docs/
+supabase/
+duud/
+.claude/
+.github/
+.vscode/
+.idea/
+
+# Node / Expo build output
+node_modules/
+*.tsbuildinfo
+.expo/
+dist/
+web-build/
+apps/mobile/ios/
+apps/mobile/android/
+
+# Signing material and secrets
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.ipa
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+.venv/
+
+# Recorded audio
+*.m4a
+*.wav
+*.caf

@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "Duud",
+    "slug": "duud",
+    "scheme": "duud",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#05060B",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "mn.duud.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Таны хэлсэн үгийг сонсож ойлгохын тулд Duud микрофон ашиглана.",
+        "NSContactsUsageDescription": "Таны хэлсэн хүн рүү залгах, мессеж бичихийн тулд Duud контактаас утасны дугаарыг хайна. Нэр, дугаар утаснаас гарахгүй."
+      }
+    },
+    "android": {
+      "package": "mn.duud.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_CONTACTS",
+        "android.permission.USE_EXACT_ALARM",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-audio",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true,
+            "buildArchs": [
+              "arm64-v8a"
+            ]
+          }
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#05060B",
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "cfeedeb0-0345-44b4-ac4c-abe1312c091f"
+      }
+    },
+    "owner": "nandinerdene.j"
+  }
+}

@@ -1,0 +1,48 @@
+# Node
+node_modules/
+*.tsbuildinfo
+npm-debug.log*
+
+# Expo / React Native (apps/mobile)
+.expo/
+dist/
+web-build/
+apps/mobile/ios/
+apps/mobile/android/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.ipa
+
+# Python (apps/api)
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Env & secrets — never commit real keys
+.env
+.env.*
+!.env.example
+
+# Supabase local
+supabase/.branches/
+supabase/.temp/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Audio captured during local debugging — never commit user audio
+*.m4a
+*.wav
+*.caf

@@ -1,0 +1,143 @@
+{
+  "$comment": "Shared intent fixtures. Backend LLM tests (Phase 6) assert planner output against these. 'arguments' = exact-match subset per action; 'argument_contains' = case-insensitive substring match; 'tools' order matters. All cases resolve relative dates against reference_now.",
+  "reference_now": "2026-10-06T14:00:00+08:00",
+  "timezone": "Asia/Ulaanbaatar",
+  "cases": [
+    {
+      "id": "01_call_mother",
+      "utterance": "Ээж рүүгээ залга.",
+      "variants": ["Ээж рүү залга", "Ээждээ залга", "Ээжтэй ярья", "Ээж рүү нэг залгаад өг"],
+      "expected": {
+        "tools": ["call_contact"],
+        "arguments": [{ "contact_name": "Ээж" }],
+        "requires_confirmation": true
+      }
+    },
+    {
+      "id": "02_call_mother_polite",
+      "utterance": "Ээждээ залгаад өгөөч.",
+      "expected": {
+        "tools": ["call_contact"],
+        "arguments": [{ "contact_name": "Ээж" }],
+        "requires_confirmation": true
+      }
+    },
+    {
+      "id": "03_alarm_tomorrow_8",
+      "utterance": "Маргааш өглөө 8д сэрээгээрэй.",
+      "variants": ["маргааш 8д сэрээгээрэй", "маргааш өглөө 8 цагт сэрээ", "маргааш 8-д намайг сэрээгээрэй"],
+      "expected": {
+        "tools": ["create_alarm"],
+        "arguments": [{ "fire_at": "2026-10-07T08:00:00+08:00" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "04_reminder_work_9",
+      "utterance": "Маргааш 9 цагт ажилтайг минь сануулаарай.",
+      "milestone": 1,
+      "expected": {
+        "tools": ["create_reminder"],
+        "arguments": [{ "due_at": "2026-10-07T09:00:00+08:00" }],
+        "argument_contains": [{ "title": "ажил" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "05_weather_rain_ub",
+      "utterance": "Өнөөдөр Улаанбаатарт бороо орох уу?",
+      "expected": {
+        "tools": ["get_weather"],
+        "arguments": [{ "date": "2026-10-06" }],
+        "argument_contains": [{ "location_name": "улаанбаатар" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "06_maps_sukhbaatar_square",
+      "utterance": "Сүхбаатарын талбай руу явъя.",
+      "expected": {
+        "tools": ["open_maps"],
+        "argument_contains": [{ "destination": "сүхбаатар" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "07_calendar_work_10",
+      "utterance": "Маргааш 10 цагт ажилтай гэж calendar дээр нэм.",
+      "expected": {
+        "tools": ["create_calendar_event"],
+        "arguments": [{ "start_at": "2026-10-07T10:00:00+08:00" }],
+        "argument_contains": [{ "title": "ажил" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "08_message_bat",
+      "utterance": "Батад орой уулзъя гэж бич.",
+      "expected": {
+        "tools": ["send_message"],
+        "arguments": [{ "contact_name": "Бат" }],
+        "argument_contains": [{ "body": "уулзъя" }],
+        "requires_confirmation": true
+      }
+    },
+    {
+      "id": "09_call_then_weather",
+      "utterance": "Ээж рүү залгаад дараа нь өнөөдрийн цаг агаарыг хэл.",
+      "expected": {
+        "tools": ["call_contact", "get_weather"],
+        "arguments": [{ "contact_name": "Ээж" }, { "date": "2026-10-06" }],
+        "requires_confirmation": true
+      }
+    },
+    {
+      "id": "10_wifi_unsupported",
+      "utterance": "Wi-Fi асаа.",
+      "expected": {
+        "tools": [],
+        "limitation": "system_settings_toggle",
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "11_alarm_and_reminder",
+      "utterance": "Маргааш өглөө 7 цагт сэрээгээд 8:30-д ажил руу гарахыг сануулаарай.",
+      "expected": {
+        "tools": ["create_alarm", "create_reminder"],
+        "arguments": [{ "fire_at": "2026-10-07T07:00:00+08:00" }, { "due_at": "2026-10-07T08:30:00+08:00" }],
+        "argument_contains": [{}, { "title": "ажил" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "12_bluetooth_unsupported",
+      "utterance": "bluetooth-оо унтраачих",
+      "expected": {
+        "tools": [],
+        "limitation": "system_settings_toggle",
+        "requires_confirmation": false
+      }
+    }
+  ],
+  "conversations": [
+    {
+      "id": "c1_tomorrow_carries_over",
+      "$comment": "'маргааш' from turn 1 must carry into turn 2.",
+      "turns": [
+        {
+          "utterance": "Маргааш 8 цагт сэрээгээрэй.",
+          "expected": { "tools": ["create_alarm"], "arguments": [{ "fire_at": "2026-10-07T08:00:00+08:00" }] }
+        },
+        {
+          "utterance": "Тэгээд 9 цагт ажилтайг сануулаарай.",
+          "expected": {
+            "tools": ["create_reminder"],
+            "arguments": [{ "due_at": "2026-10-07T09:00:00+08:00" }],
+            "argument_contains": [{ "title": "ажил" }]
+          }
+        }
+      ]
+    }
+  ]
+}
