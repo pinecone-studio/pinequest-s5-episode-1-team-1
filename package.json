@@ -1,0 +1,21 @@
+{
+  "name": "duud",
+  "private": true,
+  "description": "Duud — Mongolian voice-first personal assistant for iPhone",
+  "workspaces": [
+    "apps/mobile",
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "contracts:export": "npm run export-schemas -w @duud/contracts"
+  },
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

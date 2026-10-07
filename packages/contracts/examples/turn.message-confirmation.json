@@ -1,0 +1,22 @@
+{
+  "conversation_id": "11111111-1111-4111-8111-111111111111",
+  "turn_id": "22222222-2222-4222-8222-222222222203",
+  "transcript": "Батад орой уулзъя гэж бич.",
+  "intent": "send_message",
+  "stage": "awaiting_confirmation",
+  "response": "Батад 'орой уулзъя' гэж мессеж явуулах уу?",
+  "actions": [
+    {
+      "id": "a1",
+      "tool": "send_message",
+      "arguments": { "contact_name": "Бат", "body": "Орой уулзъя" },
+      "confirmation": { "required": true, "prompt": "Батад 'орой уулзъя' гэж мессеж явуулах уу?" },
+      "result": null
+    }
+  ],
+  "requires_confirmation": true,
+  "requires_clarification": false,
+  "clarification": null,
+  "limitations": [],
+  "audio_url": null
+}

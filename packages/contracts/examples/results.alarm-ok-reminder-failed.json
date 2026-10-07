@@ -1,0 +1,8 @@
+{
+  "conversation_id": "11111111-1111-4111-8111-111111111111",
+  "turn_id": "22222222-2222-4222-8222-222222222206",
+  "results": [
+    { "action_id": "a1", "tool": "create_alarm", "status": "succeeded", "executed_via": "native_swift", "error_code": null },
+    { "action_id": "a2", "tool": "create_reminder", "status": "failed", "executed_via": "native_swift", "error_code": "EK_SAVE_FAILED" }
+  ]
+}
