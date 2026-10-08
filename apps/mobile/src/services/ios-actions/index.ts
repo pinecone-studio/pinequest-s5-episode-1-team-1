@@ -1,11 +1,12 @@
 import { isRunningInExpoGo } from "expo";
 import { Platform } from "react-native";
 import type { ActionRequest, ActionResult } from "@bekhi/contracts";
+import { cancelAlarms, publishAlarm, refreshAlarms } from "@/services/sync/alarm-sync";
 import { NATIVE_UNAVAILABLE } from "./codes";
 import { DesktopActionService } from "./DesktopActionService";
 import { ExpoAndroidActionService } from "./ExpoAndroidActionService";
 import { ExpoIOSActionService } from "./ExpoIOSActionService";
-import type { IOSActionService } from "./IOSActionService";
+import type { ActionOutcome, IOSActionService } from "./IOSActionService";
 
 export { NATIVE_UNAVAILABLE };
 
@@ -21,8 +22,48 @@ export const iosActions: IOSActionService =
 
 /** Runs one device action and wraps the outcome as a contract ActionResult. */
 export async function executeDeviceAction(service: IOSActionService, action: ActionRequest): Promise<ActionResult> {
-  const outcome = await dispatch(service, action);
+  if (action.tool === "list_reminders" || action.tool === "cancel_reminder") {
+    // Alarms set on the user's other devices are listed and cancelled here too.
+    await refreshAlarms().catch((e: unknown) => console.warn("alarm sync failed", e));
+  }
+  const outcome = await withSync(action, await dispatch(service, action));
   return { action_id: action.id, tool: action.tool, ...outcome };
+}
+
+/**
+ * Alarms and timers for all devices (sync_id set by the backend) go to the user's other
+ * devices once this one has scheduled its copy; cancelling cancels them everywhere. The
+ * outcome's data says what happened, so the reply is honest about the other devices.
+ */
+async function withSync(action: ActionRequest, outcome: ActionOutcome): Promise<ActionOutcome> {
+  if (outcome.status !== "succeeded") return outcome;
+  if (action.tool === "create_alarm" || action.tool === "set_timer") {
+    const args = action.arguments;
+    const fireAt = args.fire_at;
+    if (!args.sync_id || !fireAt) return outcome;
+    const alarm = action.tool === "create_alarm"
+      ? { id: args.sync_id, kind: "alarm" as const, title: args.label ?? "Сэрэх цаг боллоо", fire_at: fireAt }
+      : { id: args.sync_id, kind: "timer" as const, title: args.label ?? "Таймер", fire_at: fireAt };
+    try {
+      const others = await publishAlarm(alarm);
+      return { ...outcome, data: { ...outcome.data, sync: { status: "sent", other_devices: others } } };
+    } catch (e) {
+      console.warn("alarm publish failed", e);
+      return { ...outcome, data: { ...outcome.data, sync: { status: "failed" } } };
+    }
+  }
+  if (action.tool === "cancel_reminder") {
+    const ids = outcome.data?.cancelled_sync_ids;
+    if (!Array.isArray(ids) || ids.length === 0) return outcome;
+    try {
+      await cancelAlarms(ids.map(String));
+      return { ...outcome, data: { ...outcome.data, sync: { status: "sent" } } };
+    } catch (e) {
+      console.warn("alarm cancel sync failed", e);
+      return { ...outcome, data: { ...outcome.data, sync: { status: "failed" } } };
+    }
+  }
+  return outcome;
 }
 
 function dispatch(service: IOSActionService, action: ActionRequest) {

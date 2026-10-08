@@ -53,6 +53,7 @@ with `stage: "final"`.
 | D9 | STT and TTS run in a separate GPU service, `apps/speech`, which only `apps/api` calls (bearer token). | Both models need a GPU. Railway/Render have none. The API stays cheap and CPU-only. |
 | D10 | The iPhone records 16 kHz mono 16-bit WAV (`AUDIO_UPLOAD`), max 30 s. | That's BuzzASR's native input, so there's no server-side transcoding or ffmpeg. |
 | D11 | TTS voice is `female` or `male` only (`TtsVoice`). Reference audio is never accepted from clients. | F5-TTS clones any reference voice. Allowing uploads would turn BEKHI into a voice-cloning service. |
+| D12 | Alarms and timers with `target: "all"` (the default) go to every device linked with the same **sync code** (`packages/contracts/src/sync.ts`, `apps/api` `sync.py`). The backend sets `sync_id` and a timer's `fire_at` from its own clock. The device that heard the command schedules its copy, then publishes it. The other devices pull the list and schedule their own copies **ahead of time**. Cancelling marks it cancelled for every device. The server stores only the SHA-256 of the code (Supabase `sync_alarms`/`sync_devices`, or in memory when Supabase is not configured). | A device rings even if the network is down at that moment: it only has to be online once after the alarm was set. Linking needs no login screen, and Supabase Auth can replace the code later behind the same endpoints. Replies say "илгээлээ" (sent), not "тавилаа" (set), for the other devices, because the server cannot see whether they have scheduled their copies yet. |
 
 ## Repository layout
 

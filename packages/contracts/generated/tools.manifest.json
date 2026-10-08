@@ -145,7 +145,7 @@
       ],
       "min_ios": "26.0",
       "app_intent": null,
-      "notes": "iOS 26+: AlarmKit schedules a real alarm owned by BEKHI (not an entry in the Clock app's list). Below iOS 26 there is no API to create alarms; BEKHI can run a user-installed Shortcut that uses the Clock 'Create Alarm' action, or explain the limitation. A local notification is NOT an alarm and is only offered explicitly, never substituted silently.",
+      "notes": "iOS 26+: AlarmKit schedules a real alarm owned by BEKHI (not an entry in the Clock app's list). Below iOS 26 there is no API to create alarms; BEKHI can run a user-installed Shortcut that uses the Clock 'Create Alarm' action, or explain the limitation. A local notification is NOT an alarm and is only offered explicitly, never substituted silently. target 'all' (default) also sends it to every device linked with the same sync code; each schedules its own copy.",
       "parameters": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -163,6 +163,19 @@
           "label": {
             "type": "string",
             "maxLength": 100
+          },
+          "target": {
+            "default": "all",
+            "type": "string",
+            "enum": [
+              "all",
+              "this"
+            ]
+          },
+          "sync_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
         "required": [
@@ -416,7 +429,7 @@
       ],
       "min_ios": "17.0",
       "app_intent": null,
-      "notes": "Rings after duration_seconds: a local notification on the phone, a looping toast on the computer.",
+      "notes": "Rings at fire_at (the backend adds duration_seconds to its clock): a local notification on the phone, a looping toast on the computer. target 'all' (default) also sends it to every linked device.",
       "parameters": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -429,6 +442,24 @@
           "label": {
             "type": "string",
             "maxLength": 100
+          },
+          "target": {
+            "default": "all",
+            "type": "string",
+            "enum": [
+              "all",
+              "this"
+            ]
+          },
+          "fire_at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "sync_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
         "required": [
@@ -448,7 +479,7 @@
       ],
       "min_ios": "17.0",
       "app_intent": null,
-      "notes": "Reminders, alarms and timers BEKHI has scheduled on this device; returned in the result's data.",
+      "notes": "Reminders, alarms and timers BEKHI has scheduled on this device, after pulling the synced ones from the server; returned in the result's data.",
       "parameters": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -467,7 +498,7 @@
       ],
       "min_ios": "17.0",
       "app_intent": null,
-      "notes": "Cancels BEKHI's scheduled items matching the title words or time, or all of them. Several matches without a filter ask which one (needs_clarification).",
+      "notes": "Cancels BEKHI's scheduled items matching the title words or time, or all of them. Several matches without a filter ask which one (needs_clarification). Synced alarms/timers are cancelled on the server too, so every linked device drops them.",
       "parameters": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",

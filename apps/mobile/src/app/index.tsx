@@ -8,6 +8,7 @@ import { ConfirmBar } from "@/components/ConfirmBar";
 import { EdgeGlow } from "@/components/EdgeGlow";
 import { MessageLine } from "@/components/MessageLine";
 import { type OrbState, SiriOrb } from "@/components/SiriOrb";
+import { SyncLink } from "@/components/SyncLink";
 import { TypeBar } from "@/components/TypeBar";
 import { VoicePicker } from "@/components/VoicePicker";
 import { notify, tap } from "@/lib/haptics";
@@ -164,6 +165,7 @@ export default function Chat() {
             <View style={styles.headerActions}>
               <RoundButton icon="map-outline" label="Газрын зураг, зам" onPress={() => router.push("/map")} small />
               <VoicePicker voices={voices} voiceId={voiceId} onChoose={chooseVoice} />
+              <SyncLink live={live} />
               <RoundButton
                 icon={!voiceReplies ? "volume-mute" : speaking ? "volume-high" : "volume-medium"}
                 label={voiceReplies ? "Дуугаар хариулахыг унтраах" : "Дуугаар хариулахыг асаах"}

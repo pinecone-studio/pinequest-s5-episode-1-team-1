@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from typing import Any, get_args
 from uuid import UUID, uuid4
 
@@ -34,7 +35,7 @@ from .models import (
     Limitation,
     LimitationCode,
 )
-from .planner import CONFIRM_FIELD, SUMMARY_FIELD, function_specs, system_prompt
+from .planner import BACKEND_FIELDS, CONFIRM_FIELD, SUMMARY_FIELD, function_specs, system_prompt
 from .providers.base import FunctionCall, HistoryMessage, LLMPlanner, WebSearch
 from .store import MemoryStore, PendingTurn
 
@@ -91,6 +92,21 @@ def _tool_response(result: ActionResult) -> dict[str, Any]:
     return {"error": code, "reason": FAILED_BY_CODE.get(code, "")}
 
 
+def _server_now() -> datetime:
+    return datetime.now(timezone.utc)
+
+
+def _fill_backend_fields(tool: str, args: dict[str, Any], ctx: AssistantContext) -> None:
+    """A timer becomes the moment it rings, from this server's clock and in the user's offset,
+    so every linked device rings together. An alarm or timer for all devices gets the id
+    that every device's copy shares (sync.py)."""
+    if tool == "set_timer":
+        ends = _server_now() + timedelta(seconds=int(args["duration_seconds"]))
+        args["fire_at"] = ends.astimezone(ctx.client_now.tzinfo).isoformat(timespec="seconds")
+    if tool in BACKEND_FIELDS and args.get("target", "all") == "all":
+        args["sync_id"] = str(uuid4())
+
+
 def _fallback_confirmation(tool: str, args: dict[str, Any]) -> str:
     who = args.get("contact_name", "")
     return f"{who}: залгах уу?" if tool == "call_contact" else f"{who}: '{args.get('body', '')}' гэж явуулах уу?"
@@ -133,6 +149,8 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                     continue
                 args = {k: v for k, v in call.args.items() if v is not None}
                 question = args.pop(CONFIRM_FIELD, None)
+                for name in BACKEND_FIELDS.get(call.name, ()):
+                    args.pop(name, None)
                 args = apply_defaults(call.name, args)
                 errors = validate_tool_args(call.name, args)
                 if call.name == "open_url" and not str(args.get("url", "")).lower().startswith(("http://", "https://")):
@@ -143,6 +161,7 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                     invalid = True
                     results.append((call, {"error": "INVALID_ARGUMENTS"}))
                     continue
+                _fill_backend_fields(call.name, args, ctx)
                 entry = manifest[call.name]
                 required = entry["confirmation"] == "always"
                 prompt = None

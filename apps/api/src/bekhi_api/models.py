@@ -202,3 +202,38 @@ class ApiErrorBody(BaseModel):
 
 class ApiError(BaseModel):
     error: ApiErrorBody
+
+
+# Alarm/timer sync between linked devices (packages/contracts src/sync.ts).
+SyncPlatform = Literal["ios", "android", "web"]
+
+
+class SyncDeviceRequest(BaseModel):
+    platform: SyncPlatform
+
+
+class SyncAlarm(BaseModel):
+    id: UUID
+    kind: Literal["alarm", "timer"]
+    title: str = Field(min_length=1, max_length=100)
+    fire_at: datetime
+
+    @field_validator("fire_at")
+    @classmethod
+    def _aware(cls, v: datetime) -> datetime:
+        if v.tzinfo is None:
+            raise ValueError("fire_at must include a UTC offset")
+        return v
+
+
+class SyncPublishResponse(BaseModel):
+    other_devices: list[SyncPlatform]
+
+
+class SyncCancelRequest(BaseModel):
+    ids: list[UUID] = Field(min_length=1, max_length=50)
+
+
+class SyncPullResponse(BaseModel):
+    active: list[SyncAlarm]
+    cancelled: list[UUID]

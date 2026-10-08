@@ -8,6 +8,11 @@ Endpoints (Phase 3/4):
   POST /api/v1/assistant/tts               Mongolian text -> speech (MP3, or WAV from the fallback)
   POST /api/v1/assistant/actions/results   device outcomes -> final Mongolian answer
   POST /api/v1/maps/directions             phone location + destination -> route (Google Routes API)
+  POST /api/v1/sync/devices                this device is linked (sync code + device id headers)
+  GET  /api/v1/sync/alarms                 alarms/timers to ring on every linked device
+  POST /api/v1/sync/alarms                 publish one this device has set
+  POST /api/v1/sync/alarms/cancel          cancel some on every linked device
+  POST /api/v1/desktop/sync                link this Windows PC (the API's own scheduler) to a sync code
 """
 
 from __future__ import annotations
@@ -21,15 +26,16 @@ import wave
 from array import array
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 import httpx
-from fastapi import FastAPI, File, Form, Request, UploadFile
+from fastapi import FastAPI, File, Form, Header, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import desktop, directions
+from . import desktop, directions, sync
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -42,6 +48,11 @@ from .models import (
     ChatRequest,
     DirectionsRequest,
     DirectionsResponse,
+    SyncAlarm,
+    SyncCancelRequest,
+    SyncDeviceRequest,
+    SyncPublishResponse,
+    SyncPullResponse,
 )
 from .compose import speakable
 from .pipeline import ContractViolation, Deps, UnknownTurn, plan_turn, report_results
@@ -66,8 +77,11 @@ MN_DIRECTIONS = {
     "MAPS_KEY_INVALID": (502, "Google Maps API key буруу, эсвэл Routes API идэвхжээгүй байна."),
     "MAPS_FAILED": (502, "Уучлаарай, зам тооцоолоход алдаа гарлаа."),
 }
-# Billed per request, so these share the assistant's per-minute limit.
-RATE_LIMITED_PATHS = ("/api/v1/assistant", "/api/v1/maps")
+# Billed per request, so these share the assistant's per-minute limit. Sync too: a sync code
+# must not be guessable by trying many.
+RATE_LIMITED_PATHS = ("/api/v1/assistant", "/api/v1/maps", "/api/v1/sync")
+MN_SYNC_CODE_INVALID = "Холбох код буруу байна."
+MN_SYNC_FAILED = "Бусад төхөөрөмжтэй холбогдож чадсангүй."
 LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost"}
 
 WAV_TYPES = {"audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"}
@@ -88,6 +102,10 @@ class TtsRequest(BaseModel):
 class DesktopActionRequest(BaseModel):
     tool: str = Field(max_length=64)
     arguments: dict
+
+
+class DesktopSyncRequest(BaseModel):
+    code: str = Field(max_length=32)
 
 
 def _is_local(request: Request) -> bool:
@@ -139,9 +157,11 @@ async def lifespan(app: FastAPI):
     async with httpx.AsyncClient(timeout=10) as http:
         app.state.http = http
         app.state.store = MemoryStore()
+        settings = get_settings()
+        app.state.sync = sync.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
         app.state.desktop = None
-        if get_settings().desktop_actions and desktop.available():
-            app.state.desktop = desktop.DesktopScheduler()
+        if settings.desktop_actions and desktop.available():
+            app.state.desktop = desktop.DesktopScheduler(sync=app.state.sync)
             app.state.desktop.start()
         try:
             yield
@@ -350,6 +370,68 @@ def create_app() -> FastAPI:
         except Exception:
             log.exception("desktop action failed rid=%s", request.state.request_id)
             return {"status": "failed", "executed_via": "backend", "error_code": "DESKTOP_FAILED"}
+
+    @app.post("/api/v1/desktop/sync")
+    async def desktop_sync(body: DesktopSyncRequest, request: Request):
+        """The web app on this Windows PC links the PC itself, so it rings synced alarms with the browser closed."""
+        scheduler = request.app.state.desktop
+        if scheduler is None or not _is_local(request):
+            raise ApiException(404, "invalid_request", MN_DESKTOP_UNAVAILABLE)
+        account = sync.account_key(body.code)
+        if account is None:
+            raise ApiException(401, "unauthorized", MN_SYNC_CODE_INVALID)
+        device_id = scheduler.link(account)
+        try:
+            await scheduler.sync_now()
+        except Exception:
+            log.warning("desktop sync failed rid=%s", request.state.request_id)
+        return {"device_id": device_id}
+
+    def sync_identity(code: str | None, device: str | None) -> tuple[str, str]:
+        account = sync.account_key(code)
+        if account is None or not sync.valid_device_id(device):
+            raise ApiException(401, "unauthorized", MN_SYNC_CODE_INVALID)
+        return account, device or ""
+
+    async def sync_call(request: Request, work):
+        try:
+            return await work(request.app.state.sync, datetime.now(timezone.utc))
+        except httpx.HTTPError as e:
+            log.warning("sync store failed: %s rid=%s", type(e).__name__, request.state.request_id)
+            raise ApiException(502, "internal", MN_SYNC_FAILED) from e
+
+    @app.post("/api/v1/sync/devices")
+    async def sync_device(body: SyncDeviceRequest, request: Request,
+                          x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, device = sync_identity(x_bekhi_sync, x_bekhi_device)
+        await sync_call(request, lambda store, now: store.touch_device(account, device, body.platform, now))
+        return {"ok": True}
+
+    @app.get("/api/v1/sync/alarms", response_model=SyncPullResponse)
+    async def sync_pull(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        active, cancelled = await sync_call(request, lambda store, now: store.pull(account, now))
+        return {"active": active, "cancelled": cancelled}
+
+    @app.post("/api/v1/sync/alarms", response_model=SyncPublishResponse)
+    async def sync_publish(body: SyncAlarm, request: Request,
+                           x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, device = sync_identity(x_bekhi_sync, x_bekhi_device)
+        alarm = {"id": str(body.id), "kind": body.kind, "title": body.title, "fire_at": body.fire_at.isoformat()}
+
+        async def publish(store, now):
+            await store.publish(account, device, alarm)
+            return await store.other_devices(account, device, now)
+
+        return {"other_devices": await sync_call(request, publish)}
+
+    @app.post("/api/v1/sync/alarms/cancel")
+    async def sync_cancel(body: SyncCancelRequest, request: Request,
+                          x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        ids = [str(i) for i in body.ids]
+        await sync_call(request, lambda store, now: store.cancel(account, ids, now))
+        return {"ok": True}
 
     @app.post("/api/v1/assistant/actions/results", response_model=ActionResultsResponse)
     async def action_results(body: ActionResultsRequest, request: Request):

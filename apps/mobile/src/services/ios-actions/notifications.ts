@@ -45,7 +45,7 @@ function createAndroidChannels(): Promise<unknown> {
  */
 export async function scheduleNotification(
   fireAtIso: string,
-  content: { title: string; body?: string; ringtone?: boolean; kind?: string },
+  content: { title: string; body?: string; ringtone?: boolean; kind?: string; syncId?: string },
 ): Promise<ActionOutcome> {
   const date = new Date(fireAtIso);
   if (!(date.getTime() > Date.now())) {
@@ -86,8 +86,9 @@ export async function scheduleNotification(
         body: content.body ?? null,
         // On Android the channel decides the sound; "defaultRingtone" is an iOS name.
         sound: content.ringtone && Platform.OS === "ios" ? "defaultRingtone" : "default",
-        // Read back by listScheduled(): what it is and when, as the user said it.
-        data: { bekhi: true, kind: content.kind ?? "reminder", fireAt: fireAtIso },
+        // Read back by listScheduled(): what it is and when, as the user said it, and which
+        // synced alarm it is a copy of (alarm-sync.ts).
+        data: { bekhi: true, kind: content.kind ?? "reminder", fireAt: fireAtIso, syncId: content.syncId ?? null },
       },
       trigger: channelId
         ? { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId }
@@ -106,7 +107,10 @@ export async function listScheduled(): Promise<ScheduledItem[]> {
     .flatMap((n) => {
       const data = n.content.data;
       if (data?.bekhi !== true || typeof data.fireAt !== "string") return [];
-      return [{ id: n.identifier, title: n.content.title ?? "", kind: String(data.kind ?? "reminder"), fire_at: data.fireAt }];
+      const syncId = typeof data.syncId === "string" ? data.syncId : undefined;
+      return [
+        { id: n.identifier, title: n.content.title ?? "", kind: String(data.kind ?? "reminder"), fire_at: data.fireAt, sync_id: syncId },
+      ];
     })
     .sort((a, b) => Date.parse(a.fire_at) - Date.parse(b.fire_at));
 }

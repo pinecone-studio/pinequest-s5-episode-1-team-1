@@ -4,6 +4,9 @@ Reminders, alarms and event reminders are Windows toast notifications. They are 
 in the API process (and in a small JSON file, so a restart does not lose them): they
 fire while the BEKHI API is running, and ones missed while it was stopped fire at start.
 Nothing is registered with the OS (no scheduled tasks, no autostart).
+
+Linked with a sync code (POST /api/v1/desktop/sync), the PC is one of the user's devices: it
+pulls alarms and timers set on the phone (sync.py) and rings them too, even with the browser closed.
 """
 
 from __future__ import annotations
@@ -16,7 +19,7 @@ import os
 import sys
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from xml.sax.saxutils import escape
@@ -32,6 +35,9 @@ NOTES_FILE_NAME = "БЭХИ тэмдэглэл.txt"
 OLD_NOTES_FILE_NAME = "Duud тэмдэглэл.txt"
 OLD_DATA_DIR_NAME = "Duud"
 CREATE_NO_WINDOW = 0x08000000
+SYNC_EVERY_SECONDS = 30
+# A synced alarm about to ring (or ringing) is not scheduled again: clocks differ by a few seconds.
+SYNC_MIN_LEAD = timedelta(seconds=5)
 
 TOAST_SCRIPT = """$ErrorActionPreference = 'Stop'
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
@@ -56,6 +62,7 @@ class Toast:
     body: str
     alarm: bool
     kind: str = "reminder"  # reminder | alarm | event | timer
+    sync_id: str | None = None  # shared with the other linked devices' copies
 
 
 def _data_dir() -> Path:
@@ -102,10 +109,49 @@ async def show_toast(title: str, body: str, alarm: bool = False) -> None:
 
 
 class DesktopScheduler:
-    def __init__(self, store: Path | None = None) -> None:
+    def __init__(self, store: Path | None = None, sync: Any = None) -> None:
         self._store = store or _data_dir() / "reminders.json"
+        self._link_file = self._store.with_name("sync.json")
         self._pending: list[Toast] = self._load()
         self._task: asyncio.Task | None = None
+        self._sync = sync  # sync.SyncStore
+        self._link: dict[str, str] | None = self._load_link()
+        self._synced: set[str] = {t.sync_id for t in self._pending if t.sync_id}
+
+    def _load_link(self) -> dict[str, str] | None:
+        try:
+            link = json.loads(self._link_file.read_text(encoding="utf-8"))
+            return link if {"account", "device_id"} <= set(link) else None
+        except (OSError, ValueError):
+            return None
+
+    def link(self, account: str) -> str:
+        """Joins the PC to a sync account (the hash of the code, never the code); returns its device id."""
+        device_id = (self._link or {}).get("device_id") or f"pc-{uuid.uuid4().hex[:16]}"
+        self._link = {"account": account, "device_id": device_id}
+        self._link_file.write_text(json.dumps(self._link), encoding="utf-8")
+        return device_id
+
+    async def sync_now(self, now: datetime | None = None) -> None:
+        """Rings what the other devices set; drops what any device cancelled."""
+        if self._sync is None or self._link is None:
+            return
+        now = now or datetime.now(timezone.utc)
+        account = self._link["account"]
+        await self._sync.touch_device(account, self._link["device_id"], "web", now)
+        active, cancelled = await self._sync.pull(account, now)
+        for a in active:
+            when = datetime.fromisoformat(a["fire_at"])
+            if a["id"] in self._synced or when <= now + SYNC_MIN_LEAD:
+                continue
+            if a["kind"] == "timer":
+                self.add(when, a["title"], "Таймер дууслаа", alarm=True, kind="timer", sync_id=a["id"])
+            else:
+                self.add(when, a["title"], "БЭХИ сэрүүлэг", alarm=True, kind="alarm", sync_id=a["id"])
+        gone = set(cancelled)
+        if any(t.sync_id in gone for t in self._pending):
+            self._pending = [t for t in self._pending if t.sync_id not in gone]
+            self._save()
 
     def _load(self) -> list[Toast]:
         try:
@@ -116,25 +162,29 @@ class DesktopScheduler:
     def _save(self) -> None:
         self._store.write_text(json.dumps([asdict(t) for t in self._pending], ensure_ascii=False), encoding="utf-8")
 
-    def add(self, fire_at: datetime, title: str, body: str, alarm: bool, kind: str = "reminder") -> None:
+    def add(self, fire_at: datetime, title: str, body: str, alarm: bool, kind: str = "reminder",
+            sync_id: str | None = None) -> None:
         local = fire_at.astimezone().replace(tzinfo=None, microsecond=0)
-        self._pending.append(Toast(uuid.uuid4().hex[:12], local.isoformat(), title, body, alarm, kind))
+        self._pending.append(Toast(uuid.uuid4().hex[:12], local.isoformat(), title, body, alarm, kind, sync_id))
+        if sync_id:
+            self._synced.add(sync_id)
         self._save()
 
     def items(self) -> list[dict[str, Any]]:
         """What is still to come, soonest first; times carry this PC's UTC offset."""
         ordered = sorted(self._pending, key=lambda t: t.fire_at)
         return [
-            {"id": t.id, "title": t.title, "kind": t.kind, "fire_at": datetime.fromisoformat(t.fire_at).astimezone().isoformat(timespec="seconds")}
+            {"id": t.id, "title": t.title, "kind": t.kind, "sync_id": t.sync_id,
+             "fire_at": datetime.fromisoformat(t.fire_at).astimezone().isoformat(timespec="seconds")}
             for t in ordered
         ]
 
-    def cancel(self, ids: set[str]) -> list[str]:
-        """Removes the given items; returns their titles."""
+    def cancel(self, ids: set[str]) -> list[Toast]:
+        """Removes the given items and returns them."""
         gone = [t for t in self._pending if t.id in ids]
         self._pending = [t for t in self._pending if t.id not in ids]
         self._save()
-        return [t.title for t in gone]
+        return gone
 
     def start(self) -> None:
         now = datetime.now()
@@ -149,7 +199,15 @@ class DesktopScheduler:
             self._task.cancel()
 
     async def _run(self) -> None:
+        last_sync = 0.0
+        loop = asyncio.get_running_loop()
         while True:
+            if loop.time() - last_sync >= SYNC_EVERY_SECONDS:
+                last_sync = loop.time()
+                try:
+                    await self.sync_now()
+                except Exception as e:  # offline or Supabase down: try again next round
+                    log.warning("alarm sync failed: %s", type(e).__name__)
             await self.fire_due(datetime.now())
             await asyncio.sleep(CHECK_EVERY_SECONDS)
 
@@ -298,9 +356,14 @@ def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[st
         os.startfile(target)
         return _result("succeeded")
     if tool == "set_timer":
-        when = datetime.now().astimezone() + timedelta(seconds=int(args["duration_seconds"]))
+        # The backend sets fire_at from its clock, so all linked devices ring together.
+        when = (
+            datetime.fromisoformat(args["fire_at"]) if args.get("fire_at")
+            else datetime.now().astimezone() + timedelta(seconds=int(args["duration_seconds"]))
+        )
         # The title names it in lists ("Таймер"); the toast's second line says it has run out.
-        scheduler.add(when, args.get("label") or "Таймер", "Таймер дууслаа", alarm=True, kind="timer")
+        scheduler.add(when, args.get("label") or "Таймер", "Таймер дууслаа", alarm=True, kind="timer",
+                      sync_id=args.get("sync_id"))
         return _result("succeeded")
     if tool == "list_reminders":
         return _result("succeeded", data={"items": scheduler.items()[:10]})
@@ -310,7 +373,12 @@ def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[st
             return _result("needs_clarification", "REMINDER_AMBIGUOUS", match_count=len(matches))
         if not matches:
             return _result("failed", "REMINDER_NOT_FOUND")
-        return _result("succeeded", data={"cancelled": scheduler.cancel({i["id"] for i in matches})})
+        gone = scheduler.cancel({i["id"] for i in matches})
+        # The app cancels the synced ones on the server too, so the other devices drop them.
+        return _result("succeeded", data={
+            "cancelled": [t.title for t in gone],
+            "cancelled_sync_ids": [t.sync_id for t in gone if t.sync_id],
+        })
     if tool == "computer_control":
         return computer_control(args)
     fields = {
@@ -325,5 +393,5 @@ def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[st
     if when is None:
         return _result("failed", "TIME_IN_PAST")
     title, body, alarm = content()
-    scheduler.add(when, title, body, alarm, kind)
+    scheduler.add(when, title, body, alarm, kind, sync_id=args.get("sync_id") if tool == "create_alarm" else None)
     return _result("succeeded")

@@ -99,9 +99,9 @@ def test_timers_lists_and_cancelling(tmp_path):
     ambiguous = desktop.run("cancel_reminder", {}, s)
     assert ambiguous["status"] == "needs_clarification" and ambiguous["match_count"] == 3
     assert desktop.run("cancel_reminder", {"query": "Кино"}, s)["error_code"] == "REMINDER_NOT_FOUND"
-    assert desktop.run("cancel_reminder", {"query": "ус уух"}, s)["data"] == {"cancelled": ["Ус уух"]}
-    assert desktop.run("cancel_reminder", {"at": FUTURE}, s)["data"] == {"cancelled": ["Ажилтай"]}
-    assert desktop.run("cancel_reminder", {"all": True}, s)["data"] == {"cancelled": ["Таймер"]}
+    assert desktop.run("cancel_reminder", {"query": "ус уух"}, s)["data"]["cancelled"] == ["Ус уух"]
+    assert desktop.run("cancel_reminder", {"at": FUTURE}, s)["data"]["cancelled"] == ["Ажилтай"]
+    assert desktop.run("cancel_reminder", {"all": True}, s)["data"]["cancelled"] == ["Таймер"]
     assert desktop.run("list_reminders", {}, s)["data"] == {"items": []}
 
 

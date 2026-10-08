@@ -7,6 +7,7 @@ matching result status says so. Partial failures are reported per action.
 from __future__ import annotations
 
 import re
+from collections import Counter
 from datetime import date
 
 from .models import ActionRequest, ActionResult
@@ -52,6 +53,9 @@ FOLDER_NAMES = {
     "videos": "Videos",
 }
 KIND_MN = {"reminder": "сануулга", "alarm": "сэрүүлэг", "timer": "таймер", "event": "уулзалт"}
+DEVICE_MN = {"ios": "iPhone", "android": "Android утас", "web": "компьютер"}
+MN_SYNC_FAILED = "Бусад төхөөрөмж рүү илгээж чадсангүй, зөвхөн энд тавигдлаа."
+MN_SYNC_CANCEL_FAILED = "Гэхдээ бусад төхөөрөмж дээр цуцалж чадсангүй."
 
 UNSUPPORTED_BY_CODE = {
     "WEB_NO_IPHONE_ACTIONS": "Компьютерийн browser дээр {verb} боломжгүй. Үүнийг iPhone дээр туршина.",
@@ -162,7 +166,31 @@ def _computer_sentence(a: dict, data: dict) -> str:
     return "За, хийчихлээ."
 
 
+def sync_note(data: dict | None) -> str:
+    """Where else a synced alarm/timer went, as reported by the device that published it.
+    "Sent", not "set": each device schedules its copy once it is online."""
+    sync = (data or {}).get("sync")
+    if not isinstance(sync, dict):
+        return ""  # target "this", or no devices linked
+    if sync.get("status") != "sent":
+        return MN_SYNC_FAILED
+    counts = Counter(DEVICE_MN.get(str(p), "төхөөрөмж") for p in sync.get("other_devices") or [])
+    if not counts:
+        return ""  # only this device is linked
+    names = ", ".join(name if n == 1 else f"{n} {name}" for name, n in counts.items())
+    return f"Бусад төхөөрөмж рүү бас илгээлээ: {names}."
+
+
 def sentence_for(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
+    sentence = _sentence(action, r, now_iso)
+    if action.tool in ("create_alarm", "set_timer") and r.status == "succeeded":
+        sentence = f"{sentence} {sync_note(r.data)}".strip()
+    if action.tool == "cancel_reminder" and ((r.data or {}).get("sync") or {}).get("status") == "failed":
+        sentence = f"{sentence} {MN_SYNC_CANCEL_FAILED}"
+    return sentence
+
+
+def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
     verb, dative = ACTION_MN[action.tool]
     a = action.arguments
     if r.status == "succeeded":
