@@ -74,6 +74,7 @@ class Settings:
     desktop_actions: bool
     web_search_provider: str | None
     tavily_api_key: str | None
+    google_maps_api_key: str | None
     log_level: str
     cors_origins: list[str] = field(default_factory=list)
 
@@ -122,6 +123,8 @@ def get_settings() -> Settings:
         # needs billing on the Gemini key (the free tier answers 429).
         web_search_provider=os.getenv("WEB_SEARCH_PROVIDER", "tavily") or None,
         tavily_api_key=os.getenv("TAVILY_API_KEY") or None,
+        # Routes API (in-app directions). Server-side only: the map tiles in the app use their own keys.
+        google_maps_api_key=os.getenv("GOOGLE_MAPS_API_KEY") or None,
         log_level=os.getenv("LOG_LEVEL") or "INFO",
         cors_origins=_csv(os.getenv("CORS_ORIGINS")) or ["http://localhost:8081"],
     )

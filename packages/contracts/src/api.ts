@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ActionRequest, ActionResult } from "./actions";
 import { DEFAULT_TIMEZONE, IanaTimezone, IsoDateTime, SpokenText, TtsVoice, Uuid } from "./common";
-import { isDeviceTool } from "./tools";
+import { isDeviceTool, TravelMode } from "./tools";
 
 // ---------------------------------------------------------------------------
 // Device capabilities — sent with every request so the backend can plan
@@ -193,6 +193,42 @@ export const ActionResultsResponse = z.object({
 export type ActionResultsResponse = z.infer<typeof ActionResultsResponse>;
 
 // ---------------------------------------------------------------------------
+// POST /api/v1/maps/directions — a route from where the phone is (Google Routes API)
+// ---------------------------------------------------------------------------
+
+export const LatLng = z.object({
+  latitude: z.number().min(-90).max(90),
+  longitude: z.number().min(-180).max(180),
+});
+export type LatLng = z.infer<typeof LatLng>;
+
+export const DirectionsRequest = z.object({
+  origin: LatLng,
+  /** Free text, as the user said it: "Сансар", "Улсын их дэлгүүр". */
+  destination: z.string().min(1).max(200),
+  mode: TravelMode.default("driving"),
+});
+export type DirectionsRequest = z.infer<typeof DirectionsRequest>;
+
+export const DirectionsResponse = z.object({
+  distance_m: z.number().int().min(0),
+  duration_s: z.number().int().min(0),
+  destination: LatLng,
+  /** The route to draw, origin first. */
+  path: z.array(LatLng).max(5000),
+  steps: z
+    .array(
+      z.object({
+        /** Turn instruction from Google, in Mongolian where Google has it. */
+        instruction: z.string().max(500),
+        distance_m: z.number().int().min(0),
+      }),
+    )
+    .max(200),
+});
+export type DirectionsResponse = z.infer<typeof DirectionsResponse>;
+
+// ---------------------------------------------------------------------------
 // Errors
 // ---------------------------------------------------------------------------
 
@@ -200,6 +236,7 @@ export const ApiErrorCode = z.enum([
   "stt_failed",
   "llm_failed",
   "tts_failed",
+  "maps_failed",
   "invalid_request",
   "unauthorized",
   "rate_limited",

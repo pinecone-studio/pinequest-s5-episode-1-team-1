@@ -10,6 +10,8 @@ src/services/assistant/     AssistantClient interface · PreviewAssistantClient 
 src/services/ios-actions/   IOSActionService interface · Expo (iPhone) / ExpoAndroid / Desktop (web) implementations
 src/services/audio/         recorder (16 kHz WAV; Android reads raw PCM and writes the WAV itself) · endpointing
 src/services/speech/        plays the reply from POST /assistant/tts (expo-audio on iPhone, <audio> on web)
+src/services/maps/          live location (expo-location) · route from POST /maps/directions · progress along the route
+src/app/map.tsx             map screen: route on react-native-maps (RouteMap.web.tsx: Maps JavaScript API), re-routes when you leave it
 src/components/             SiriOrb (tap to talk) · EdgeGlow · Backdrop · MessageLine · TypeBar · ConfirmBar · VoicePicker
 ```
 
@@ -59,7 +61,7 @@ the LAN, hence `usesCleartextTraffic` (expo-build-properties). Exact-alarm permi
 | | Expo Go (iPhone) | Expo Go (Android) | Development build (Phase 9+) | Browser on the PC that runs the API |
 |---|---|---|---|---|
 | Voice conversation (record → backend STT → reply → spoken reply) | ✅ | ✅ | ✅ | ✅ |
-| Open maps (`open_maps`) | ✅ Apple Maps | ✅ Google Maps | ✅ | ✅ Google Maps tab |
+| Open maps (`open_maps`) | ✅ BEKHI's map screen (Apple Maps tiles in Expo Go) | ✅ BEKHI's map screen (Google Maps) | ✅ | ✅ Google Maps tab |
 | Call / message a contact | ✅ expo-contacts + `tel:` / message sheet | ✅ expo-contacts + dialer / SMS app | ✅ | ❌ |
 | Reminder / alarm / event / timer | ⚠️ local notification at that time | ⚠️ local notification at that time | ✅ EventKit / AlarmKit | ⚠️ Windows toast while the API runs |
 | Note | ❌ | ❌ | ✅ | ✅ appended to Documents\BEKHI тэмдэглэл.txt |
