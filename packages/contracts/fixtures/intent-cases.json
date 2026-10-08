@@ -137,6 +137,32 @@
         "limitation": "system_settings_toggle",
         "requires_confirmation": false
       }
+    },
+    {
+      "id": "13_open_app",
+      "utterance": "YouTube-ээ нээгээч.",
+      "variants": ["Фэйсбүүк рүүгээ ороочээ"],
+      "expected": {
+        "tools": ["open_app"],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "14_search_in_app",
+      "utterance": "YouTube-ээс Монгол дуу хайгаад өг.",
+      "expected": {
+        "tools": ["open_app"],
+        "argument_contains": [{ "app_name": "youtube", "query": "монгол дуу" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "15_open_any_installed_app",
+      "utterance": "Хаан банкны аппаа нээ.",
+      "expected": {
+        "tools": ["open_app"],
+        "requires_confirmation": false
+      }
     }
   ],
   "conversations": [

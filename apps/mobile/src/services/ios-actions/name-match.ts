@@ -47,7 +47,7 @@ export function nameKeys(name: string): string[] {
 const MIN_SCORE = 0.82;
 
 /** How alike two keys are, 0 to 1 (Jaro-Winkler: forgives a misheard letter, trusts a shared start). */
-function similarity(a: string, b: string): number {
+export function similarity(a: string, b: string): number {
   if (a === b) return 1;
   if (!a || !b) return 0;
   const range = Math.max(0, Math.floor(Math.max(a.length, b.length) / 2) - 1);

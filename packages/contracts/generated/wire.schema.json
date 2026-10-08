@@ -2615,7 +2615,14 @@
                       "app_name": {
                         "type": "string",
                         "minLength": 1,
-                        "maxLength": 100
+                        "maxLength": 100,
+                        "description": "The app in its usual name, as under its icon: 'YouTube', 'Spotify', 'Khan Bank', 'Камер', 'VS Code'"
+                      },
+                      "query": {
+                        "description": "Only when the user wants something found or played in the app: what to search for there ('Монгол дуу')",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300
                       }
                     },
                     "required": [
@@ -6362,7 +6369,14 @@
                 "app_name": {
                   "type": "string",
                   "minLength": 1,
-                  "maxLength": 100
+                  "maxLength": 100,
+                  "description": "The app in its usual name, as under its icon: 'YouTube', 'Spotify', 'Khan Bank', 'Камер', 'VS Code'"
+                },
+                "query": {
+                  "description": "Only when the user wants something found or played in the app: what to search for there ('Монгол дуу')",
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
                 }
               },
               "required": [

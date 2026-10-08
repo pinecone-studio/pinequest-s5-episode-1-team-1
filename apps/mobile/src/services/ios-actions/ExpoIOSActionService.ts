@@ -2,6 +2,7 @@ import { Linking } from "react-native";
 import * as SMS from "expo-sms";
 import type { ToolArguments } from "@bekhi/contracts";
 import { toLocalIso } from "@/lib/time";
+import { openAppOnPhone } from "./apps";
 import { lookupPhone, type ContactLookup } from "./contacts";
 import { type ActionOutcome, type ChosenContact, type NotificationRequest, unsupported } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
@@ -12,8 +13,8 @@ import { pickScheduled } from "./scheduled";
 /**
  * What a real iPhone can do in Expo Go, without the native module (Phase 9): calls
  * (Contacts + tel:), messages (Contacts + the system message sheet), reminders, alarms
- * and event reminders as local notifications, and directions on BEKHI's own map screen.
- * Notes still need the native module.
+ * and event reminders as local notifications, directions on BEKHI's own map screen, and
+ * the known apps through their URL schemes. Notes still need the native module.
  */
 export class ExpoIOSActionService extends LinkingIOSActionService {
   openMaps = (args: ToolArguments<"open_maps">) => openInAppMap(args);
@@ -112,8 +113,8 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
 
   createNotification = (req: NotificationRequest) => scheduleNotification(req.fire_at, { title: req.title, body: req.body });
 
-  // iOS lets an app open another app only through that app's own URL scheme.
-  openApp = async () => unsupported("IOS_CANNOT_OPEN_APPS");
+  // iOS lets an app open another app only through that app's own URL scheme: the known apps.
+  openApp = (args: ToolArguments<"open_app">) => openAppOnPhone(args, "ios");
 }
 
 /** The contact the user picked on screen, or else the name looked up again. */

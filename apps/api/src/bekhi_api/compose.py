@@ -37,7 +37,7 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "complete_todo": ("тэмдэглэх", "тэмдэглэхэд"),
     "delete_todo": ("устгах", "устгахад"),
     "open_url": ("вэб хуудас нээх", "вэб хуудас нээхэд"),
-    "open_app": ("програм нээх", "програм нээхэд"),
+    "open_app": ("апп нээх", "апп нээхэд"),
     "set_timer": ("таймер тавих", "таймер тавихад"),
     "list_reminders": ("сануулгуудыг харах", "сануулгуудыг харахад"),
     "cancel_reminder": ("сануулга цуцлах", "сануулга цуцлахад"),
@@ -62,10 +62,12 @@ UNSUPPORTED_BY_CODE = {
     "EXPO_GO_NATIVE_UNAVAILABLE": "Expo Go дээр {verb} боломжгүй. Үүнд development build хэрэгтэй.",
     "NATIVE_MODULE_NOT_BUILT": "{Verb} үйлдэл одоохондоо бэлэн болоогүй байна.",
     "SMS_UNAVAILABLE": "Энэ утсаар мессеж илгээх боломжгүй байна.",
-    "IOS_CANNOT_OPEN_APPS": "iPhone дээр БЭХИ өөр апп нээж чадахгүй, iOS үүнийг зөвшөөрдөггүй.",
+    "IOS_CANNOT_OPEN_APPS": "iPhone дээр '{app}' аппыг нээж чадсангүй. iOS зөвхөн YouTube, Spotify, Facebook шиг "
+    "танил аппуудыг нээхийг зөвшөөрдөг.",
     "IOS_NO_SYSTEM_CONTROL": "iPhone дээр БЭХИ дууны түвшин өөрчлөх, утсыг түгжих боломжгүй, iOS зөвшөөрдөггүй.",
     # Possible on Android, but not from Expo Go: these need a native build of BEKHI.
-    "ANDROID_CANNOT_OPEN_APPS": "Android утсан дээр БЭХИ одоохондоо өөр апп нээж чадахгүй.",
+    "ANDROID_CANNOT_OPEN_APPS": "Expo Go дээр '{app}' аппыг нээж чадсангүй. БЭХИ-гийн Android апп суулгавал утсан "
+    "дээрх ямар ч аппыг нэрээр нь нээнэ.",
     "ANDROID_NO_SYSTEM_CONTROL": "Android утсан дээр БЭХИ одоохондоо дууны түвшин өөрчлөх, утсыг түгжих боломжгүй.",
 }
 
@@ -81,6 +83,8 @@ FAILED_BY_CODE = {
     "WEB_SEARCH_LIMIT": "Энэ сарын үнэгүй хайлтын эрх (Tavily, 1000 удаа) дууссан байна.",
     "WEB_SEARCH_FAILED": "Вэбээс хайхад асуудал гарлаа.",
     "APP_NOT_FOUND": "'{app}' гэсэн програм энэ компьютер дээр олдсонгүй.",
+    "APP_NOT_INSTALLED": "'{app}' гэсэн апп энэ утсанд олдсонгүй.",
+    "APP_OPEN_FAILED": "'{app}' аппыг нээж чадсангүй.",
     "URL_NOT_HTTP": "Энэ хаягийг нээж чадсангүй.",
     "LOCATION_NOT_FOUND": "Тэр газрыг олсонгүй. Өөрөөр хэлээд өгөөч.",
     "CONTACT_NOT_FOUND": "{name} гэсэн контакт олдсонгүй.",
@@ -164,6 +168,17 @@ def _computer_sentence(a: dict, data: dict) -> str:
         case "open_folder":
             return f"За, {FOLDER_NAMES.get(a.get('folder', ''), 'хавтсыг')} хавтсыг нээлээ."
     return "За, хийчихлээ."
+
+
+def _app_sentence(a: dict, data: dict) -> str:
+    """The app the phone (or a browser tab) opened, named as the device reports it, and the search done there."""
+    app = str(data.get("app") or a["app_name"])
+    query = a.get("query")
+    if query and data.get("searched"):
+        return f"За, {app} дээр '{query}' гэж хайлаа."
+    if query:
+        return f"За, {app} нээлээ. '{query}' гэж тэндээсээ хайгаарай."
+    return f"За, {app} нээлээ."
 
 
 def sync_note(data: dict | None) -> str:
@@ -256,6 +271,8 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return f"За, {toward(a['contact_name'])} бичих мессежийг бэлдлээ. Илгээх товчийг дараарай."
             case "open_url":
                 return f"За, {a.get('title') or 'хуудсыг'} нээлээ."
+            case "open_app":
+                return _app_sentence(a, r.data or {})
         return "За, нээчихлээ."
     if r.status == "cancelled":
         return "За, болиулчихлаа."
@@ -269,7 +286,7 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
         return "Аль нь болохыг тодруулаад өгөөч."
     if r.status == "unsupported":
         template = UNSUPPORTED_BY_CODE.get(r.error_code or "")
-        return template.format(verb=verb, Verb=_cap(verb)) if template else MN_PHONE_UNAVAILABLE
+        return template.format(verb=verb, Verb=_cap(verb), app=a.get("app_name", "")) if template else MN_PHONE_UNAVAILABLE
     template = FAILED_BY_CODE.get(r.error_code or "")
     if not template:
         return f"{_cap(dative)} асуудал гарлаа."
