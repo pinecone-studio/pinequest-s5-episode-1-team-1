@@ -1,6 +1,6 @@
 import { Linking } from "react-native";
 import * as SMS from "expo-sms";
-import type { ToolArguments } from "@duud/contracts";
+import type { ToolArguments } from "@bekhi/contracts";
 import { toLocalIso } from "@/lib/time";
 import { lookupPhone, type ContactLookup } from "./contacts";
 import { type ActionOutcome, type NotificationRequest, unsupported } from "./IOSActionService";
@@ -15,7 +15,7 @@ import { pickScheduled } from "./scheduled";
  */
 export class ExpoIOSActionService extends LinkingIOSActionService {
   callContact = async (args: ToolArguments<"call_contact">): Promise<ActionOutcome> => {
-    const contact = await lookupPhone(args.contact_name).catch(() => null);
+    const contact = await lookupPhone(args.contact_name).catch(lookupFailed);
     if (contact?.kind !== "found") return notReachable(contact);
     try {
       // iOS shows its own "Call …?" prompt; whether the call happens is not observable.
@@ -28,7 +28,7 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
 
   sendMessage = async (args: ToolArguments<"send_message">): Promise<ActionOutcome> => {
     if (!(await SMS.isAvailableAsync())) return unsupported("SMS_UNAVAILABLE");
-    const contact = await lookupPhone(args.contact_name).catch(() => null);
+    const contact = await lookupPhone(args.contact_name).catch(lookupFailed);
     if (contact?.kind !== "found") return notReachable(contact);
     try {
       // The system message sheet: the user taps Send, and iOS reports whether they did.
@@ -42,18 +42,18 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
   };
 
   createReminder = (args: ToolArguments<"create_reminder">) =>
-    scheduleNotification(args.due_at, { title: args.title, body: args.notes ?? "Duud сануулга", kind: "reminder" });
+    scheduleNotification(args.due_at, { title: args.title, body: args.notes ?? "БЭХИ сануулга", kind: "reminder" });
 
   createAlarm = (args: ToolArguments<"create_alarm">) =>
     scheduleNotification(args.fire_at, {
       title: args.label ?? "Сэрэх цаг боллоо",
-      body: "Duud сэрүүлэг",
+      body: "БЭХИ сэрүүлэг",
       ringtone: true,
       kind: "alarm",
     });
 
   createCalendarEvent = (args: ToolArguments<"create_calendar_event">) =>
-    scheduleNotification(args.start_at, { title: args.title, body: args.location ?? "Duud: эхлэх цаг боллоо", kind: "event" });
+    scheduleNotification(args.start_at, { title: args.title, body: args.location ?? "БЭХИ: эхлэх цаг боллоо", kind: "event" });
 
   setTimer = (args: ToolArguments<"set_timer">) =>
     scheduleNotification(toLocalIso(new Date(Date.now() + args.duration_seconds * 1000)), {
@@ -103,6 +103,12 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
 
   // iOS lets an app open another app only through that app's own URL scheme.
   openApp = async () => unsupported("IOS_CANNOT_OPEN_APPS");
+}
+
+/** Why a contact lookup threw, for the dev server log; the user hears a short sentence instead. */
+function lookupFailed(e: unknown): null {
+  console.warn("contact lookup failed", e);
+  return null;
 }
 
 function notReachable(contact: ContactLookup | null): ActionOutcome {

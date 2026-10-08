@@ -11,9 +11,9 @@ let handlerSet = false;
  * still rings.
  */
 const ANDROID_CHANNELS: Record<"reminders" | "alarms", { id: string } & Notifications.NotificationChannelInput> = {
-  reminders: { id: "duud-reminders", name: "Сануулга", importance: Notifications.AndroidImportance.HIGH },
+  reminders: { id: "bekhi-reminders", name: "Сануулга", importance: Notifications.AndroidImportance.HIGH },
   alarms: {
-    id: "duud-alarms",
+    id: "bekhi-alarms",
     name: "Сэрүүлэг, таймер",
     importance: Notifications.AndroidImportance.MAX,
     audioAttributes: { usage: Notifications.AndroidAudioUsage.ALARM },
@@ -68,7 +68,7 @@ export async function scheduleNotification(
     return { status: "permission_denied", executed_via: "react_native", error_code: "NOTIFICATIONS_DENIED" };
   }
   if (!handlerSet) {
-    // Also show and sound it when Duud is open at that moment.
+    // Also show and sound it when BEKHI is open at that moment.
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
         shouldShowBanner: true,
@@ -87,7 +87,7 @@ export async function scheduleNotification(
         // On Android the channel decides the sound; "defaultRingtone" is an iOS name.
         sound: content.ringtone && Platform.OS === "ios" ? "defaultRingtone" : "default",
         // Read back by listScheduled(): what it is and when, as the user said it.
-        data: { duud: true, kind: content.kind ?? "reminder", fireAt: fireAtIso },
+        data: { bekhi: true, kind: content.kind ?? "reminder", fireAt: fireAtIso },
       },
       trigger: channelId
         ? { type: Notifications.SchedulableTriggerInputTypes.DATE, date, channelId }
@@ -99,13 +99,13 @@ export async function scheduleNotification(
   }
 }
 
-/** Duud's notifications still to come, soonest first (other apps' are left out). */
+/** BEKHI's notifications still to come, soonest first (other apps' are left out). */
 export async function listScheduled(): Promise<ScheduledItem[]> {
   const all = await Notifications.getAllScheduledNotificationsAsync();
   return all
     .flatMap((n) => {
       const data = n.content.data;
-      if (data?.duud !== true || typeof data.fireAt !== "string") return [];
+      if (data?.bekhi !== true || typeof data.fireAt !== "string") return [];
       return [{ id: n.identifier, title: n.content.title ?? "", kind: String(data.kind ?? "reminder"), fire_at: data.fireAt }];
     })
     .sort((a, b) => Date.parse(a.fire_at) - Date.parse(b.fire_at));

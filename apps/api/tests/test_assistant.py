@@ -5,10 +5,10 @@ import math
 import struct
 import wave
 
-from duud_api import main as main_mod
-from duud_api.contracts import validate_wire
-from duud_api.planner import DEVICE_LINES
-from duud_api.providers import ProviderNotConfigured
+from bekhi_api import main as main_mod
+from bekhi_api.contracts import validate_wire
+from bekhi_api.planner import DEVICE_LINES
+from bekhi_api.providers import ProviderNotConfigured
 
 from .conftest import FakeSTT, context
 
@@ -259,7 +259,7 @@ def test_missing_key_is_explained(client, monkeypatch):
 
 
 def test_direction_suffix_follows_vowel_harmony():
-    from duud_api.compose import toward
+    from bekhi_api.compose import toward
 
     assert toward("Ээж") == "Ээж рүү"
     assert toward("Бат") == "Бат руу"
@@ -272,7 +272,7 @@ def test_direction_suffix_follows_vowel_harmony():
 async def test_overloaded_model_falls_back_to_next():
     from google.genai import errors, types
 
-    from duud_api.providers.gemini import generate_with_fallback
+    from bekhi_api.providers.gemini import generate_with_fallback
 
     calls = []
 
@@ -297,8 +297,8 @@ async def test_overloaded_model_falls_back_to_next():
 async def test_duudlaga_stt_request_and_errors():
     import httpx
 
-    from duud_api.providers.base import ProviderUserError
-    from duud_api.providers.duudlaga import DuudlagaSpeechToText
+    from bekhi_api.providers.base import ProviderUserError
+    from bekhi_api.providers.duudlaga import DuudlagaSpeechToText
 
     seen = {}
 
@@ -349,6 +349,20 @@ def test_tts_endpoint_returns_audio_and_caches(client, monkeypatch):
     assert calls == ["За, болиулчихлаа."]
 
 
+def test_tts_says_the_app_name_as_a_word(client, monkeypatch):
+    said = []
+
+    class FakeTTS:
+        async def synthesize(self, text, voice=None):
+            said.append(text)
+            return b"ID3fake-mp3"
+
+    monkeypatch.setattr(main_mod, "get_tts", lambda http: FakeTTS())
+    r = client.post("/api/v1/assistant/tts", json={"text": "Сайн байна уу, би БЭХИ байна. БЭХИ-д хэлээрэй."})
+    assert r.status_code == 200
+    assert said == ["Сайн байна уу, би Бэхи байна. Бэхи-д хэлээрэй."]
+
+
 def test_tts_without_key_is_explained(client, monkeypatch):
     def missing(http):
         raise ProviderNotConfigured("no key")
@@ -365,7 +379,7 @@ async def test_elevenlabs_request_shape():
 
     import httpx
 
-    from duud_api.providers.elevenlabs import ElevenLabsTextToSpeech
+    from bekhi_api.providers.elevenlabs import ElevenLabsTextToSpeech
 
     seen = {}
 
@@ -387,9 +401,9 @@ async def test_elevenlabs_request_shape():
 async def test_provider_errors_name_the_real_cause():
     import httpx
 
-    from duud_api.providers.base import ProviderUserError
-    from duud_api.providers.duudlaga import DuudlagaSpeechToText
-    from duud_api.providers.elevenlabs import ElevenLabsTextToSpeech
+    from bekhi_api.providers.base import ProviderUserError
+    from bekhi_api.providers.duudlaga import DuudlagaSpeechToText
+    from bekhi_api.providers.elevenlabs import ElevenLabsTextToSpeech
 
     def duudlaga(request):  # 402 with a body shape we do not recognise
         return httpx.Response(402, json={"detail": "Payment Required"})
@@ -426,8 +440,8 @@ async def test_provider_errors_name_the_real_cause():
 
 
 async def test_stt_falls_back_when_primary_fails():
-    from duud_api.providers import FallbackSpeechToText
-    from duud_api.providers.base import ProviderUserError
+    from bekhi_api.providers import FallbackSpeechToText
+    from bekhi_api.providers.base import ProviderUserError
 
     class Broke:
         async def transcribe(self, audio, mime_type):
@@ -438,9 +452,9 @@ async def test_stt_falls_back_when_primary_fails():
 
 
 async def test_failed_account_is_skipped_for_a_while(monkeypatch):
-    from duud_api import providers
-    from duud_api.providers import FallbackSpeechToText
-    from duud_api.providers.base import ProviderUserError
+    from bekhi_api import providers
+    from bekhi_api.providers import FallbackSpeechToText
+    from bekhi_api.providers.base import ProviderUserError
 
     monkeypatch.setattr(providers, "_skip_until", {})
     calls = []
@@ -457,9 +471,9 @@ async def test_failed_account_is_skipped_for_a_while(monkeypatch):
 
 
 async def test_tts_falls_back_when_primary_fails(monkeypatch):
-    from duud_api import providers
-    from duud_api.providers import FallbackTextToSpeech
-    from duud_api.providers.base import ProviderUserError
+    from bekhi_api import providers
+    from bekhi_api.providers import FallbackTextToSpeech
+    from bekhi_api.providers.base import ProviderUserError
 
     monkeypatch.setattr(providers, "_skip_until", {})
 
@@ -476,7 +490,7 @@ async def test_tts_falls_back_when_primary_fails(monkeypatch):
 
 
 def test_only_the_configured_provider_is_used(monkeypatch):
-    from duud_api.providers import FallbackTextToSpeech, _with_fallback
+    from bekhi_api.providers import FallbackTextToSpeech, _with_fallback
 
     def build(name):
         if name == "elevenlabs":
@@ -551,7 +565,7 @@ def _gemini_stub(live_messages=None, live_error=None, text="prompted"):
 async def test_gemini_stt_uses_the_transcription_model():
     from google.genai import types
 
-    from duud_api.providers.gemini import GeminiSpeechToText
+    from bekhi_api.providers.gemini import GeminiSpeechToText
 
     msg = lambda **sc: types.LiveServerMessage(server_content=types.LiveServerContent(**sc))  # noqa: E731
     client = _gemini_stub([
@@ -565,7 +579,7 @@ async def test_gemini_stt_uses_the_transcription_model():
 
 
 async def test_gemini_stt_falls_back_to_prompted_transcription():
-    from duud_api.providers.gemini import STT_INSTRUCTION, GeminiSpeechToText
+    from bekhi_api.providers.gemini import STT_INSTRUCTION, GeminiSpeechToText
 
     client = _gemini_stub(live_error=RuntimeError("quota"), text="Өнөөдөр бороо орох уу?")
     stt = GeminiSpeechToText(client, ["gemini-3.6-flash"], "gemini-3.5-transcribe-live")
@@ -576,7 +590,7 @@ async def test_gemini_stt_falls_back_to_prompted_transcription():
 async def test_quota_exhausted_model_is_tried_last(monkeypatch):
     from google.genai import errors, types
 
-    from duud_api.providers import gemini
+    from bekhi_api.providers import gemini
 
     monkeypatch.setattr(gemini, "_quota_exhausted_until", {})
     calls = []
@@ -599,7 +613,7 @@ async def test_quota_exhausted_model_is_tried_last(monkeypatch):
 
 
 def test_every_function_restates_the_request():
-    from duud_api.planner import SUMMARY_FIELD, function_specs
+    from bekhi_api.planner import SUMMARY_FIELD, function_specs
 
     for spec in function_specs():
         assert spec.parameters["required"][0] == SUMMARY_FIELD, spec.name
@@ -625,8 +639,8 @@ def test_restated_question_is_returned_and_not_sent_as_tool_args(client, planner
 async def test_duudlaga_string_error_code():
     import httpx
 
-    from duud_api.providers.base import ProviderUserError
-    from duud_api.providers.duudlaga import DuudlagaSpeechToText
+    from bekhi_api.providers.base import ProviderUserError
+    from bekhi_api.providers.duudlaga import DuudlagaSpeechToText
 
     def handler(request):  # the body Duudlaga actually sends with an empty balance
         return httpx.Response(402, json={"error": "insufficient_credits", "message": "Top up your balance."})
@@ -642,8 +656,8 @@ async def test_duudlaga_string_error_code():
 async def test_library_voice_on_free_plan_is_explained():
     import httpx
 
-    from duud_api.providers.base import ProviderUserError
-    from duud_api.providers.elevenlabs import ElevenLabsTextToSpeech
+    from bekhi_api.providers.base import ProviderUserError
+    from bekhi_api.providers.elevenlabs import ElevenLabsTextToSpeech
 
     def handler(request):
         return httpx.Response(402, json={"detail": {
@@ -725,7 +739,7 @@ def test_notification_outcomes_are_honest(client, planner):
 
 
 def test_voices_and_paid_voice_fallback(client, monkeypatch):
-    from duud_api.providers.base import VoiceNeedsPaidPlan
+    from bekhi_api.providers.base import VoiceNeedsPaidPlan
 
     asked = []
 
@@ -742,10 +756,10 @@ def test_voices_and_paid_voice_fallback(client, monkeypatch):
     assert not names["Laura"]["needs_paid_plan"] and names["Sarnai (Монгол)"]["needs_paid_plan"]
 
     r = client.post("/api/v1/assistant/tts", json={"text": "Сайн уу", "voice": "FGY2WhTYpPnrIDTdsKH5"})
-    assert r.content == b"ID3FGY2WhTYpPnrIDTdsKH5" and "x-duud-voice-fallback" not in r.headers
+    assert r.content == b"ID3FGY2WhTYpPnrIDTdsKH5" and "x-bekhi-voice-fallback" not in r.headers
 
     r = client.post("/api/v1/assistant/tts", json={"text": "Сайн уу", "voice": "WgH4JH8sD6a2SIrujiKn"})
-    assert r.content == b"ID3default" and r.headers["x-duud-voice-fallback"] == "paid_plan_required"
+    assert r.content == b"ID3default" and r.headers["x-bekhi-voice-fallback"] == "paid_plan_required"
 
     r = client.post("/api/v1/assistant/tts", json={"text": "Сайн уу", "voice": "not-a-listed-voice"})
     assert r.content == b"ID3default"  # unknown ids never reach the provider

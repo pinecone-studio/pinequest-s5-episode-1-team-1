@@ -154,7 +154,7 @@ export default function Chat() {
         <KeyboardAvoidingView style={styles.flex} behavior={NATIVE ? "padding" : undefined}>
           <View style={styles.header}>
             <View style={styles.brand}>
-              <Text style={styles.wordmark}>Duud</Text>
+              <Text style={styles.wordmark}>BEKHI</Text>
               <View style={styles.connection}>
                 <View style={[styles.dot, { backgroundColor: live ? colors.success : colors.warning }]} />
                 <Text style={styles.connectionText}>{live ? "Холбогдсон" : "Туршилтын горим"}</Text>

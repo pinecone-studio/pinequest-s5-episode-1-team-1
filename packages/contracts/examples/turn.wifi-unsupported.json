@@ -19,5 +19,5 @@
       }
     }
   ],
-  "audio_url": "https://api.duud.example/api/v1/assistant/tts/audio/22222222-2222-4222-8222-222222222205.mp3"
+  "audio_url": "https://api.bekhi.example/api/v1/assistant/tts/audio/22222222-2222-4222-8222-222222222205.mp3"
 }

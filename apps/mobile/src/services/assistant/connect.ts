@@ -55,12 +55,12 @@ export function connectAssistant(): Promise<AssistantClient> {
 async function findApi(): Promise<string | null> {
   const known = [configuredBaseUrl(), loadServerAddress()].filter((b): b is string => b !== null);
   for (const base of new Set(known)) {
-    if (await isDuudApi(base, PROBE_TIMEOUT_MS)) return base;
+    if (await isBekhiApi(base, PROBE_TIMEOUT_MS)) return base;
   }
   return Platform.OS === "web" ? null : scanWifi();
 }
 
-/** Every other address of the phone's /24 network, a batch at a time; the first Duud API wins. */
+/** Every other address of the phone's /24 network, a batch at a time; the first BEKHI API wins. */
 async function scanWifi(): Promise<string | null> {
   try {
     const state = await getNetworkStateAsync();
@@ -72,7 +72,7 @@ async function scanWifi(): Promise<string | null> {
     const hosts = Array.from({ length: 254 }, (_, i) => i + 1).filter((h) => h !== own);
     for (let i = 0; i < hosts.length; i += SCAN_BATCH) {
       const batch = hosts.slice(i, i + SCAN_BATCH).map((h) => `http://${prefix}.${h}:${API_PORT}`);
-      const answers = await Promise.all(batch.map(async (b) => ((await isDuudApi(b, SCAN_TIMEOUT_MS)) ? b : null)));
+      const answers = await Promise.all(batch.map(async (b) => ((await isBekhiApi(b, SCAN_TIMEOUT_MS)) ? b : null)));
       const found = answers.find((b) => b !== null);
       if (found) return found;
     }
@@ -82,8 +82,8 @@ async function scanWifi(): Promise<string | null> {
   return null;
 }
 
-/** True when `base` answers like the Duud API, not just any server on that port. */
-async function isDuudApi(base: string, timeoutMs: number): Promise<boolean> {
+/** True when `base` answers like the BEKHI API, not just any server on that port. */
+async function isBekhiApi(base: string, timeoutMs: number): Promise<boolean> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

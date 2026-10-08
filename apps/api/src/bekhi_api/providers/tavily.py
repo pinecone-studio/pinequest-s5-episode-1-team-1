@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 URL = "https://api.tavily.com/search"
 MAX_RESULTS = 5
 SNIPPET_CHARS = 600
-# Duud's users are in Mongolia: "Pinecone Academy" should find the one in Ulaanbaatar, not a namesake abroad.
+# BEKHI's users are in Mongolia: "Pinecone Academy" should find the one in Ulaanbaatar, not a namesake abroad.
 COUNTRY = "mongolia"
 
 # HTTP status -> web_search error code (compose.FAILED_BY_CODE has the Mongolian wording).

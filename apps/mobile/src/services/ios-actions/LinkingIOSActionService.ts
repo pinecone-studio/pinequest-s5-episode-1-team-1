@@ -1,5 +1,5 @@
 import { Linking } from "react-native";
-import type { ToolArguments } from "@duud/contracts";
+import type { ToolArguments } from "@bekhi/contracts";
 import { type ActionOutcome, type IOSActionService, unsupported } from "./IOSActionService";
 
 /**

@@ -1,7 +1,7 @@
 import { File, Paths } from "expo-file-system";
 
-/** The Duud API address that last answered, so the next start finds the PC at once. */
-const FILE_NAME = "duud-server.txt";
+/** The BEKHI API address that last answered, so the next start finds the PC at once. */
+const FILE_NAME = "bekhi-server.txt";
 
 export function loadServerAddress(): string | null {
   try {

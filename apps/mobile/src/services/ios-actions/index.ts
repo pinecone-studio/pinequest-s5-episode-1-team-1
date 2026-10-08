@@ -1,6 +1,6 @@
 import { isRunningInExpoGo } from "expo";
 import { Platform } from "react-native";
-import type { ActionRequest, ActionResult } from "@duud/contracts";
+import type { ActionRequest, ActionResult } from "@bekhi/contracts";
 import { NATIVE_UNAVAILABLE } from "./codes";
 import { DesktopActionService } from "./DesktopActionService";
 import { ExpoAndroidActionService } from "./ExpoAndroidActionService";

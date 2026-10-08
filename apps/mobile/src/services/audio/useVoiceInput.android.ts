@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { requestRecordingPermissionsAsync, useAudioStream, type AudioStreamBuffer } from "expo-audio";
 import { File, Paths } from "expo-file-system";
-import { AUDIO_UPLOAD } from "@duud/contracts";
+import { AUDIO_UPLOAD } from "@bekhi/contracts";
 import { createEndpointer, type Verdict } from "./endpointing";
 import { pcm16Wav } from "./wav";
 
@@ -54,7 +54,7 @@ export function useVoiceInput(
           pcm.set(chunk, offset);
           offset += chunk.length;
         }
-        const file = new File(Paths.cache, `duud-voice-${Date.now()}.wav`);
+        const file = new File(Paths.cache, `bekhi-voice-${Date.now()}.wav`);
         file.write(pcm16Wav(pcm, current.rate, current.channels));
         lastFile.current = file;
         return file.uri;

@@ -5,7 +5,7 @@ import {
   MN,
   type ActionResultsRequest,
   type AssistantContext,
-} from "@duud/contracts";
+} from "@bekhi/contracts";
 import { appendAudio } from "@/services/audio/audio-upload";
 import { AssistantError, type AssistantClient } from "./AssistantClient";
 

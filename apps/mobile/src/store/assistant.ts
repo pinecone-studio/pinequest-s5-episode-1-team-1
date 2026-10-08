@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { MN, type ActionResult, type AssistantTurn } from "@duud/contracts";
+import { MN, type ActionResult, type AssistantTurn } from "@bekhi/contracts";
 import { AssistantError, type AssistantClient } from "@/services/assistant/AssistantClient";
 import { PreviewAssistantClient } from "@/services/assistant/PreviewAssistantClient";
 import { apiBaseUrl, connectAssistant } from "@/services/assistant/connect";
@@ -22,10 +22,10 @@ export type Tone = "normal" | "warning" | "error";
 
 export interface ChatMessage {
   id: string;
-  role: "user" | "duud";
+  role: "user" | "bekhi";
   text: string;
   tone: Tone;
-  /** How Duud understood a spoken request, shown when it differs from what was heard. */
+  /** How BEKHI understood a spoken request, shown when it differs from what was heard. */
   understood?: string;
 }
 
@@ -91,12 +91,12 @@ export const useAssistant = create<AssistantState>((set, get) => {
   }
 
   /**
-   * Show a Duud reply and, if enabled, read it aloud. Speech problems never hide the text.
+   * Show a BEKHI reply and, if enabled, read it aloud. Speech problems never hide the text.
    * `thenListen`: the user may answer by voice once the reply has been spoken.
    */
   function reply(text: string, tone: Tone = "normal", thenListen = false) {
     if (!text) return;
-    push(msg("duud", text, tone));
+    push(msg("bekhi", text, tone));
     if (!thenListen) set({ conversing: false });
     const { client, voiceReplies } = get();
     if (!voiceReplies || client.mode !== "live") {
@@ -212,7 +212,7 @@ export const useAssistant = create<AssistantState>((set, get) => {
       if (get().client.mode !== "live") return;
       const mine = ++speechSeq;
       set({ speaking: true });
-      speak(apiBaseUrl(), `Сайн байна уу, би ${voice.name.split(" ")[0]} байна.`, id, showPaidVoiceNotice)
+      speak(apiBaseUrl(), "Сайн байна уу, би БЭХИ байна.", id, showPaidVoiceNotice)
         .catch((e) => set({ speechError: e instanceof AssistantError ? e.message : "Дуу тоглуулж чадсангүй." }))
         .finally(() => {
           if (mine === speechSeq) set({ speaking: false });

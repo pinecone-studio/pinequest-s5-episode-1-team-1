@@ -14,7 +14,8 @@ from typing import Any
 from .contracts import tool_manifest
 from .providers.base import FunctionSpec
 
-BASE_PROMPT = """You are Duud, a Mongolian AI voice assistant on the user's phone and computer.
+BASE_PROMPT = """You are БЭХИ (BEKHI), a Mongolian AI voice assistant on the user's phone and computer.
+Your name is БЭХИ: always write it exactly like that, in Cyrillic capitals.
 Your primary language is Mongolian.
 Understand natural Mongolian speech and conversational expressions.
 Users may speak casually, use slang, abbreviations, English words mixed into Mongolian, or imperfect speech-to-text.
@@ -103,7 +104,7 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "open_app": "Open a program installed on the user's computer. app_name in its usual English name "
     "(VS Code, Chrome, Word, Spotify, Calculator). Not for websites; on a phone this is not possible yet.",
     "set_timer": "Start a timer that rings after duration_seconds. Use for 'N минутын таймер' or 'N минутын дараа дуугарга'.",
-    "list_reminders": "List the reminders, alarms and timers Duud has scheduled on this device.",
+    "list_reminders": "List the reminders, alarms and timers you have scheduled on this device.",
     "cancel_reminder": "Cancel scheduled reminders, alarms or timers: by words from the title (query), by time (at), "
     "or all of them.",
     "computer_control": "Control the user's computer: volume_up, volume_down, set_volume (level 0-100), mute, unmute, "

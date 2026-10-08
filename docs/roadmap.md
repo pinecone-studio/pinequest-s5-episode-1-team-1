@@ -18,7 +18,7 @@ gets built first:
 | 5 | P5 STT | `apps/speech` with BuzzASR (CPU locally, GPU host); measure CER on real recordings of `intent-cases.json` | ⬜ |
 | 6 | P6 LLM planner | Gemini function calling, system prompt, date resolution, run `intent-cases.json` | ⬜ |
 | 7 | P7 Tool registry | registry loads `tools.manifest.json`; `create_reminder` + backend tools | ⬜ |
-| 8 | P9 Swift action service | Expo module `DuudIOSActions`, `IOSActionService` TS interface | ⬜ |
+| 8 | P9 Swift action service | Expo module `BekhiIOSActions`, `IOSActionService` TS interface | ⬜ |
 | 9 | P12 Reminders | EventKit reminder end to end | ⬜ |
 | 10 | P16 TTS | OronTTS in `apps/speech` (female/male, text normalizer), `/assistant/tts` | ⬜ |
 | 11 | P21 + P22 | EAS dev build, **Milestone 1 on a real iPhone** | ⬜ |

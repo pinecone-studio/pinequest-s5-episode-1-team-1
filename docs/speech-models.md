@@ -25,7 +25,7 @@ OpenAI stays available as an alternative implementation.
 - Two voices, `female` and `male`. Each is a curated reference clip plus its transcript, shipped with the weights.
 - Text must go through `oron_tts.text.MongolianNormalizer` first: numbers, times ("8:30") and abbreviations get spelled out.
 - Inference: `F5TTS(model="F5TTS_v1_Base", ckpt_file, vocab_file, use_ema=False).infer(ref_file, ref_text, gen_text, nfe_step=32, cfg_strength=2.0)`.
-- **Voice cloning risk:** F5-TTS reproduces whatever reference voice it's given. Duud only ever uses the
+- **Voice cloning risk:** F5-TTS reproduces whatever reference voice it's given. BEKHI only ever uses the
   two shipped voices. The API takes `voice: "female" | "male"` and never accepts uploaded reference audio.
 - Young project (few stars, architecture was rebuilt recently). Pin the weights revision.
 

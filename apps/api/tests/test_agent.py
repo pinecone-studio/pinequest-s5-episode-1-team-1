@@ -6,10 +6,10 @@ from types import SimpleNamespace
 
 from google.genai import errors, types
 
-from duud_api import desktop
-from duud_api import main as main_mod
-from duud_api.pipeline import MAX_AGENT_STEPS
-from duud_api.providers.base import SearchError
+from bekhi_api import desktop
+from bekhi_api import main as main_mod
+from bekhi_api.pipeline import MAX_AGENT_STEPS
+from bekhi_api.providers.base import SearchError
 
 from .conftest import context
 
@@ -123,8 +123,8 @@ def test_open_outcomes(client, planner):
 
 
 async def test_gemini_follow_up_returns_the_model_turn_unchanged():
-    from duud_api.providers.base import FunctionCall
-    from duud_api.providers.gemini import GeminiPlanner
+    from bekhi_api.providers.base import FunctionCall
+    from bekhi_api.providers.gemini import GeminiPlanner
 
     sent = []
     model_turn = types.Content(role="model", parts=[types.Part(function_call=types.FunctionCall(name="web_search", args={"query": "x"}), thought_signature=b"sig")])
@@ -166,7 +166,7 @@ async def test_tavily_request_and_errors():
 
     import httpx
 
-    from duud_api.providers.tavily import TavilyWebSearch
+    from bekhi_api.providers.tavily import TavilyWebSearch
 
     seen = {}
 
@@ -197,7 +197,7 @@ async def test_tavily_request_and_errors():
 
 
 async def test_gemini_search_without_quota():
-    from duud_api.providers.gemini import GeminiWebSearch
+    from bekhi_api.providers.gemini import GeminiWebSearch
 
     class Models:
         async def generate_content(self, model, contents, config):
@@ -214,9 +214,9 @@ async def test_gemini_search_without_quota():
 def test_search_provider_needs_a_key(monkeypatch):
     import httpx
 
-    from duud_api import providers
-    from duud_api.config import get_settings
-    from duud_api.providers.tavily import TavilyWebSearch
+    from bekhi_api import providers
+    from bekhi_api.config import get_settings
+    from bekhi_api.providers.tavily import TavilyWebSearch
 
     s = get_settings()
     monkeypatch.setattr(providers, "get_settings", lambda: s.__class__(**{**s.__dict__, "web_search_provider": "tavily", "tavily_api_key": None}))

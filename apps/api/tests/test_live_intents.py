@@ -14,8 +14,8 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from duud_api import main as main_mod
-from duud_api.config import get_settings
+from bekhi_api import main as main_mod
+from bekhi_api.config import get_settings
 
 from .conftest import context, open_meteo
 

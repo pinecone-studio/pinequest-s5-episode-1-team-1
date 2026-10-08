@@ -1,5 +1,5 @@
 import { AudioQuality, IOSOutputFormat, type RecordingOptions } from "expo-audio";
-import { AUDIO_UPLOAD } from "@duud/contracts";
+import { AUDIO_UPLOAD } from "@bekhi/contracts";
 
 /** iOS records straight to the upload format (16 kHz mono 16-bit WAV). Web records
  *  WebM and is converted to the same WAV before upload (audio-upload.web.ts). */

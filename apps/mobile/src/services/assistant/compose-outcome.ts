@@ -1,4 +1,4 @@
-import { MN, type ActionRequest, type ActionResult, type ToolName } from "@duud/contracts";
+import { MN, type ActionRequest, type ActionResult, type ToolName } from "@bekhi/contracts";
 import { NATIVE_UNAVAILABLE } from "@/services/ios-actions/codes";
 import { formatWhenMn } from "@/lib/time";
 import { toward } from "@/lib/mongolian";

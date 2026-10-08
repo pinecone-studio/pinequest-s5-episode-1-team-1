@@ -17,7 +17,7 @@ const edges = (top: string, right: string, bottom: string, left: string) =>
 const LAYERS = [edges(orange, pink, purple, cyan), edges(cyan, orange, pink, blue), edges(blue, cyan, orange, purple)];
 const CYCLE_MS = 4800;
 
-/** The iOS 18 Siri edge light: a soft rainbow glow around the screen while Duud is active. */
+/** The iOS 18 Siri edge light: a soft rainbow glow around the screen while BEKHI is active. */
 export function EdgeGlow({ active }: { active: boolean }) {
   const shown = useRef(new Animated.Value(0)).current;
   const cycle = useRef(new Animated.Value(0)).current;

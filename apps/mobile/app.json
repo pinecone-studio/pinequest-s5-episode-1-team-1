@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Duud",
-    "slug": "duud",
-    "scheme": "duud",
+    "name": "BEKHI",
+    "slug": "bekhi",
+    "scheme": "bekhi",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,14 +10,14 @@
     "backgroundColor": "#05060B",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "mn.duud.app",
+      "bundleIdentifier": "mn.bekhi.app",
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Таны хэлсэн үгийг сонсож ойлгохын тулд Duud микрофон ашиглана.",
-        "NSContactsUsageDescription": "Таны хэлсэн хүн рүү залгах, мессеж бичихийн тулд Duud контактаас утасны дугаарыг хайна. Нэр, дугаар утаснаас гарахгүй."
+        "NSMicrophoneUsageDescription": "Таны хэлсэн үгийг сонсож ойлгохын тулд БЭХИ микрофон ашиглана.",
+        "NSContactsUsageDescription": "Таны хэлсэн хүн рүү залгах, мессеж бичихийн тулд БЭХИ контактаас утасны дугаарыг хайна. Нэр, дугаар утаснаас гарахгүй."
       }
     },
     "android": {
-      "package": "mn.duud.app",
+      "package": "mn.bekhi.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
@@ -60,10 +60,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "cfeedeb0-0345-44b4-ac4c-abe1312c091f"
-      }
+      "router": {}
     },
     "owner": "nandinerdene.j"
   }

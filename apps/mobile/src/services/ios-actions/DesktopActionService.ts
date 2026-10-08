@@ -1,11 +1,11 @@
-import { ActionStatus, type ToolArguments, type ToolName } from "@duud/contracts";
+import { ActionStatus, type ToolArguments, type ToolName } from "@bekhi/contracts";
 import { apiBaseUrl } from "@/services/assistant/connect";
 import type { ActionOutcome } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
 import { googleMapsUrl } from "./maps";
 
 /**
- * The web app on the Windows PC that runs the Duud API: reminders, alarms, event reminders
+ * The web app on the Windows PC that runs the BEKHI API: reminders, alarms, event reminders
  * and notes are done on this PC by the API (apps/api desktop.py). Calls and messages need
  * a phone. In any other browser the API answers 404 and the action is unsupported.
  */
