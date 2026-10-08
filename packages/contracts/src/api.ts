@@ -120,7 +120,7 @@ const AssistantTurnBase = z.object({
   transcript: z.string().max(2000),
   /**
    * What the user asked, restated by the assistant in one short sentence. Speech
-   * recognition can mishear words; this shows how Duud understood the request.
+   * recognition can mishear words; this shows how BEKHI understood the request.
    */
   summary: z.string().max(300).nullable().optional(),
   /** Primary intent: a tool name, "multi", "chitchat", "clarification" or "unsupported". */

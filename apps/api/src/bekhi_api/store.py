@@ -20,7 +20,7 @@ TTL_SECONDS = 2 * 60 * 60
 class PendingTurn:
     actions: list[ActionRequest]
     now_iso: str
-    # Limitation messages to say after the outcome ("VS Code нээлээ" + what Duud could not do).
+    # Limitation messages to say after the outcome ("VS Code нээлээ" + what BEKHI could not do).
     notes: list[str] = field(default_factory=list)
 
 

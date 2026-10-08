@@ -6,7 +6,7 @@ import { colors, glow } from "@/theme";
 
 const NATIVE = Platform.OS !== "web";
 
-/** Deep night gradient, with a glow behind the orb that brightens while Duud is active. */
+/** Deep night gradient, with a glow behind the orb that brightens while BEKHI is active. */
 export function Backdrop({ active }: { active: boolean }) {
   const lit = useRef(new Animated.Value(0)).current;
 
@@ -20,13 +20,13 @@ export function Backdrop({ active }: { active: boolean }) {
       <Animated.View style={[styles.glow, { opacity: lit.interpolate({ inputRange: [0, 1], outputRange: [0.45, 1] }) }]}>
         <Svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
           <Defs>
-            <RadialGradient id="duudBackdrop" cx="50" cy="100" r="62" gradientUnits="userSpaceOnUse">
+            <RadialGradient id="bekhiBackdrop" cx="50" cy="100" r="62" gradientUnits="userSpaceOnUse">
               <Stop offset="0" stopColor={glow.purple} stopOpacity={0.42} />
               <Stop offset="0.45" stopColor={glow.blue} stopOpacity={0.14} />
               <Stop offset="1" stopColor={glow.blue} stopOpacity={0} />
             </RadialGradient>
           </Defs>
-          <Rect x="0" y="0" width="100" height="100" fill="url(#duudBackdrop)" />
+          <Rect x="0" y="0" width="100" height="100" fill="url(#bekhiBackdrop)" />
         </Svg>
       </Animated.View>
     </View>

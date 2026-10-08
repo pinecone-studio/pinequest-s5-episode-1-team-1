@@ -215,7 +215,7 @@ export const TOOL_MANIFEST = {
     confirmation: "always",
     permissions: ["contacts"],
     min_ios: MIN_IOS,
-    app_intent: "DuudCallContactIntent",
+    app_intent: "BekhiCallContactIntent",
     notes:
       "Contact resolved on-device with the Contacts framework (supports iOS 18 limited access). " +
       "Call started via tel: URL; iOS shows its own call prompt. Apps cannot place cellular calls " +
@@ -238,7 +238,7 @@ export const TOOL_MANIFEST = {
     confirmation: "if_ambiguous",
     permissions: ["reminders"],
     min_ios: MIN_IOS,
-    app_intent: "DuudCreateReminderIntent",
+    app_intent: "BekhiCreateReminderIntent",
     notes: "EventKit EKReminder with an EKAlarm at due_at, saved to the default Reminders list.",
   },
   create_calendar_event: {
@@ -247,8 +247,8 @@ export const TOOL_MANIFEST = {
     confirmation: "if_ambiguous",
     permissions: ["calendar_write"],
     min_ios: MIN_IOS,
-    app_intent: "DuudCreateCalendarEventIntent",
-    notes: "EventKit EKEvent using write-only calendar access (iOS 17+); Duud never reads the calendar.",
+    app_intent: "BekhiCreateCalendarEventIntent",
+    notes: "EventKit EKEvent using write-only calendar access (iOS 17+); BEKHI never reads the calendar.",
   },
   create_alarm: {
     executor: "device",
@@ -258,8 +258,8 @@ export const TOOL_MANIFEST = {
     min_ios: "26.0",
     app_intent: null,
     notes:
-      "iOS 26+: AlarmKit schedules a real alarm owned by Duud (not an entry in the Clock app's list). " +
-      "Below iOS 26 there is no API to create alarms; Duud can run a user-installed Shortcut that uses " +
+      "iOS 26+: AlarmKit schedules a real alarm owned by BEKHI (not an entry in the Clock app's list). " +
+      "Below iOS 26 there is no API to create alarms; BEKHI can run a user-installed Shortcut that uses " +
       "the Clock 'Create Alarm' action, or explain the limitation. A local notification is NOT an alarm " +
       "and is only offered explicitly, never substituted silently.",
   },
@@ -269,7 +269,7 @@ export const TOOL_MANIFEST = {
     confirmation: "never",
     permissions: [],
     min_ios: MIN_IOS,
-    app_intent: "DuudOpenMapsIntent",
+    app_intent: "BekhiOpenMapsIntent",
     notes: "Apple Maps directions URL (maps.apple.com); Google Maps URL scheme if installed and preferred.",
   },
   create_note: {
@@ -280,7 +280,7 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes:
-      "Apple Notes has no public API. Default: note stored inside Duud. Optional: user-installed " +
+      "Apple Notes has no public API. Default: note stored inside BEKHI. Optional: user-installed " +
       "Shortcut using the Notes 'Create Note' action.",
   },
   get_weather: {
@@ -289,7 +289,7 @@ export const TOOL_MANIFEST = {
     confirmation: "never",
     permissions: [],
     min_ios: MIN_IOS,
-    app_intent: "DuudGetWeatherIntent",
+    app_intent: "BekhiGetWeatherIntent",
     notes: "Open-Meteo geocoding + forecast, executed by FastAPI.",
   },
   web_search: {
@@ -348,7 +348,7 @@ export const TOOL_MANIFEST = {
     permissions: ["notifications"],
     min_ios: MIN_IOS,
     app_intent: null,
-    notes: "Reminders, alarms and timers Duud has scheduled on this device; returned in the result's data.",
+    notes: "Reminders, alarms and timers BEKHI has scheduled on this device; returned in the result's data.",
   },
   cancel_reminder: {
     executor: "device",
@@ -358,7 +358,7 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes:
-      "Cancels Duud's scheduled items matching the title words or time, or all of them. Several matches " +
+      "Cancels BEKHI's scheduled items matching the title words or time, or all of them. Several matches " +
       "without a filter ask which one (needs_clarification).",
   },
   computer_control: {

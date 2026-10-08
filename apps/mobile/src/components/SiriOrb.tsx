@@ -86,13 +86,13 @@ export function SiriOrb({ state, level, size = 92, disabled, accessibilityLabel,
       <Animated.View style={[styles.center, styles.passThrough, { width: box, height: box, opacity: haloOpacity, transform: [{ scale: haloScale }] }]}>
         <Svg width={box} height={box} viewBox="0 0 100 100">
           <Defs>
-            <RadialGradient id="duudHalo" cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
+            <RadialGradient id="bekhiHalo" cx="50" cy="50" r="50" gradientUnits="userSpaceOnUse">
               <Stop offset="0.25" stopColor={glow.purple} stopOpacity={0.55} />
               <Stop offset="0.55" stopColor={glow.blue} stopOpacity={0.22} />
               <Stop offset="1" stopColor={glow.blue} stopOpacity={0} />
             </RadialGradient>
           </Defs>
-          <Circle cx="50" cy="50" r="50" fill="url(#duudHalo)" />
+          <Circle cx="50" cy="50" r="50" fill="url(#bekhiHalo)" />
         </Svg>
       </Animated.View>
 
@@ -101,13 +101,13 @@ export function SiriOrb({ state, level, size = 92, disabled, accessibilityLabel,
           <Animated.View key={b.color} style={[StyleSheet.absoluteFill, { transform: [{ rotate: turn(b.period, b.reverse) }] }]}>
             <Svg width={size} height={size} viewBox="0 0 100 100">
               <Defs>
-                <RadialGradient id={`duudBlob${i}`} cx="50%" cy="50%" r="50%">
+                <RadialGradient id={`bekhiBlob${i}`} cx="50%" cy="50%" r="50%">
                   <Stop offset="0" stopColor={b.color} stopOpacity={0.95} />
                   <Stop offset="0.5" stopColor={b.color} stopOpacity={0.55} />
                   <Stop offset="1" stopColor={b.color} stopOpacity={0} />
                 </RadialGradient>
               </Defs>
-              <Circle cx={50 + b.offset * 100} cy="50" r={b.size * 50} fill={`url(#duudBlob${i})`} />
+              <Circle cx={50 + b.offset * 100} cy="50" r={b.size * 50} fill={`url(#bekhiBlob${i})`} />
             </Svg>
           </Animated.View>
         ))}
@@ -116,24 +116,24 @@ export function SiriOrb({ state, level, size = 92, disabled, accessibilityLabel,
         <Animated.View style={[StyleSheet.absoluteFill, { opacity: thinking, transform: [{ rotate: turn(1.5, false) }] }]}>
           <Svg width={size} height={size} viewBox="0 0 100 100">
             <Defs>
-              <LinearGradient id="duudComet" x1="0" y1="0" x2="1" y2="1">
+              <LinearGradient id="bekhiComet" x1="0" y1="0" x2="1" y2="1">
                 <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.95} />
                 <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
               </LinearGradient>
             </Defs>
-            <Circle cx="50" cy="50" r="45" stroke="url(#duudComet)" strokeWidth={4} strokeLinecap="round" strokeDasharray="80 300" fill="none" />
+            <Circle cx="50" cy="50" r="45" stroke="url(#bekhiComet)" strokeWidth={4} strokeLinecap="round" strokeDasharray="80 300" fill="none" />
           </Svg>
         </Animated.View>
 
         {/* Glass: a soft highlight and a thin rim. */}
         <Svg width={size} height={size} viewBox="0 0 100 100" style={StyleSheet.absoluteFill}>
           <Defs>
-            <RadialGradient id="duudShine" cx="34" cy="26" r="46" gradientUnits="userSpaceOnUse">
+            <RadialGradient id="bekhiShine" cx="34" cy="26" r="46" gradientUnits="userSpaceOnUse">
               <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.5} />
               <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
             </RadialGradient>
           </Defs>
-          <Circle cx="50" cy="50" r="50" fill="url(#duudShine)" />
+          <Circle cx="50" cy="50" r="50" fill="url(#bekhiShine)" />
         </Svg>
         <View style={[StyleSheet.absoluteFill, styles.passThrough, styles.rim, { borderRadius: size / 2 }]} />
 

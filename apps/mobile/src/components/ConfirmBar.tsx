@@ -1,6 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { MN } from "@duud/contracts";
+import { MN } from "@bekhi/contracts";
 import { colors, glow } from "@/theme";
 
 /** Yes / no before a call or message. */

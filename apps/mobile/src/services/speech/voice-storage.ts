@@ -1,7 +1,7 @@
 import { File, Paths } from "expo-file-system";
 
 /** The chosen voice, kept in a small file so it survives app restarts on the phone. */
-const FILE_NAME = "duud-voice.txt";
+const FILE_NAME = "bekhi-voice.txt";
 
 export function loadSavedVoice(): string | null {
   try {

@@ -6,10 +6,10 @@ import json
 
 import pytest
 
-from duud_api.config import get_settings
-from duud_api.contracts import tool_manifest, validate_wire
-from duud_api.models import ActionResultsRequest, ActionResultsResponse, AssistantContext, AssistantTurn
-from duud_api.planner import function_specs
+from bekhi_api.config import get_settings
+from bekhi_api.contracts import tool_manifest, validate_wire
+from bekhi_api.models import ActionResultsRequest, ActionResultsResponse, AssistantContext, AssistantTurn
+from bekhi_api.planner import function_specs
 
 EXAMPLES = get_settings().contracts_dir / "examples"
 MODELS = {

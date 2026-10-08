@@ -1,4 +1,4 @@
-# apps/api — Duud backend
+# apps/api — BEKHI backend
 
 Python 3.12+ · FastAPI · Pydantic · httpx · python-dotenv · google-genai, managed with `uv`.
 
@@ -6,7 +6,7 @@ The backend decides **what** should happen. It never performs iPhone actions and
 device action is done before the phone reports the real outcome.
 
 ```
-src/duud_api/
+src/bekhi_api/
   main.py            endpoints, Mongolian errors, CORS, rate limit, safe logging
   pipeline.py        text -> LLM function calls -> validated AssistantTurn; results -> final answer
   planner.py         system prompt + functions (tools from contracts + reply / ask_clarification / explain_limitation)
@@ -26,7 +26,7 @@ uv sync
 Put the key in `apps/api/.env` (git-ignored): `GEMINI_API_KEY=...`
 
 ```bash
-uv run uvicorn duud_api.main:app --host 127.0.0.1 --port 8000
+uv run uvicorn bekhi_api.main:app --host 127.0.0.1 --port 8000
 ```
 
 Use `--host 0.0.0.0` when an iPhone on the same network needs to reach it.
@@ -52,7 +52,7 @@ uv run pytest -m live -v
 | POST | `/api/v1/assistant/voice` | multipart `audio` (16 kHz mono WAV) + `context` JSON → AssistantTurn |
 | POST | `/api/v1/assistant/transcribe` | multipart `audio` → `{transcript}` |
 | GET | `/api/v1/assistant/voices` | ElevenLabs voices the app can pick (`config.ELEVENLABS_VOICES`) and the default |
-| POST | `/api/v1/assistant/tts` | `{text, voice?}` → MP3 (ElevenLabs) or WAV (Gemini fallback). A voice that needs a paid plan is read in the default voice, with `X-Duud-Voice-Fallback: paid_plan_required` |
+| POST | `/api/v1/assistant/tts` | `{text, voice?}` → MP3 (ElevenLabs) or WAV (Gemini fallback). A voice that needs a paid plan is read in the default voice, with `X-Bekhi-Voice-Fallback: paid_plan_required` |
 | POST | `/api/v1/assistant/actions/results` | device outcomes → final Mongolian answer |
 | POST | `/api/v1/desktop/actions` | `{tool, arguments}` → ActionResult, run on this Windows PC. Requests from localhost only; `DESKTOP_ACTIONS=false` turns it off |
 
@@ -64,9 +64,9 @@ words. Device actions end the loop: their outcome only exists once the phone or 
 not have (429).
 
 Desktop actions (`desktop.py`): reminders, alarms and event reminders become Windows toast
-notifications, kept in `%LOCALAPPDATA%\Duud\reminders.json` and fired by the running API (nothing is
+notifications, kept in `%LOCALAPPDATA%\BEKHI\reminders.json` and fired by the running API (nothing is
 registered with Windows, so they only fire while the API runs). Notes are appended to
-`Documents\Duud тэмдэглэл.txt`. `open_app` launches an installed app found in the Start menu.
+`Documents\BEKHI тэмдэглэл.txt`. `open_app` launches an installed app found in the Start menu.
 `set_timer`, `list_reminders` and `cancel_reminder` work on the same scheduled items (the iPhone does
 the same with its local notifications). `computer_control` (`windows_controls.py`) sets the speaker
 volume and mute through Core Audio, locks the screen, and opens Downloads/Documents/... folders.

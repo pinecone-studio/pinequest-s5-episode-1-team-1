@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import { requestRecordingPermissionsAsync, setAudioModeAsync, useAudioRecorder } from "expo-audio";
-import { AUDIO_UPLOAD } from "@duud/contracts";
+import { AUDIO_UPLOAD } from "@bekhi/contracts";
 import { createEndpointer } from "./endpointing";
 import { VOICE_RECORDING } from "./recording-options";
 

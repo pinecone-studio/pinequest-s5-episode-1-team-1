@@ -1,5 +1,5 @@
 {
-  "name": "@duud/mobile",
+  "name": "@bekhi/mobile",
   "version": "0.1.0",
   "private": true,
   "main": "expo-router/entry",
@@ -11,7 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@duud/contracts": "*",
+    "@bekhi/contracts": "*",
     "@expo/vector-icons": "^15.0.2",
     "expo": "~57.0.26",
     "expo-audio": "~57.0.5",

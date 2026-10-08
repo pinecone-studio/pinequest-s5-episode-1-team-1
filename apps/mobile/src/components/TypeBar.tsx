@@ -43,7 +43,7 @@ export function TypeBar({ disabled, onSend, onVoice }: Props) {
           value={text}
           onChangeText={setText}
           onSubmitEditing={send}
-          placeholder="Duud-д бичих…"
+          placeholder="БЭХИ-д бичих…"
           placeholderTextColor={colors.tertiaryLabel}
           selectionColor={colors.accent}
           keyboardAppearance="dark"

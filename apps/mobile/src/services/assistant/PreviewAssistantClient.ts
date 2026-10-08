@@ -5,7 +5,7 @@ import {
   type ActionResultsResponse,
   type AssistantContext,
   type Limitation,
-} from "@duud/contracts";
+} from "@bekhi/contracts";
 import { toLocalIso, tomorrowAt } from "@/lib/time";
 import { AssistantError, type AssistantClient } from "./AssistantClient";
 import { composeOutcome } from "./compose-outcome";

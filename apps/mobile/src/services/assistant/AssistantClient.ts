@@ -3,7 +3,7 @@ import type {
   ActionResultsResponse,
   AssistantContext,
   AssistantTurn,
-} from "@duud/contracts";
+} from "@bekhi/contracts";
 
 /**
  * - preview: no backend; plans a fixed set of sample phrases locally

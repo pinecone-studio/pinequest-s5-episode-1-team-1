@@ -57,7 +57,7 @@ def _method(obj: c_void_p, slot: int, *argtypes, restype=ctypes.HRESULT) -> Call
 
 
 # COM calls run on one worker thread that owns its apartment, away from the event loop.
-_com = ThreadPoolExecutor(max_workers=1, thread_name_prefix="duud-com")
+_com = ThreadPoolExecutor(max_workers=1, thread_name_prefix="bekhi-com")
 
 
 def _with_speaker_volume(work: Callable[[c_void_p], T]) -> T:

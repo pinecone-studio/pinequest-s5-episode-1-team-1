@@ -2,9 +2,9 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "duud-web",
+      "name": "bekhi-web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "web", "-w", "@duud/mobile"],
+      "runtimeArgs": ["run", "web", "-w", "@bekhi/mobile"],
       "port": 8081
     }
   ]

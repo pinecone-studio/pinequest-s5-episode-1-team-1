@@ -1,4 +1,4 @@
-"""Duud FastAPI app.
+"""BEKHI FastAPI app.
 
 Endpoints (Phase 3/4):
   GET  /api/v1/health
@@ -40,11 +40,12 @@ from .models import (
     AssistantTurn,
     ChatRequest,
 )
+from .compose import speakable
 from .pipeline import ContractViolation, Deps, UnknownTurn, plan_turn, report_results
 from .providers import ProviderNotConfigured, ProviderUserError, VoiceNeedsPaidPlan, get_llm, get_search, get_stt, get_tts
 from .store import MemoryStore
 
-log = logging.getLogger("duud_api")
+log = logging.getLogger("bekhi_api")
 
 MN_STT_FAILED = "Уучлаарай, сайн сонсогдсонгүй. Дахин хэлээд өгөөч."
 MN_MIC_SILENT = "Бичлэгт дуу огт алга байна. Микрофон тань дуугүй (mute) болсон эсэхийг шалгана уу."
@@ -61,7 +62,7 @@ LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost"}
 
 WAV_TYPES = {"audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"}
 # Set on a TTS response read in the default voice because the chosen one needs a paid plan.
-VOICE_FALLBACK_HEADER = "X-Duud-Voice-Fallback"
+VOICE_FALLBACK_HEADER = "X-Bekhi-Voice-Fallback"
 # Quieter than this at its loudest, a recording has no voice in it: a muted or wrong microphone.
 # Speech peaks around -30..-5 dBFS; a muted mic gives about -90.
 SILENT_PEAK_DBFS = -60
@@ -143,7 +144,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
     logging.basicConfig(level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 
-    app = FastAPI(title="Duud API", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(title="BEKHI API", version="0.1.0", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -293,7 +294,7 @@ def create_app() -> FastAPI:
 
     @app.post("/api/v1/assistant/tts")
     async def tts(body: TtsRequest, request: Request):
-        text = body.text.strip()
+        text = speakable(body.text.strip())
         voice = body.voice if body.voice in voice_ids and body.voice != settings.elevenlabs_voice_id else None
         cached = tts_cache.get((voice, text))
         if cached is None:
@@ -341,6 +342,9 @@ def create_app() -> FastAPI:
 
     @app.post("/api/v1/assistant/actions/results", response_model=ActionResultsResponse)
     async def action_results(body: ActionResultsRequest, request: Request):
+        # Outcome codes only (never names, numbers or text): what happened on the device.
+        for r in body.results:
+            log.info("action %s %s %s rid=%s", r.tool, r.status, r.error_code or "-", request.state.request_id)
         try:
             return report_results(body, request.app.state.store)
         except UnknownTurn as e:
@@ -355,4 +359,4 @@ app = create_app()
 def run() -> None:
     import uvicorn
 
-    uvicorn.run("duud_api.main:app", host="0.0.0.0", port=8000, reload=False)
+    uvicorn.run("bekhi_api.main:app", host="0.0.0.0", port=8000, reload=False)

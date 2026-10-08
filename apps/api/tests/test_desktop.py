@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
-from duud_api import desktop
-from duud_api import main as main_mod
+from bekhi_api import desktop
+from bekhi_api import main as main_mod
 
 from .conftest import context
 
@@ -12,7 +12,7 @@ PAST = (datetime.now().astimezone() - timedelta(hours=1)).replace(microsecond=0)
 
 
 def test_toast_xml_escapes_and_alarm_loops():
-    xml = desktop.toast_xml("Ажил <чухал> & яаралтай", "Duud", alarm=True)
+    xml = desktop.toast_xml("Ажил <чухал> & яаралтай", "BEKHI", alarm=True)
     assert "&lt;чухал&gt; &amp;" in xml
     assert 'scenario="alarm"' in xml and "Looping.Alarm" in xml
     assert 'scenario="reminder"' in desktop.toast_xml("a", "b", alarm=False)
@@ -38,7 +38,7 @@ async def test_due_toasts_fire_once(tmp_path, monkeypatch):
 
     monkeypatch.setattr(desktop, "show_toast", fake_toast)
     s = desktop.DesktopScheduler(tmp_path / "r.json")
-    s.add(datetime.now().astimezone() + timedelta(minutes=5), "Ажилтай", "Duud", False)
+    s.add(datetime.now().astimezone() + timedelta(minutes=5), "Ажилтай", "BEKHI", False)
     await s.fire_due(datetime.now())
     assert shown == []
     await s.fire_due(datetime.now() + timedelta(minutes=6))
@@ -51,6 +51,15 @@ def test_notes_go_to_a_text_file(tmp_path, monkeypatch):
     r = desktop.run("create_note", {"title": "Дэлгүүр", "body": "Талх, сүү"}, desktop.DesktopScheduler(tmp_path / "r.json"))
     assert r["status"] == "succeeded"
     assert "Дэлгүүр\nТалх, сүү" in (tmp_path / desktop.NOTES_FILE_NAME).read_text(encoding="utf-8")
+
+
+def test_notes_from_before_the_rename_are_kept(tmp_path, monkeypatch):
+    monkeypatch.setattr(desktop, "_documents_dir", lambda: tmp_path)
+    (tmp_path / desktop.OLD_NOTES_FILE_NAME).write_text("[хуучин]\nТалх\n\n", encoding="utf-8")
+    desktop.run("create_note", {"title": "Шинэ", "body": "Сүү"}, desktop.DesktopScheduler(tmp_path / "r.json"))
+    notes = (tmp_path / desktop.NOTES_FILE_NAME).read_text(encoding="utf-8")
+    assert "Талх" in notes and "Сүү" in notes
+    assert not (tmp_path / desktop.OLD_NOTES_FILE_NAME).exists()
 
 
 def test_desktop_endpoint_is_local_only(client, tmp_path, monkeypatch):
@@ -97,7 +106,7 @@ def test_timers_lists_and_cancelling(tmp_path):
 
 
 def test_computer_control(monkeypatch):
-    from duud_api import windows_controls as win
+    from bekhi_api import windows_controls as win
 
     calls, opened = [], []
     monkeypatch.setattr(win, "change_volume", lambda **kw: calls.append(kw) or 40)

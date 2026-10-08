@@ -1,4 +1,4 @@
-import type { ActionResult, ToolArguments } from "@duud/contracts";
+import type { ActionResult, ToolArguments } from "@bekhi/contracts";
 
 /** What an action implementation reports. The dispatcher adds action_id and tool. */
 export type ActionOutcome = Pick<ActionResult, "status" | "executed_via" | "error_code"> & {

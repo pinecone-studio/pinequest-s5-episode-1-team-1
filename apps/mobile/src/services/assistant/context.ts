@@ -1,7 +1,7 @@
 import Constants from "expo-constants";
 import { isRunningInExpoGo } from "expo";
 import { Platform } from "react-native";
-import type { AssistantContext } from "@duud/contracts";
+import type { AssistantContext } from "@bekhi/contracts";
 import { deviceTimezone, toLocalIso } from "@/lib/time";
 
 /**

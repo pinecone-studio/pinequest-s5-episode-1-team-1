@@ -6,9 +6,15 @@ matching result status says so. Partial failures are reported per action.
 
 from __future__ import annotations
 
+import re
 from datetime import date
 
 from .models import ActionRequest, ActionResult
+
+# The app's name: BEKHI in Latin letters, БЭХИ in Mongolian text. Written in capitals the speech
+# synthesizer spells it out letter by letter, so speech gets it as an ordinary word.
+APP_NAME = "БЭХИ"
+SPOKEN_APP_NAME = "Бэхи"
 
 MN_PERMISSION_DENIED = "Энэ үйлдлийг хийхийн тулд утасныхаа тохиргооноос зөвшөөрөл өгөх хэрэгтэй байна."
 MN_PHONE_UNAVAILABLE = "Уучлаарай, утсан дээр энэ үйлдлийг одоохондоо хийж чадахгүй байна."
@@ -48,11 +54,11 @@ UNSUPPORTED_BY_CODE = {
     "EXPO_GO_NATIVE_UNAVAILABLE": "Expo Go дээр {verb} боломжгүй. Үүнд development build хэрэгтэй.",
     "NATIVE_MODULE_NOT_BUILT": "{Verb} үйлдэл одоохондоо бэлэн болоогүй байна.",
     "SMS_UNAVAILABLE": "Энэ утсаар мессеж илгээх боломжгүй байна.",
-    "IOS_CANNOT_OPEN_APPS": "iPhone дээр Duud өөр апп нээж чадахгүй, iOS үүнийг зөвшөөрдөггүй.",
-    "IOS_NO_SYSTEM_CONTROL": "iPhone дээр Duud дууны түвшин өөрчлөх, утсыг түгжих боломжгүй, iOS зөвшөөрдөггүй.",
-    # Possible on Android, but not from Expo Go: these need a native build of Duud.
-    "ANDROID_CANNOT_OPEN_APPS": "Android утсан дээр Duud одоохондоо өөр апп нээж чадахгүй.",
-    "ANDROID_NO_SYSTEM_CONTROL": "Android утсан дээр Duud одоохондоо дууны түвшин өөрчлөх, утсыг түгжих боломжгүй.",
+    "IOS_CANNOT_OPEN_APPS": "iPhone дээр БЭХИ өөр апп нээж чадахгүй, iOS үүнийг зөвшөөрдөггүй.",
+    "IOS_NO_SYSTEM_CONTROL": "iPhone дээр БЭХИ дууны түвшин өөрчлөх, утсыг түгжих боломжгүй, iOS зөвшөөрдөггүй.",
+    # Possible on Android, but not from Expo Go: these need a native build of BEKHI.
+    "ANDROID_CANNOT_OPEN_APPS": "Android утсан дээр БЭХИ одоохондоо өөр апп нээж чадахгүй.",
+    "ANDROID_NO_SYSTEM_CONTROL": "Android утсан дээр БЭХИ одоохондоо дууны түвшин өөрчлөх, утсыг түгжих боломжгүй.",
 }
 
 PERMISSION_BY_CODE = {
@@ -171,16 +177,16 @@ def sentence_for(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
             case "computer_control":
                 return _computer_sentence(a, data)
         if r.executed_via == "backend":
-            # Done on the Windows PC (desktop.py): toasts while Duud runs, notes in a file.
+            # Done on the Windows PC (desktop.py): toasts while BEKHI runs, notes in a file.
             match action.tool:
                 case "create_reminder":
                     return f"За, {format_when_mn(a['due_at'], now_iso)} компьютер дээр мэдэгдлээр сануулъя."
                 case "create_alarm":
-                    return f"За, {format_when_mn(a['fire_at'], now_iso)} компьютер дээр сэрүүлэг дуугаргана. Duud асаалттай байх хэрэгтэй."
+                    return f"За, {format_when_mn(a['fire_at'], now_iso)} компьютер дээр сэрүүлэг дуугаргана. БЭХИ асаалттай байх хэрэгтэй."
                 case "create_calendar_event":
                     return f"Календарьт шууд нэмж чадахгүй ч {format_when_mn(a['start_at'], now_iso)} компьютер дээр мэдэгдлээр сануулъя."
                 case "create_note":
-                    return "За, тэмдэглэчихлээ. Documents доторх 'Duud тэмдэглэл.txt' файлд байгаа."
+                    return "За, тэмдэглэчихлээ. Documents доторх 'БЭХИ тэмдэглэл.txt' файлд байгаа."
                 case "open_app":
                     return f"За, {a['app_name']} нээлээ."
         if r.executed_via == "react_native":
@@ -244,3 +250,8 @@ def compose(actions: list[ActionRequest], results: list[ActionResult], now_iso: 
         if p not in seen:
             seen.append(p)
     return " ".join(seen)
+
+
+def speakable(text: str) -> str:
+    """Text for the speech synthesizer: the app's name as a word it pronounces."""
+    return re.sub(rf"\b{APP_NAME}\b", SPOKEN_APP_NAME, text)

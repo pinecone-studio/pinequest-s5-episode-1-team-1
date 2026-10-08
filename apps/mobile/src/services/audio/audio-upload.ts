@@ -1,5 +1,5 @@
 import { File } from "expo-file-system";
-import { AUDIO_UPLOAD } from "@duud/contracts";
+import { AUDIO_UPLOAD } from "@bekhi/contracts";
 
 /**
  * Native: the recorder already wrote a 16 kHz mono WAV file.

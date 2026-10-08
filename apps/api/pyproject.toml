@@ -1,7 +1,7 @@
 [project]
-name = "duud-api"
+name = "bekhi-api"
 version = "0.1.0"
-description = "Duud backend: decides WHAT should happen; the iPhone decides HOW"
+description = "BEKHI backend: decides WHAT should happen; the iPhone decides HOW"
 readme = "README.md"
 authors = [
     { name = "nandinerden1219-alt", email = "nandinerden1219@gmail.com" }
@@ -20,7 +20,7 @@ dependencies = [
 ]
 
 [project.scripts]
-duud-api = "duud_api.main:run"
+bekhi-api = "bekhi_api.main:run"
 
 [build-system]
 requires = ["uv_build>=0.12.14,<0.13.0"]

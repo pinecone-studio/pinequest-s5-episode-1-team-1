@@ -1,5 +1,5 @@
 /** The chosen voice, remembered by the browser. */
-const STORAGE_KEY = "duud.voice";
+const STORAGE_KEY = "bekhi.voice";
 
 export function loadSavedVoice(): string | null {
   try {

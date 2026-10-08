@@ -1,6 +1,6 @@
-import type { ToolArguments } from "@duud/contracts";
+import type { ToolArguments } from "@bekhi/contracts";
 
-/** A reminder, alarm, event reminder or timer Duud scheduled on this device. */
+/** A reminder, alarm, event reminder or timer BEKHI scheduled on this device. */
 export interface ScheduledItem {
   id: string;
   title: string;

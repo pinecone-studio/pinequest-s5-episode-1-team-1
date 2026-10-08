@@ -2,7 +2,7 @@
 
 Reminders, alarms and event reminders are Windows toast notifications. They are kept
 in the API process (and in a small JSON file, so a restart does not lose them): they
-fire while the Duud API is running, and ones missed while it was stopped fire at start.
+fire while the BEKHI API is running, and ones missed while it was stopped fire at start.
 Nothing is registered with the OS (no scheduled tasks, no autostart).
 """
 
@@ -27,7 +27,10 @@ log = logging.getLogger(__name__)
 APP_ID = r"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\WindowsPowerShell\v1.0\powershell.exe"
 CHECK_EVERY_SECONDS = 10  # wall-clock polling, so a sleeping PC still fires on wake
 MISSED_GRACE = timedelta(hours=12)  # overdue at start: fire if this recent, else drop
-NOTES_FILE_NAME = "Duud тэмдэглэл.txt"
+NOTES_FILE_NAME = "БЭХИ тэмдэглэл.txt"
+# The app was called Duud before: its notes and scheduled items move to the new names on first use.
+OLD_NOTES_FILE_NAME = "Duud тэмдэглэл.txt"
+OLD_DATA_DIR_NAME = "Duud"
 CREATE_NO_WINDOW = 0x08000000
 
 TOAST_SCRIPT = """$ErrorActionPreference = 'Stop'
@@ -56,7 +59,10 @@ class Toast:
 
 
 def _data_dir() -> Path:
-    d = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "Duud"
+    base = Path(os.environ.get("LOCALAPPDATA") or Path.home())
+    d = base / "BEKHI"
+    if (base / OLD_DATA_DIR_NAME).is_dir() and not d.exists():
+        (base / OLD_DATA_DIR_NAME).rename(d)
     d.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -215,6 +221,9 @@ def find_app(name: str, start_menu: list[Path] | None = None) -> str | None:
 
 def append_note(text: str, now: datetime | None = None) -> Path:
     path = _documents_dir() / NOTES_FILE_NAME
+    old = path.with_name(OLD_NOTES_FILE_NAME)
+    if old.exists() and not path.exists():
+        old.rename(path)
     stamp = (now or datetime.now()).strftime("%Y-%m-%d %H:%M")
     with path.open("a", encoding="utf-8") as f:
         f.write(f"[{stamp}]\n{text.strip()}\n\n")
@@ -305,9 +314,9 @@ def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[st
     if tool == "computer_control":
         return computer_control(args)
     fields = {
-        "create_reminder": ("due_at", "reminder", lambda: (args["title"], args.get("notes") or "Duud сануулга", False)),
-        "create_alarm": ("fire_at", "alarm", lambda: (args.get("label") or "Сэрэх цаг боллоо", "Duud сэрүүлэг", True)),
-        "create_calendar_event": ("start_at", "event", lambda: (args["title"], args.get("location") or "Duud: эхлэх цаг боллоо", False)),
+        "create_reminder": ("due_at", "reminder", lambda: (args["title"], args.get("notes") or "БЭХИ сануулга", False)),
+        "create_alarm": ("fire_at", "alarm", lambda: (args.get("label") or "Сэрэх цаг боллоо", "БЭХИ сэрүүлэг", True)),
+        "create_calendar_event": ("start_at", "event", lambda: (args["title"], args.get("location") or "БЭХИ: эхлэх цаг боллоо", False)),
     }
     if tool not in fields:
         return _result("unsupported", "DESKTOP_UNSUPPORTED") | {"executed_via": None}

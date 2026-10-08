@@ -1,4 +1,4 @@
-import type { ToolArguments } from "@duud/contracts";
+import type { ToolArguments } from "@bekhi/contracts";
 
 const TRAVEL_MODE = { driving: "driving", walking: "walking", transit: "transit" } as const;
 

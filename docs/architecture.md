@@ -1,4 +1,4 @@
-# Duud architecture
+# BEKHI architecture
 
 ## The one rule
 
@@ -52,14 +52,14 @@ with `stage: "final"`.
 | D8 | STT, LLM and TTS sit behind provider interfaces in the backend (`providers/stt`, `providers/llm`, `providers/tts`). Defaults: **BuzzASR** STT, **Gemini** LLM, **OronTTS** TTS. See [speech-models.md](speech-models.md). | Mongolian quality varies a lot by provider. Implementations can be swapped without touching the pipeline. |
 | D9 | STT and TTS run in a separate GPU service, `apps/speech`, which only `apps/api` calls (bearer token). | Both models need a GPU. Railway/Render have none. The API stays cheap and CPU-only. |
 | D10 | The iPhone records 16 kHz mono 16-bit WAV (`AUDIO_UPLOAD`), max 30 s. | That's BuzzASR's native input, so there's no server-side transcoding or ffmpeg. |
-| D11 | TTS voice is `female` or `male` only (`TtsVoice`). Reference audio is never accepted from clients. | F5-TTS clones any reference voice. Allowing uploads would turn Duud into a voice-cloning service. |
+| D11 | TTS voice is `female` or `male` only (`TtsVoice`). Reference audio is never accepted from clients. | F5-TTS clones any reference voice. Allowing uploads would turn BEKHI into a voice-cloning service. |
 
 ## Repository layout
 
 ```
-duud/
+bekhi/
 ├── apps/
-│   ├── mobile/          Expo (dev build) + Expo Router + Zustand; Swift in modules/duud-ios-actions (Phase 2, 9)
+│   ├── mobile/          Expo (dev build) + Expo Router + Zustand; Swift in modules/bekhi-ios-actions (Phase 2, 9)
 │   ├── api/             FastAPI + Pydantic + uv, CPU only — Railway/Render (Phase 3)
 │   └── speech/          GPU service: BuzzASR STT + OronTTS (Phase 5, 16)
 ├── packages/
@@ -79,7 +79,7 @@ screens (Expo Router)  ──▶  useAssistantStore (Zustand)  ──▶  Assist
                                          │  callContact / createReminder / createCalendarEvent
                                          │  createAlarm / createNotification / openMaps / executeShortcut
                                          ▼
-                      Expo native module "DuudIOSActions" (Swift, isolated)
+                      Expo native module "BekhiIOSActions" (Swift, isolated)
                                          ▼
                  EventKit · Contacts · AlarmKit · UserNotifications · MessageUI · UIApplication.open
 ```

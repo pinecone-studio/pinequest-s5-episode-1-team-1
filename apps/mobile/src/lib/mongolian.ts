@@ -4,7 +4,7 @@ const FRONT_VOWELS = new Set([..."эөүе"]);
 /**
  * Directional case "руу/рүү/луу/лүү" by vowel harmony of the last word:
  * "Бат руу", "Ээж рүү", "Баатар луу", "Сүхбаатарын талбай руу".
- * Mirrors toward() in apps/api/src/duud_api/compose.py.
+ * Mirrors toward() in apps/api/src/bekhi_api/compose.py.
  */
 export function toward(phrase: string): string {
   const word = (phrase.trim().split(/\s+/).pop() ?? "").toLowerCase();

@@ -1,10 +1,10 @@
-import { ApiError } from "@duud/contracts";
+import { ApiError } from "@bekhi/contracts";
 import { AssistantError } from "@/services/assistant/AssistantClient";
 
 const TIMEOUT_MS = 20_000;
 
 /** Response header: the chosen voice needs a paid ElevenLabs plan, so the default voice was used. */
-export const VOICE_FALLBACK_HEADER = "x-duud-voice-fallback";
+export const VOICE_FALLBACK_HEADER = "x-bekhi-voice-fallback";
 
 /**
  * Asks the backend to synthesize `text` (the TTS keys never reach the app) in `voice`

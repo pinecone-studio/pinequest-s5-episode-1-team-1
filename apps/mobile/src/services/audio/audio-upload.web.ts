@@ -1,4 +1,4 @@
-import { AUDIO_UPLOAD } from "@duud/contracts";
+import { AUDIO_UPLOAD } from "@bekhi/contracts";
 import { pcm16Wav } from "./wav";
 
 /**

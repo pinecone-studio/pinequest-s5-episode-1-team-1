@@ -10,8 +10,8 @@ import httpx
 import pytest
 from fastapi.testclient import TestClient
 
-from duud_api import main as main_mod
-from duud_api.providers.base import FunctionCall, HistoryMessage
+from bekhi_api import main as main_mod
+from bekhi_api.providers.base import FunctionCall, HistoryMessage
 
 NOW = "2026-10-06T14:00:00+08:00"
 

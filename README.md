@@ -1,8 +1,8 @@
-# Duud
+# BEKHI
 
 Mongolian voice-first personal assistant for iPhone.
 
-The user speaks Mongolian, casual and mixed with English. Duud works out the intent and runs
+The user speaks Mongolian, casual and mixed with English. BEKHI works out the intent and runs
 the action with **officially supported iOS APIs**, then replies in natural Mongolian.
 It never claims an action succeeded unless the iPhone confirmed it.
 
@@ -16,7 +16,7 @@ docs                architecture · iOS capabilities · roadmap
 ```
 
 - [docs/architecture.md](docs/architecture.md): the backend decides WHAT, the iPhone decides HOW, the turn lifecycle, decisions
-- [docs/ios-capabilities.md](docs/ios-capabilities.md): what iOS allows and what Duud must not claim
+- [docs/ios-capabilities.md](docs/ios-capabilities.md): what iOS allows and what BEKHI must not claim
 - [docs/roadmap.md](docs/roadmap.md): phases, reordered toward Milestone 1
 - [docs/speech-models.md](docs/speech-models.md): BuzzASR, Gemini, OronTTS — hardware, deployment, licensing
 

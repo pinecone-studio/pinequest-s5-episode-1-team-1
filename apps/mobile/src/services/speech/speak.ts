@@ -27,7 +27,7 @@ export async function speak(
   if (mine !== generation) return false;
 
   const ext = (res.headers.get("content-type") ?? "").includes("wav") ? "wav" : "mp3";
-  const file = new File(Paths.cache, `duud-reply-${mine}.${ext}`);
+  const file = new File(Paths.cache, `bekhi-reply-${mine}.${ext}`);
   file.write(bytes);
   // Recording leaves the iOS session in play-and-record mode, which plays through the
   // earpiece. Switch back so the reply comes out of the loudspeaker.

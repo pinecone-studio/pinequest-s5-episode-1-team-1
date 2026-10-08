@@ -1,7 +1,7 @@
 {
-  "name": "duud",
+  "name": "bekhi",
   "private": true,
-  "description": "Duud — Mongolian voice-first personal assistant for iPhone",
+  "description": "BEKHI — Mongolian voice-first personal assistant for iPhone",
   "workspaces": [
     "apps/mobile",
     "packages/*"
@@ -9,7 +9,7 @@
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "contracts:export": "npm run export-schemas -w @duud/contracts"
+    "contracts:export": "npm run export-schemas -w @bekhi/contracts"
   },
   "overrides": {
     "react": "19.2.3",

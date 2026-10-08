@@ -1,6 +1,6 @@
-# apps/mobile — Duud app (iPhone, Android, web)
+# apps/mobile — BEKHI app (iPhone, Android, web)
 
-Expo SDK 57 · Expo Router (`src/app`) · Zustand · TypeScript. Consumes `@duud/contracts` and
+Expo SDK 57 · Expo Router (`src/app`) · Zustand · TypeScript. Consumes `@bekhi/contracts` and
 validates every assistant turn with it before acting.
 
 ```
@@ -62,7 +62,7 @@ the LAN, hence `usesCleartextTraffic` (expo-build-properties). Exact-alarm permi
 | Open maps (`open_maps`) | ✅ Apple Maps | ✅ Google Maps | ✅ | ✅ Google Maps tab |
 | Call / message a contact | ✅ expo-contacts + `tel:` / message sheet | ✅ expo-contacts + dialer / SMS app | ✅ | ❌ |
 | Reminder / alarm / event / timer | ⚠️ local notification at that time | ⚠️ local notification at that time | ✅ EventKit / AlarmKit | ⚠️ Windows toast while the API runs |
-| Note | ❌ | ❌ | ✅ | ✅ appended to Documents\Duud тэмдэглэл.txt |
+| Note | ❌ | ❌ | ✅ | ✅ appended to Documents\BEKHI тэмдэглэл.txt |
 | Open another app, volume, lock screen | ❌ iOS does not allow it | ❌ needs a native build | | ✅ |
 
 Expo Go never fakes success, and the reply says when something is only a notification. `expo-calendar`
@@ -73,10 +73,10 @@ On a physical iPhone, Expo Go opens a dev server only when Expo CLI and Expo Go 
 same Expo account (`npx expo login`). Since SDK 57 the global `fetch` is Expo's, which rejects React
 Native's `{ uri, name, type }` FormData parts, so uploads pass a part with `bytes()` (audio-upload.ts).
 
-## Talking to Duud
+## Talking to BEKHI
 
 Tap 🎙️ and speak. Recording stops by itself about 1.3 s after you stop talking (or tap ■).
-Duud answers in text and reads it aloud. After a voice question it listens again for your
+BEKHI answers in text and reads it aloud. After a voice question it listens again for your
 answer, so you can keep talking hands-free. It stops listening after 7 s of silence, when you
 type, or when you tap 🎙️ while it is speaking (that also cuts the reply short).
 
