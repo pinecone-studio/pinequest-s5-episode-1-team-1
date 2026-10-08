@@ -660,7 +660,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -845,7 +849,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -1043,7 +1051,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -1222,7 +1234,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -1392,7 +1408,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -1570,7 +1590,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -1743,7 +1767,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -1919,7 +1947,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -2088,7 +2120,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -2254,7 +2290,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -2427,7 +2467,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -2596,7 +2640,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -2769,7 +2817,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -2929,7 +2981,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -3103,7 +3159,11 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -3295,7 +3355,713 @@
                               "set_timer",
                               "list_reminders",
                               "cancel_reminder",
-                              "computer_control"
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "add_todo"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                      },
+                      "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                      }
+                    },
+                    "required": [
+                      "title"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "list_todos"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "filter": {
+                        "default": "open",
+                        "type": "string",
+                        "enum": [
+                          "open",
+                          "today",
+                          "tomorrow",
+                          "week",
+                          "overdue",
+                          "done",
+                          "all"
+                        ]
+                      }
+                    }
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "complete_todo"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    },
+                    "required": [
+                      "query"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "delete_todo"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "type": "string",
+                        "maxLength": 100
+                      },
+                      "all": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
                             ]
                           },
                           "status": {
@@ -3590,7 +4356,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -3775,7 +4545,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -3973,7 +4747,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -4152,7 +4930,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -4322,7 +5104,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -4500,7 +5286,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -4673,7 +5463,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -4849,7 +5643,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -5018,7 +5816,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -5184,7 +5986,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -5357,7 +6163,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -5526,7 +6336,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -5699,7 +6513,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -5859,7 +6677,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -6033,7 +6855,11 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -6225,7 +7051,713 @@
                         "set_timer",
                         "list_reminders",
                         "cancel_reminder",
-                        "computer_control"
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "add_todo"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "due_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                }
+              },
+              "required": [
+                "title"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "list_todos"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "filter": {
+                  "default": "open",
+                  "type": "string",
+                  "enum": [
+                    "open",
+                    "today",
+                    "tomorrow",
+                    "week",
+                    "overdue",
+                    "done",
+                    "all"
+                  ]
+                }
+              }
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "complete_todo"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "query"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "delete_todo"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "all": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              }
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
                       ]
                     },
                     "status": {
@@ -6347,7 +7879,11 @@
             "set_timer",
             "list_reminders",
             "cancel_reminder",
-            "computer_control"
+            "computer_control",
+            "add_todo",
+            "list_todos",
+            "complete_todo",
+            "delete_todo"
           ]
         },
         "status": {
@@ -6470,7 +8006,11 @@
                   "set_timer",
                   "list_reminders",
                   "cancel_reminder",
-                  "computer_control"
+                  "computer_control",
+                  "add_todo",
+                  "list_todos",
+                  "complete_todo",
+                  "delete_todo"
                 ]
               },
               "status": {

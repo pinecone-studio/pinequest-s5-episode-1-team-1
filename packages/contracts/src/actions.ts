@@ -82,5 +82,9 @@ export const ActionRequest = z.discriminatedUnion("tool", [
   actionRequest("list_reminders"),
   actionRequest("cancel_reminder"),
   actionRequest("computer_control"),
+  actionRequest("add_todo"),
+  actionRequest("list_todos"),
+  actionRequest("complete_todo"),
+  actionRequest("delete_todo"),
 ]);
 export type ActionRequest = z.infer<typeof ActionRequest>;
