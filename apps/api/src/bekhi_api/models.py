@@ -26,6 +26,10 @@ ToolName = Literal[
     "list_reminders",
     "cancel_reminder",
     "computer_control",
+    "add_todo",
+    "list_todos",
+    "complete_todo",
+    "delete_todo",
 ]
 ExecutionTarget = Literal["backend", "react_native", "native_swift", "app_intent", "shortcut", "url_scheme"]
 ActionStatus = Literal[

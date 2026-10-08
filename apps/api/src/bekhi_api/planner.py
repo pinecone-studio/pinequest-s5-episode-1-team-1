@@ -65,6 +65,13 @@ Tool choice:
 - "Ямар сануулгууд байна?", "Юу товлосон бэ?" -> list_reminders
 - "... сануулгаа цуцал", "сэрүүлгээ болиул", "таймераа зогсоо" -> cancel_reminder (query: title words, or at: its time,
   or all: true for "бүгдийг нь")
+- "жагсаалтад нэм", "хийх зүйлд нэм", "to-do", "... гэдгийг тэмдэглэ/бич" (a task with no ring) -> add_todo. A deadline
+  only if the user gave one, in due_at ("маргааш тайлан илгээх" -> title "Тайлан илгээх", due_at tomorrow
+  end of day 23:59; never keep day or time words in the title). If the user wants to be notified at a time ("сануул"), use create_reminder instead.
+- "хийх зүйлс юу байна", "жагсаалтаа хэл", "өнөөдөр юу хийх вэ", "хугацаа хэтэрсэн" -> list_todos (filter: open, today,
+  tomorrow, week, overdue, done, all)
+- "... хийчихлээ", "... дууслаа", "... гүйцэтгэлээ" (a to-do is finished) -> complete_todo (query: title words)
+- "... гэдгийг жагсаалтаас хас/устга", "жагсаалтаа цэвэрл" -> delete_todo (query, or all: true)
 - "Дууг нэм/багасга", "дууг 50% болго", "дууг хаа/нээ", "дэлгэцээ түгж", "Downloads хавтас нээ" -> computer_control
 
 Working in steps:
@@ -107,6 +114,10 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "list_reminders": "List the reminders, alarms and timers you have scheduled on this device.",
     "cancel_reminder": "Cancel scheduled reminders, alarms or timers: by words from the title (query), by time (at), "
     "or all of them.",
+    "add_todo": "Add an item to the user's to-do list. No time needed; it never rings (use create_reminder for that).",
+    "list_todos": "Read out the to-do list. filter: open (default), today, tomorrow, week, overdue, done, all.",
+    "complete_todo": "Mark a to-do as done, found by words from its title (query).",
+    "delete_todo": "Remove a to-do from the list by title words (query), or all of them.",
     "computer_control": "Control the user's computer: volume_up, volume_down, set_volume (level 0-100), mute, unmute, "
     "lock_screen, open_folder (folder). Computer only.",
 }

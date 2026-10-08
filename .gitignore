@@ -46,3 +46,6 @@ Thumbs.db
 *.m4a
 *.wav
 *.caf
+
+# To-do list file (apps/api)
+apps/api/data/

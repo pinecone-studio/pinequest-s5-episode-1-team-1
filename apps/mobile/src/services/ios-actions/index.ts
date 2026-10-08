@@ -56,6 +56,10 @@ function dispatch(service: IOSActionService, action: ActionRequest) {
     case "get_weather":
     case "web_search":
     case "get_current_time":
+    case "add_todo":
+    case "list_todos":
+    case "complete_todo":
+    case "delete_todo":
       return Promise.resolve({ status: "failed" as const, executed_via: null, error_code: "BACKEND_TOOL_ON_DEVICE" });
   }
 }

@@ -18,7 +18,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools
+from . import backend_tools, todos
 from .compose import FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
@@ -71,6 +71,14 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
+    if tool == "add_todo":
+        return todos.add_todo(action_id, args, ctx.client_now)
+    if tool == "list_todos":
+        return todos.list_todos(action_id, args, ctx.client_now)
+    if tool == "complete_todo":
+        return todos.complete_todo(action_id, args)
+    if tool == "delete_todo":
+        return todos.delete_todo(action_id, args)
     return await backend_tools.web_search(action_id, args, deps.search)
 
 

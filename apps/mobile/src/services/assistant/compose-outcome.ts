@@ -21,6 +21,10 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   list_reminders: { verb: "сануулгуудыг харах", dative: "сануулгуудыг харахад" },
   cancel_reminder: { verb: "сануулга цуцлах", dative: "сануулга цуцлахад" },
   computer_control: { verb: "компьютер удирдах", dative: "компьютер удирдахад" },
+  add_todo: { verb: "жагсаалтад нэмэх", dative: "жагсаалтад нэмэхэд" },
+  list_todos: { verb: "жагсаалт харах", dative: "жагсаалт харахад" },
+  complete_todo: { verb: "тэмдэглэх", dative: "тэмдэглэхэд" },
+  delete_todo: { verb: "устгах", dative: "устгахад" },
 };
 
 /**

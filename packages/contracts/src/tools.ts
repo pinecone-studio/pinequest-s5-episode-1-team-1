@@ -18,6 +18,10 @@ export const TOOL_NAMES = [
   "list_reminders",
   "cancel_reminder",
   "computer_control",
+  "add_todo",
+  "list_todos",
+  "complete_todo",
+  "delete_todo",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -155,6 +159,30 @@ export const CancelReminderArgs = z.object({
   all: z.boolean().default(false),
 });
 
+export const AddTodoArgs = z.object({
+  title: z.string().min(1).max(200),
+  /** Optional deadline; a to-do needs no time. Does not ring: use create_reminder for that. */
+  due_at: IsoDateTime.optional(),
+});
+
+export const TodoFilter = z.enum(["open", "today", "tomorrow", "week", "overdue", "done", "all"]);
+export type TodoFilter = z.infer<typeof TodoFilter>;
+
+export const ListTodosArgs = z.object({
+  filter: TodoFilter.default("open"),
+});
+
+export const CompleteTodoArgs = z.object({
+  /** Words from the to-do's title, e.g. "сүү". */
+  query: z.string().min(1).max(100),
+});
+
+export const DeleteTodoArgs = z.object({
+  query: z.string().max(100).optional(),
+  /** "Бүгдийг нь устга". */
+  all: z.boolean().default(false),
+});
+
 export const ComputerFolder = z.enum(["downloads", "documents", "desktop", "pictures", "music", "videos"]);
 export type ComputerFolder = z.infer<typeof ComputerFolder>;
 
@@ -183,6 +211,10 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   list_reminders: ListRemindersArgs,
   cancel_reminder: CancelReminderArgs,
   computer_control: ComputerControlArgs,
+  add_todo: AddTodoArgs,
+  list_todos: ListTodosArgs,
+  complete_todo: CompleteTodoArgs,
+  delete_todo: DeleteTodoArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -372,6 +404,42 @@ export const TOOL_MANIFEST = {
       "Computer only (volume, mute, lock screen, open a standard folder), run by the API on the user's Windows " +
       "PC. iOS does not let apps change the volume or lock the phone, so the iPhone reports unsupported; " +
       "so does Android in Expo Go.",
+  },
+  add_todo: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "To-do list kept by FastAPI (a local file), the same on every device. No due time needed; it does not ring.",
+  },
+  list_todos: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "Open, due-today, tomorrow, this-week, overdue or done to-dos, returned inline.",
+  },
+  complete_todo: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "Marks the to-do matching the title words as done.",
+  },
+  delete_todo: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "Deletes the to-do matching the title words, or all of them.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 
