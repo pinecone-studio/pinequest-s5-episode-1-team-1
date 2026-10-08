@@ -26,6 +26,8 @@
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_CONTACTS",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.USE_EXACT_ALARM",
         "android.permission.SCHEDULE_EXACT_ALARM",
         "android.permission.MODIFY_AUDIO_SETTINGS",
@@ -36,6 +38,12 @@
     "plugins": [
       "expo-router",
       "expo-audio",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Очих газар руу тань зам зааж өгөхийн тулд BEKHI таны байршлыг ашиглана."
+        }
+      ],
       [
         "expo-build-properties",
         {

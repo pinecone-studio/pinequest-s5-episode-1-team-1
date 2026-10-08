@@ -158,7 +158,36 @@ class ActionResultsResponse(BaseModel):
     audio_url: str | None = None
 
 
-ApiErrorCode = Literal["stt_failed", "llm_failed", "tts_failed", "invalid_request", "unauthorized", "rate_limited", "internal"]
+TravelMode = Literal["driving", "walking", "transit"]
+
+
+class LatLng(BaseModel):
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+
+
+class DirectionsRequest(BaseModel):
+    origin: LatLng
+    destination: str = Field(min_length=1, max_length=200)
+    mode: TravelMode = "driving"
+
+
+class DirectionsStep(BaseModel):
+    instruction: str = Field(max_length=500)
+    distance_m: int = Field(ge=0)
+
+
+class DirectionsResponse(BaseModel):
+    distance_m: int = Field(ge=0)
+    duration_s: int = Field(ge=0)
+    destination: LatLng
+    path: list[LatLng] = Field(max_length=5000)
+    steps: list[DirectionsStep] = Field(max_length=200)
+
+
+ApiErrorCode = Literal[
+    "stt_failed", "llm_failed", "tts_failed", "maps_failed", "invalid_request", "unauthorized", "rate_limited", "internal"
+]
 
 
 class ApiErrorBody(BaseModel):

@@ -9,6 +9,8 @@ import {
   AssistantTurn,
   ChatRequest,
   DeviceCapabilities,
+  DirectionsRequest,
+  DirectionsResponse,
   TOOL_ARGUMENT_SCHEMAS,
   TOOL_MANIFEST,
   TOOL_NAMES,
@@ -28,6 +30,8 @@ export function buildGeneratedFiles(): Record<string, string> {
     ActionResult,
     ActionResultsRequest,
     ActionResultsResponse,
+    DirectionsRequest,
+    DirectionsResponse,
     ApiError,
   };
 
