@@ -113,9 +113,12 @@ export const GetWeatherArgs = z.object({
   date: IsoDate.optional(),
 });
 
+export const TravelMode = z.enum(["driving", "walking", "transit"]);
+export type TravelMode = z.infer<typeof TravelMode>;
+
 export const OpenMapsArgs = z.object({
   destination: z.string().min(1).max(200),
-  mode: z.enum(["driving", "walking", "transit"]).default("driving"),
+  mode: TravelMode.default("driving"),
 });
 
 export const CreateNoteArgs = z.object({

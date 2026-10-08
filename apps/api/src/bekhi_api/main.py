@@ -7,6 +7,7 @@ Endpoints (Phase 3/4):
   POST /api/v1/assistant/transcribe        16 kHz mono WAV -> transcript
   POST /api/v1/assistant/tts               Mongolian text -> speech (MP3, or WAV from the fallback)
   POST /api/v1/assistant/actions/results   device outcomes -> final Mongolian answer
+  POST /api/v1/maps/directions             phone location + destination -> route (Google Routes API)
 """
 
 from __future__ import annotations
@@ -28,7 +29,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import desktop
+from . import desktop, directions
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -39,6 +40,8 @@ from .models import (
     AssistantContext,
     AssistantTurn,
     ChatRequest,
+    DirectionsRequest,
+    DirectionsResponse,
 )
 from .compose import speakable
 from .pipeline import ContractViolation, Deps, UnknownTurn, plan_turn, report_results
@@ -58,6 +61,13 @@ MN_INVALID = "Хүсэлт буруу байна."
 MN_RATE_LIMITED = "Хэт олон хүсэлт ирлээ. Түр хүлээгээд дахин оролдоно уу."
 MN_INTERNAL = "Уучлаарай, системд алдаа гарлаа."
 MN_DESKTOP_UNAVAILABLE = "Энэ компьютер дээр үйлдэл хийх боломжгүй."
+MN_DIRECTIONS = {
+    "ROUTE_NOT_FOUND": (404, "Тэр газар хүрэх зам олдсонгүй. Хаягаа тодруулаад дахин оролдоно уу."),
+    "MAPS_KEY_INVALID": (502, "Google Maps API key буруу, эсвэл Routes API идэвхжээгүй байна."),
+    "MAPS_FAILED": (502, "Уучлаарай, зам тооцоолоход алдаа гарлаа."),
+}
+# Billed per request, so these share the assistant's per-minute limit.
+RATE_LIMITED_PATHS = ("/api/v1/assistant", "/api/v1/maps")
 LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost"}
 
 WAV_TYPES = {"audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"}
@@ -158,7 +168,7 @@ def create_app() -> FastAPI:
     @app.middleware("http")
     async def request_context(request: Request, call_next):
         request.state.request_id = uuid.uuid4().hex[:12]
-        if request.url.path.startswith("/api/v1/assistant"):
+        if request.url.path.startswith(RATE_LIMITED_PATHS):
             key = request.client.host if request.client else "unknown"
             now = time.monotonic()
             window = hits[key]
@@ -258,6 +268,7 @@ def create_app() -> FastAPI:
                 "provider": settings.web_search_provider,
                 "configured": bool({"tavily": settings.tavily_api_key, "gemini": settings.gemini_api_key}.get(settings.web_search_provider or "")),
             },
+            "maps": {"provider": "google_routes", "configured": bool(settings.google_maps_api_key)},
         }
 
     @app.post("/api/v1/assistant/chat", response_model=AssistantTurn)
@@ -349,6 +360,26 @@ def create_app() -> FastAPI:
             return report_results(body, request.app.state.store)
         except UnknownTurn as e:
             raise ApiException(404, "invalid_request", MN_INVALID) from e
+
+    @app.post("/api/v1/maps/directions", response_model=DirectionsResponse)
+    async def maps_directions(body: DirectionsRequest, request: Request):
+        if not settings.google_maps_api_key:
+            raise ApiException(503, "maps_failed", MN_KEY_MISSING.format("Google Maps"))
+        try:
+            return await directions.compute_route(
+                request.app.state.http,
+                settings.google_maps_api_key,
+                body.origin.model_dump(),
+                body.destination.strip(),
+                body.mode,
+            )
+        except directions.DirectionsError as e:
+            status, message = MN_DIRECTIONS[e.code]
+            raise ApiException(status, "maps_failed", message) from e
+        except httpx.HTTPError as e:
+            log.warning("routes api unreachable: %s rid=%s", type(e).__name__, request.state.request_id)
+            status, message = MN_DIRECTIONS["MAPS_FAILED"]
+            raise ApiException(status, "maps_failed", message) from e
 
     return app
 

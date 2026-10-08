@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, AppState, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Backdrop } from "@/components/Backdrop";
 import { ConfirmBar } from "@/components/ConfirmBar";
 import { EdgeGlow } from "@/components/EdgeGlow";
@@ -161,6 +162,7 @@ export default function Chat() {
               </View>
             </View>
             <View style={styles.headerActions}>
+              <RoundButton icon="map-outline" label="Газрын зураг, зам" onPress={() => router.push("/map")} small />
               <VoicePicker voices={voices} voiceId={voiceId} onChoose={chooseVoice} />
               <RoundButton
                 icon={!voiceReplies ? "volume-mute" : speaking ? "volume-high" : "volume-medium"}

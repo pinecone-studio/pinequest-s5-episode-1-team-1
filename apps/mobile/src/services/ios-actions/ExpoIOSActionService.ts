@@ -5,15 +5,19 @@ import { toLocalIso } from "@/lib/time";
 import { lookupPhone, type ContactLookup } from "./contacts";
 import { type ActionOutcome, type NotificationRequest, unsupported } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
+import { openInAppMap } from "./maps";
 import { cancelScheduled, listScheduled, scheduleNotification } from "./notifications";
 import { pickScheduled } from "./scheduled";
 
 /**
  * What a real iPhone can do in Expo Go, without the native module (Phase 9): calls
- * (Contacts + tel:), messages (Contacts + the system message sheet), and reminders, alarms
- * and event reminders as local notifications. Notes still need the native module.
+ * (Contacts + tel:), messages (Contacts + the system message sheet), reminders, alarms
+ * and event reminders as local notifications, and directions on BEKHI's own map screen.
+ * Notes still need the native module.
  */
 export class ExpoIOSActionService extends LinkingIOSActionService {
+  openMaps = (args: ToolArguments<"open_maps">) => openInAppMap(args);
+
   callContact = async (args: ToolArguments<"call_contact">): Promise<ActionOutcome> => {
     const contact = await lookupPhone(args.contact_name).catch(lookupFailed);
     if (contact?.kind !== "found") return notReachable(contact);
