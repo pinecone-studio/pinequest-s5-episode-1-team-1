@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, get_args
 from uuid import UUID, uuid4
@@ -65,6 +65,9 @@ class Deps:
     http: httpx.AsyncClient
     store: MemoryStore
     search: WebSearch | None = None
+    todo_store: todos.TodoStore = field(default_factory=todos.FileTodoStore)
+    # The sync account of the device asking (sync.account_key): whose to-do list it is.
+    account: str | None = None
 
 
 async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx: AssistantContext, deps: Deps) -> ActionResult:
@@ -72,15 +75,27 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
-    if tool == "add_todo":
-        return todos.add_todo(action_id, args, ctx.client_now)
-    if tool == "list_todos":
-        return todos.list_todos(action_id, args, ctx.client_now)
-    if tool == "complete_todo":
-        return todos.complete_todo(action_id, args)
-    if tool == "delete_todo":
-        return todos.delete_todo(action_id, args)
+    if tool in TODO_TOOLS:
+        try:
+            return await _run_todo_tool(action_id, tool, args, ctx, deps)
+        except httpx.HTTPError as e:
+            log.warning("todo store failed: %s", type(e).__name__)
+            return ActionResult(action_id=action_id, tool=tool, status="failed", executed_via="backend",
+                                error_code="TODO_UNAVAILABLE", data=None)
     return await backend_tools.web_search(action_id, args, deps.search)
+
+
+TODO_TOOLS = ("add_todo", "list_todos", "complete_todo", "delete_todo")
+
+
+async def _run_todo_tool(action_id: str, tool: str, args: dict[str, Any], ctx: AssistantContext, deps: Deps) -> ActionResult:
+    if tool == "add_todo":
+        return await todos.add_todo(action_id, args, ctx.client_now, deps.todo_store, deps.account)
+    if tool == "list_todos":
+        return await todos.list_todos(action_id, args, ctx.client_now, deps.todo_store, deps.account)
+    if tool == "complete_todo":
+        return await todos.complete_todo(action_id, args, deps.todo_store, deps.account)
+    return await todos.delete_todo(action_id, args, deps.todo_store, deps.account)
 
 
 def _tool_response(result: ActionResult) -> dict[str, Any]:

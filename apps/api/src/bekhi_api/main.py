@@ -35,7 +35,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import desktop, directions, sync
+from . import desktop, directions, sync, todos
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -87,6 +87,8 @@ LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost"}
 WAV_TYPES = {"audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"}
 # Set on a TTS response read in the default voice because the chosen one needs a paid plan.
 VOICE_FALLBACK_HEADER = "X-Bekhi-Voice-Fallback"
+# The device-linking sync code (packages/contracts sync.ts), also sent with chat and voice requests.
+SYNC_CODE_HEADER = "X-Bekhi-Sync"
 # Quieter than this at its loudest, a recording has no voice in it: a muted or wrong microphone.
 # Speech peaks around -30..-5 dBFS; a muted mic gives about -90.
 SILENT_PEAK_DBFS = -60
@@ -159,6 +161,7 @@ async def lifespan(app: FastAPI):
         app.state.store = MemoryStore()
         settings = get_settings()
         app.state.sync = sync.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
+        app.state.todos = todos.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
         app.state.desktop = None
         if settings.desktop_actions and desktop.available():
             app.state.desktop = desktop.DesktopScheduler(sync=app.state.sync)
@@ -219,7 +222,12 @@ def create_app() -> FastAPI:
             log.error("llm not configured: %s", e)
             raise ApiException(503, "llm_failed", MN_NOT_CONFIGURED) from e
         http = request.app.state.http
-        return Deps(llm=llm, http=http, store=request.app.state.store, search=get_search(http))
+        return Deps(
+            llm=llm, http=http, store=request.app.state.store, search=get_search(http),
+            todo_store=request.app.state.todos,
+            # The asking device's sync code picks its account's to-do list (sync.py).
+            account=sync.account_key(request.headers.get(SYNC_CODE_HEADER)),
+        )
 
     async def run_plan(text: str, ctx: AssistantContext, request: Request) -> AssistantTurn:
         d = deps(request)

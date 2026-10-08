@@ -13,3 +13,10 @@ device-linking sync code (the code itself is never stored). RLS is on with no po
 backend, using `SUPABASE_SERVICE_ROLE_KEY`, reads and writes them. Set `SUPABASE_URL` and
 `SUPABASE_SERVICE_ROLE_KEY` in `apps/api/.env`. Without them the API keeps synced alarms in memory, which
 works only while every linked device talks to the same API.
+
+## To-do lists (in use)
+
+`migrations/20261009000000_todos.sql`: `todos`, one list per account (the same sync-code hash), read and
+written only by the backend with the service role key. Without Supabase the API keeps a JSON file per
+account next to `TODO_FILE`; a request without a sync code (an app from before accounts) uses the one list
+in `TODO_FILE` itself.
