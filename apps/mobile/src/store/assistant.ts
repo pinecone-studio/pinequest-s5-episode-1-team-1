@@ -61,6 +61,8 @@ interface AssistantState {
   voices: Voice[];
   /** The chosen voice id (the backend's default until the user picks one). */
   voiceId: string | null;
+  /** Looking for the API; a sleeping cloud server takes up to a minute to answer. */
+  connecting: boolean;
   connect(): Promise<void>;
   /** Pick a voice and hear a short sample in it. */
   chooseVoice(id: string): void;
@@ -255,9 +257,11 @@ export const useAssistant = create<AssistantState>((set, get) => {
     listenRequest: 0,
     voices: [],
     voiceId: null,
+    connecting: false,
 
     async connect() {
-      const client = await connectAssistant();
+      set({ connecting: true });
+      const client = await connectAssistant().finally(() => set({ connecting: false }));
       set({ client });
       if (client.mode !== "live") return;
       // Alarms and timers set on the user's other devices ring here too.
