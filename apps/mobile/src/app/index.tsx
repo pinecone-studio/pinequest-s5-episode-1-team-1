@@ -73,6 +73,8 @@ export default function Chat() {
     stopConversation,
     stopReply,
     answerConfirmation,
+    contactChoice,
+    chooseContact,
     toggleVoiceReplies,
     fail,
   } = useAssistant();
@@ -217,7 +219,13 @@ export default function Chat() {
           </ScrollView>
 
           <View style={styles.bottom}>
-            {confirming && <ConfirmBar onAnswer={answerConfirmation} />}
+            {confirming && (
+              <ConfirmBar
+                onAnswer={answerConfirmation}
+                choices={contactChoice && !contactChoice.sure ? contactChoice.names : undefined}
+                onChoose={chooseContact}
+              />
+            )}
             {typing ? (
               <TypeBar disabled={busy || confirming} onSend={submitText} onVoice={() => void onOrb()} />
             ) : (

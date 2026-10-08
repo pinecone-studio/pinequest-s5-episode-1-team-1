@@ -603,6 +603,16 @@
                         "minLength": 1,
                         "maxLength": 100,
                         "description": "Contact name as the user said it, normalized to nominative case, e.g. 'Ээж', 'Бат'"
+                      },
+                      "name_spellings": {
+                        "maxItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 60
+                        },
+                        "description": "How the person is likely saved in the phone's contacts, which are often in Latin letters: 'Анка' -> ['Anka'], 'Майкл' -> ['Michael'], 'Ээж' -> ['Mom', 'Mama', 'Eej']"
                       }
                     },
                     "required": [
@@ -1897,6 +1907,16 @@
                         "minLength": 1,
                         "maxLength": 100,
                         "description": "Contact name as the user said it, normalized to nominative case, e.g. 'Ээж', 'Бат'"
+                      },
+                      "name_spellings": {
+                        "maxItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 60
+                        },
+                        "description": "How the person is likely saved in the phone's contacts, which are often in Latin letters: 'Анка' -> ['Anka'], 'Майкл' -> ['Michael'], 'Ээж' -> ['Mom', 'Mama', 'Eej']"
                       },
                       "body": {
                         "type": "string",
@@ -4330,6 +4350,16 @@
                   "minLength": 1,
                   "maxLength": 100,
                   "description": "Contact name as the user said it, normalized to nominative case, e.g. 'Ээж', 'Бат'"
+                },
+                "name_spellings": {
+                  "maxItems": 4,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "description": "How the person is likely saved in the phone's contacts, which are often in Latin letters: 'Анка' -> ['Anka'], 'Майкл' -> ['Michael'], 'Ээж' -> ['Mom', 'Mama', 'Eej']"
                 }
               },
               "required": [
@@ -5624,6 +5654,16 @@
                   "minLength": 1,
                   "maxLength": 100,
                   "description": "Contact name as the user said it, normalized to nominative case, e.g. 'Ээж', 'Бат'"
+                },
+                "name_spellings": {
+                  "maxItems": 4,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "description": "How the person is likely saved in the phone's contacts, which are often in Latin letters: 'Анка' -> ['Anka'], 'Майкл' -> ['Michael'], 'Ээж' -> ['Mom', 'Mama', 'Eej']"
                 },
                 "body": {
                   "type": "string",

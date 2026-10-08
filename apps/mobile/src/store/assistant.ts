@@ -1,10 +1,13 @@
+import { Platform } from "react-native";
 import { create } from "zustand";
-import { MN, type ActionResult, type AssistantTurn } from "@bekhi/contracts";
+import { MN, type ActionRequest, type ActionResult, type AssistantTurn } from "@bekhi/contracts";
+import { toward } from "@/lib/mongolian";
 import { AssistantError, type AssistantClient } from "@/services/assistant/AssistantClient";
 import { PreviewAssistantClient } from "@/services/assistant/PreviewAssistantClient";
 import { apiBaseUrl, connectAssistant } from "@/services/assistant/connect";
 import { buildContext } from "@/services/assistant/context";
-import { executeDeviceAction, iosActions } from "@/services/ios-actions";
+import { executeDeviceAction, iosActions, type ChosenContact } from "@/services/ios-actions";
+import { findContacts, type ContactCandidate } from "@/services/ios-actions/contacts";
 import { speak, stopSpeaking } from "@/services/speech/speak";
 import { startAlarmSync } from "@/services/sync/alarm-sync";
 import { fetchVoices, loadSavedVoice, saveVoice, type Voice } from "@/services/speech/voices";
@@ -30,10 +33,20 @@ export interface ChatMessage {
   understood?: string;
 }
 
+/** Before a call or message: who the phone found for the name the user said. */
+export interface ContactChoice {
+  /** Contact names, best first. */
+  names: string[];
+  /** One name stands out, so the screen just asks yes / no about it. */
+  sure: boolean;
+}
+
 interface AssistantState {
   phase: Phase;
   messages: ChatMessage[];
   pendingTurn: AssistantTurn | null;
+  /** Set while confirming a call or message, once the phone has looked up the contact. */
+  contactChoice: ContactChoice | null;
   conversationId: string | null;
   client: AssistantClient;
   voiceReplies: boolean;
@@ -59,6 +72,8 @@ interface AssistantState {
   /** Stop reading the reply aloud, and do not listen again afterwards. */
   stopReply(): void;
   answerConfirmation(yes: boolean): Promise<void>;
+  /** Pick one of `contactChoice.names` by index, or null for none of them. */
+  chooseContact(index: number | null): Promise<void>;
   toggleVoiceReplies(): void;
   fail(message: string): void;
 }
@@ -124,8 +139,11 @@ export const useAssistant = create<AssistantState>((set, get) => {
     set({ speechError: `${name} хоолой ElevenLabs-ийн төлбөртэй багц шаарддаг тул үндсэн хоолойгоор уншлаа.` });
   }
 
-  async function runActions(turn: AssistantTurn, approved: boolean) {
-    set({ phase: "executing", pendingTurn: null });
+  /** The contacts found for the call or message waiting for an answer (numbers stay on the phone). */
+  let found: { actionId: string; candidates: ContactCandidate[] } | null = null;
+
+  async function runActions(turn: AssistantTurn, approved: boolean, chosen?: { actionId: string; contact: ChosenContact }) {
+    set({ phase: "executing", pendingTurn: null, contactChoice: null });
     const results: ActionResult[] = [];
     for (const action of turn.actions) {
       if (action.result) {
@@ -133,7 +151,7 @@ export const useAssistant = create<AssistantState>((set, get) => {
       } else if (action.confirmation.required && !approved) {
         results.push({ action_id: action.id, tool: action.tool, status: "cancelled", executed_via: null, error_code: null });
       } else {
-        results.push(await executeDeviceAction(iosActions, action));
+        results.push(await executeDeviceAction(iosActions, action, chosen?.actionId === action.id ? chosen.contact : undefined));
       }
     }
     const final = await get().client.reportResults({
@@ -157,10 +175,16 @@ export const useAssistant = create<AssistantState>((set, get) => {
         reply(turn.response, limited ? "warning" : "normal", true);
         break;
       }
-      case "awaiting_confirmation":
+      case "awaiting_confirmation": {
+        const contactAction = contactToFind(turn);
+        if (contactAction) {
+          await askWhichContact(turn, contactAction);
+          break;
+        }
         set({ phase: "confirming", pendingTurn: turn });
         reply(turn.response);
         break;
+      }
       case "awaiting_device":
         await runActions(turn, true);
         break;
@@ -171,12 +195,48 @@ export const useAssistant = create<AssistantState>((set, get) => {
     }
   }
 
+  /** A call or message that is the only thing waiting for a yes: the phone finds the contact first. */
+  function contactToFind(turn: AssistantTurn): ActionRequest | null {
+    if (Platform.OS === "web") return null;
+    const asking = turn.actions.filter((a) => !a.result && a.confirmation.required);
+    const [only] = asking;
+    return asking.length === 1 && only && (only.tool === "call_contact" || only.tool === "send_message") ? only : null;
+  }
+
+  /**
+   * Ask with the contact the phone actually found ("Anka руу залгах уу?"), or let the user pick
+   * when several names are close: speech recognition often mishears names, and contacts are
+   * saved in Latin letters. Nothing is dialled or sent before the user answers.
+   */
+  async function askWhichContact(turn: AssistantTurn, action: ActionRequest) {
+    const args = action.arguments as { contact_name: string; name_spellings?: string[]; body?: string };
+    const search = await findContacts(args.contact_name, args.name_spellings ?? []).catch((e: unknown) => {
+      console.warn("contact search failed", e);
+      return null;
+    });
+    if (search?.kind !== "candidates") {
+      // Nobody to ask about: the action reports why (not found, no number, no permission).
+      await runActions(turn, true, search?.kind === "not_found" ? { actionId: action.id, contact: null } : undefined);
+      return;
+    }
+    found = { actionId: action.id, candidates: search.candidates };
+    const names = search.candidates.map((c) => c.name);
+    set({ phase: "confirming", pendingTurn: turn, contactChoice: { names, sure: search.sure } });
+    const verb = action.tool === "call_contact" ? "залгах" : "бичих";
+    const [first] = names;
+    if (search.sure && first) {
+      reply(action.tool === "call_contact" ? `${toward(first)} залгах уу?` : `${toward(first)} "${args.body ?? ""}" гэж бичих үү?`);
+    } else {
+      reply(`${names.join(", ")}. Аль рүү нь ${verb} вэ?`);
+    }
+  }
+
   async function guarded(work: () => Promise<void>) {
     try {
       await work();
     } catch (e) {
       console.warn("assistant turn failed", e);
-      set({ phase: "error", pendingTurn: null });
+      set({ phase: "error", pendingTurn: null, contactChoice: null });
       reply(e instanceof AssistantError ? e.message : MN.errors.llm, "error");
     }
   }
@@ -185,6 +245,7 @@ export const useAssistant = create<AssistantState>((set, get) => {
     phase: "idle",
     messages: [],
     pendingTurn: null,
+    contactChoice: null,
     conversationId: null,
     client: new PreviewAssistantClient(),
     voiceReplies: true,
@@ -227,13 +288,13 @@ export const useAssistant = create<AssistantState>((set, get) => {
       if (!trimmed) return;
       stopSpeaking();
       push(msg("user", trimmed));
-      set({ phase: "processing", pendingTurn: null, conversing: false });
+      set({ phase: "processing", pendingTurn: null, contactChoice: null, conversing: false });
       await guarded(async () => handleTurn(await get().client.sendText(trimmed, buildContext(get().conversationId))));
     },
 
     startListening() {
       stopSpeaking();
-      set({ phase: "listening", pendingTurn: null });
+      set({ phase: "listening", pendingTurn: null, contactChoice: null });
     },
 
     stopReply() {
@@ -274,7 +335,20 @@ export const useAssistant = create<AssistantState>((set, get) => {
       const turn = get().pendingTurn;
       if (!turn) return;
       push(msg("user", yes ? MN.ui.confirmYes : MN.ui.confirmNo));
-      await guarded(() => runActions(turn, yes));
+      const picked = found;
+      found = null;
+      const chosen = yes && picked ? { actionId: picked.actionId, contact: picked.candidates[0] ?? null } : undefined;
+      await guarded(() => runActions(turn, yes, chosen));
+    },
+
+    async chooseContact(index) {
+      const turn = get().pendingTurn;
+      const picked = found;
+      if (!turn || !picked) return;
+      found = null;
+      const contact = index === null ? undefined : picked.candidates[index];
+      push(msg("user", contact?.name ?? MN.ui.confirmNo));
+      await guarded(() => runActions(turn, !!contact, contact ? { actionId: picked.actionId, contact } : undefined));
     },
 
     toggleVoiceReplies() {
@@ -283,7 +357,7 @@ export const useAssistant = create<AssistantState>((set, get) => {
     },
 
     fail(message) {
-      set({ phase: "error", pendingTurn: null });
+      set({ phase: "error", pendingTurn: null, contactChoice: null });
       reply(message, "error");
     },
   };

@@ -72,12 +72,22 @@ const ContactName = z
   .max(100)
   .describe("Contact name as the user said it, normalized to nominative case, e.g. 'Ээж', 'Бат'");
 
+const NameSpellings = z
+  .array(z.string().trim().min(1).max(60))
+  .max(4)
+  .describe(
+    "How the person is likely saved in the phone's contacts, which are often in Latin letters: " +
+      "'Анка' -> ['Anka'], 'Майкл' -> ['Michael'], 'Ээж' -> ['Mom', 'Mama', 'Eej']",
+  );
+
 export const CallContactArgs = z.object({
   contact_name: ContactName,
+  name_spellings: NameSpellings.optional(),
 });
 
 export const SendMessageArgs = z.object({
   contact_name: ContactName,
+  name_spellings: NameSpellings.optional(),
   body: z.string().min(1).max(1000),
 });
 

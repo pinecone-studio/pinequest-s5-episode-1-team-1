@@ -93,6 +93,9 @@ Working in steps:
 Arguments:
 - Contact names: use the person as the user named them, in nominative form without case suffixes.
   "Ээж рүүгээ", "Ээждээ", "Ээжтэй", "Ээж рүү" -> "Ээж". "Батад", "Бат руу" -> "Бат".
+  Also fill `name_spellings`: contacts are often saved in Latin letters, so give how the person is likely written
+  there: "Анка" -> ["Anka"], "Хулан" -> ["Khulan", "Hulan"], a foreign name in its original spelling
+  ("Майкл" -> ["Michael"], "Жон" -> ["John"]), a family word as it is saved ("Ээж" -> ["Mom", "Mama", "Eej"]).
 - Dates and times: output absolute ISO-8601 with the user's UTC offset, e.g. "2026-10-07T09:00:00+08:00".
   Resolve relative words against the current local time given below: "өнөөдөр" today, "маргааш" tomorrow,
   "нөгөөдөр" the day after tomorrow. "өглөө 8" = 08:00, "орой 7" = 19:00, "8:30" = 08:30,
@@ -105,7 +108,8 @@ Arguments:
 """
 
 TOOL_DESCRIPTIONS: dict[str, str] = {
-    "call_contact": "Call a person from the user's phone contacts. The phone resolves the name and the user confirms.",
+    "call_contact": "Call a person from the user's phone contacts. The phone finds the contact, shows who it found "
+    "and the user confirms.",
     "send_message": "Send an SMS to a contact. The user confirms and taps Send on the phone.",
     "create_reminder": "Create a reminder at a specific time (a notification on the phone or the computer).",
     "create_calendar_event": "Add an event to the calendar.",

@@ -43,26 +43,70 @@ export function nameKeys(name: string): string[] {
     .filter(Boolean);
 }
 
-export const sameName = (a: string, b: string) => nameKeys(a).join(" ") === nameKeys(b).join(" ");
+/** Below this a contact is too far from the name to offer. */
+const MIN_SCORE = 0.82;
+
+/** How alike two keys are, 0 to 1 (Jaro-Winkler: forgives a misheard letter, trusts a shared start). */
+function similarity(a: string, b: string): number {
+  if (a === b) return 1;
+  if (!a || !b) return 0;
+  const range = Math.max(0, Math.floor(Math.max(a.length, b.length) / 2) - 1);
+  const aHit: boolean[] = [];
+  const bHit: boolean[] = [];
+  let matches = 0;
+  for (let i = 0; i < a.length; i++) {
+    for (let j = Math.max(0, i - range); j < Math.min(b.length, i + range + 1); j++) {
+      if (bHit[j] || a[i] !== b[j]) continue;
+      aHit[i] = bHit[j] = true;
+      matches++;
+      break;
+    }
+  }
+  if (matches === 0) return 0;
+  let k = 0;
+  let swapped = 0;
+  for (let i = 0; i < a.length; i++) {
+    if (!aHit[i]) continue;
+    while (!bHit[k]) k++;
+    if (a[i] !== b[k]) swapped++;
+    k++;
+  }
+  const jaro = (matches / a.length + matches / b.length + (matches - swapped / 2) / matches) / 3;
+  let prefix = 0;
+  while (prefix < 4 && a[prefix] !== undefined && a[prefix] === b[prefix]) prefix++;
+  return jaro + prefix * 0.1 * (1 - jaro);
+}
 
 /**
- * The contacts whose name matches what the user said: whole name or one of its words with the
- * same key first; otherwise words that start with it ("Бат" → "Batbold"), like the system search.
+ * Contacts ranked by how well their name matches any spoken form: the name as heard plus the
+ * assistant's spellings of it ("Anka", "Michael"). 1 means the same name; misheard names still
+ * rank close, so the user can pick the right one.
  */
-export function matchContacts<T extends { fullName?: string | null }>(contacts: readonly T[], spoken: string): T[] {
-  const said = nameKeys(spoken);
-  if (said.length === 0) return [];
-  const whole = said.join(" ");
-  const family = (FAMILY[spoken.trim().toLocaleLowerCase()] ?? []).map((w) => nameKeys(w).join(" "));
-  const wanted = new Set([whole, said.join(""), ...family]);
+export function rankContacts<T extends { fullName?: string | null }>(
+  contacts: readonly T[],
+  spoken: readonly string[],
+): { contact: T; score: number }[] {
+  const wanted = new Set<string>();
+  for (const form of spoken) {
+    const keys = nameKeys(form);
+    if (keys.length === 0) continue;
+    wanted.add(keys.join(" "));
+    wanted.add(keys.join(""));
+    for (const w of FAMILY[form.trim().toLocaleLowerCase()] ?? []) wanted.add(nameKeys(w).join(" "));
+  }
+  if (wanted.size === 0) return [];
 
-  const exact = contacts.filter((c) => {
-    const keys = nameKeys(c.fullName ?? "");
-    return wanted.has(keys.join(" ")) || wanted.has(keys.join("")) || (said.length === 1 && keys.some((k) => wanted.has(k)));
-  });
-  if (exact.length > 0) return exact;
-
-  const first = said[0] ?? "";
-  if (said.length > 1 || first.length < 3) return [];
-  return contacts.filter((c) => nameKeys(c.fullName ?? "").some((k) => k.startsWith(first)));
+  const ranked: { contact: T; score: number }[] = [];
+  for (const contact of contacts) {
+    const keys = nameKeys(contact.fullName ?? "");
+    if (keys.length === 0) continue;
+    let score = 0;
+    for (const w of wanted) {
+      score = Math.max(score, similarity(w, keys.join(" ")), similarity(w, keys.join("")));
+      // One word of a longer name ("Khulan" in "Khulan Bat") ranks just below the whole name.
+      for (const k of keys) score = Math.max(score, similarity(w, k) * 0.99);
+    }
+    if (score >= MIN_SCORE) ranked.push({ contact, score });
+  }
+  return ranked.sort((x, y) => y.score - x.score);
 }

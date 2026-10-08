@@ -3,7 +3,7 @@ import * as SMS from "expo-sms";
 import type { ToolArguments } from "@bekhi/contracts";
 import { toLocalIso } from "@/lib/time";
 import { lookupPhone, type ContactLookup } from "./contacts";
-import { type ActionOutcome, type NotificationRequest, unsupported } from "./IOSActionService";
+import { type ActionOutcome, type ChosenContact, type NotificationRequest, unsupported } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
 import { openInAppMap } from "./maps";
 import { cancelScheduled, listScheduled, scheduleNotification } from "./notifications";
@@ -18,8 +18,8 @@ import { pickScheduled } from "./scheduled";
 export class ExpoIOSActionService extends LinkingIOSActionService {
   openMaps = (args: ToolArguments<"open_maps">) => openInAppMap(args);
 
-  callContact = async (args: ToolArguments<"call_contact">): Promise<ActionOutcome> => {
-    const contact = await lookupPhone(args.contact_name).catch(lookupFailed);
+  callContact = async (args: ToolArguments<"call_contact">, chosen?: ChosenContact): Promise<ActionOutcome> => {
+    const contact = await resolveContact(args, chosen);
     if (contact?.kind !== "found") return notReachable(contact);
     try {
       // iOS shows its own "Call …?" prompt; whether the call happens is not observable.
@@ -30,9 +30,9 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
     }
   };
 
-  sendMessage = async (args: ToolArguments<"send_message">): Promise<ActionOutcome> => {
+  sendMessage = async (args: ToolArguments<"send_message">, chosen?: ChosenContact): Promise<ActionOutcome> => {
     if (!(await SMS.isAvailableAsync())) return unsupported("SMS_UNAVAILABLE");
-    const contact = await lookupPhone(args.contact_name).catch(lookupFailed);
+    const contact = await resolveContact(args, chosen);
     if (contact?.kind !== "found") return notReachable(contact);
     try {
       // The system message sheet: the user taps Send, and iOS reports whether they did.
@@ -114,6 +114,16 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
 
   // iOS lets an app open another app only through that app's own URL scheme.
   openApp = async () => unsupported("IOS_CANNOT_OPEN_APPS");
+}
+
+/** The contact the user picked on screen, or else the name looked up again. */
+function resolveContact(
+  args: { contact_name: string; name_spellings?: string[] },
+  chosen: ChosenContact | undefined,
+): Promise<ContactLookup | null> {
+  if (chosen === null) return Promise.resolve({ kind: "not_found" });
+  if (chosen) return Promise.resolve({ kind: "found", number: chosen.number });
+  return lookupPhone(args.contact_name, args.name_spellings).catch(lookupFailed);
 }
 
 /** Why a contact lookup threw, for the dev server log; the user hears a short sentence instead. */

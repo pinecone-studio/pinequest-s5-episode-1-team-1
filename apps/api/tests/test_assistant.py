@@ -85,6 +85,14 @@ def test_call_requires_confirmation(client, planner):
     assert report(client, turn, [result("a1", "call_contact", "handed_off", "url_scheme")]) == "За, Ээж рүү тань залгаж байна."
 
 
+def test_call_passes_the_latin_spellings_to_the_phone(client, planner):
+    planner.then(("call_contact", {
+        "contact_name": "Майкл", "name_spellings": ["Michael", "Maikl"], "confirmation_question": "Майкл руу залгах уу?",
+    }))
+    turn = chat(client, "Майкл руу залга.")
+    assert turn["actions"][0]["arguments"] == {"contact_name": "Майкл", "name_spellings": ["Michael", "Maikl"]}
+
+
 def test_message_without_question_still_confirms(client, planner):
     planner.then(("send_message", {"contact_name": "Бат", "body": "Орой уулзъя"}))
     turn = chat(client, "Батад орой уулзъя гэж бич.")
