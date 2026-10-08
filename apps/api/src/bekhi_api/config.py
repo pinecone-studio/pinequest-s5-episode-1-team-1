@@ -75,6 +75,8 @@ class Settings:
     web_search_provider: str | None
     tavily_api_key: str | None
     google_maps_api_key: str | None
+    supabase_url: str | None
+    supabase_service_role_key: str | None
     log_level: str
     cors_origins: list[str] = field(default_factory=list)
 
@@ -125,6 +127,9 @@ def get_settings() -> Settings:
         tavily_api_key=os.getenv("TAVILY_API_KEY") or None,
         # Routes API (in-app directions). Server-side only: the map tiles in the app use their own keys.
         google_maps_api_key=os.getenv("GOOGLE_MAPS_API_KEY") or None,
+        # Alarm/timer sync between devices (sync.py). Unset: kept in this process instead.
+        supabase_url=os.getenv("SUPABASE_URL") or None,
+        supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,
         log_level=os.getenv("LOG_LEVEL") or "INFO",
         cors_origins=_csv(os.getenv("CORS_ORIGINS")) or ["http://localhost:8081"],
     )

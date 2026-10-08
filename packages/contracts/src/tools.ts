@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { IanaTimezone, IsoDate, IsoDateTime } from "./common";
+import { IanaTimezone, IsoDate, IsoDateTime, Uuid } from "./common";
 
 export const TOOL_NAMES = [
   "call_contact",
@@ -101,10 +101,22 @@ export const CreateCalendarEventArgs = z.object({
 
 export const DEFAULT_EVENT_DURATION_MINUTES = 60;
 
+/**
+ * Where an alarm or timer rings: "all" = every device linked with the same sync code
+ * (phone, computer...), "this" = only the device the user is talking to.
+ */
+export const AlarmTarget = z.enum(["all", "this"]);
+export type AlarmTarget = z.infer<typeof AlarmTarget>;
+
+/** Id shared by every device's copy of one synced alarm/timer. Set by the backend, never by the model. */
+const SyncId = Uuid.optional();
+
 export const CreateAlarmArgs = z.object({
   fire_at: IsoDateTime,
   timezone: IanaTimezone,
   label: z.string().max(100).optional(),
+  target: AlarmTarget.default("all"),
+  sync_id: SyncId,
 });
 
 export const GetWeatherArgs = z.object({
@@ -149,6 +161,10 @@ export const SetTimerArgs = z.object({
   /** "10 минут" -> 600. The device adds it to its own clock, so no time maths in the model. */
   duration_seconds: z.number().int().min(1).max(86_400),
   label: z.string().max(100).optional(),
+  target: AlarmTarget.default("all"),
+  /** When it rings, computed by the backend from its clock, so every device rings at the same moment. */
+  fire_at: IsoDateTime.optional(),
+  sync_id: SyncId,
 });
 
 export const ListRemindersArgs = z.object({});
@@ -296,7 +312,8 @@ export const TOOL_MANIFEST = {
       "iOS 26+: AlarmKit schedules a real alarm owned by BEKHI (not an entry in the Clock app's list). " +
       "Below iOS 26 there is no API to create alarms; BEKHI can run a user-installed Shortcut that uses " +
       "the Clock 'Create Alarm' action, or explain the limitation. A local notification is NOT an alarm " +
-      "and is only offered explicitly, never substituted silently.",
+      "and is only offered explicitly, never substituted silently. target 'all' (default) also sends it to " +
+      "every device linked with the same sync code; each schedules its own copy.",
   },
   open_maps: {
     executor: "device",
@@ -374,7 +391,9 @@ export const TOOL_MANIFEST = {
     permissions: ["notifications"],
     min_ios: MIN_IOS,
     app_intent: null,
-    notes: "Rings after duration_seconds: a local notification on the phone, a looping toast on the computer.",
+    notes:
+      "Rings at fire_at (the backend adds duration_seconds to its clock): a local notification on the phone, " +
+      "a looping toast on the computer. target 'all' (default) also sends it to every linked device.",
   },
   list_reminders: {
     executor: "device",
@@ -383,7 +402,9 @@ export const TOOL_MANIFEST = {
     permissions: ["notifications"],
     min_ios: MIN_IOS,
     app_intent: null,
-    notes: "Reminders, alarms and timers BEKHI has scheduled on this device; returned in the result's data.",
+    notes:
+      "Reminders, alarms and timers BEKHI has scheduled on this device, after pulling the synced ones from " +
+      "the server; returned in the result's data.",
   },
   cancel_reminder: {
     executor: "device",
@@ -394,7 +415,8 @@ export const TOOL_MANIFEST = {
     app_intent: null,
     notes:
       "Cancels BEKHI's scheduled items matching the title words or time, or all of them. Several matches " +
-      "without a filter ask which one (needs_clarification).",
+      "without a filter ask which one (needs_clarification). Synced alarms/timers are cancelled on the " +
+      "server too, so every linked device drops them.",
   },
   computer_control: {
     executor: "device",

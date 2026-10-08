@@ -7,6 +7,8 @@ export interface ScheduledItem {
   kind: string;
   /** Local wall-clock ISO with offset. */
   fire_at: string;
+  /** Set on alarms/timers shared with the user's other devices (alarm-sync.ts). */
+  sync_id?: string;
 }
 
 /** Minutes either side of a spoken time ("3 цагийнхаа сануулга") that still count as that item. */

@@ -54,17 +54,20 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
       body: "БЭХИ сэрүүлэг",
       ringtone: true,
       kind: "alarm",
+      syncId: args.sync_id,
     });
 
   createCalendarEvent = (args: ToolArguments<"create_calendar_event">) =>
     scheduleNotification(args.start_at, { title: args.title, body: args.location ?? "БЭХИ: эхлэх цаг боллоо", kind: "event" });
 
+  // fire_at comes from the backend's clock, so every linked device rings at the same moment.
   setTimer = (args: ToolArguments<"set_timer">) =>
-    scheduleNotification(toLocalIso(new Date(Date.now() + args.duration_seconds * 1000)), {
+    scheduleNotification(args.fire_at ?? toLocalIso(new Date(Date.now() + args.duration_seconds * 1000)), {
       title: args.label ?? "Таймер",
       body: "Таймер дууслаа",
       ringtone: true,
       kind: "timer",
+      syncId: args.sync_id,
     });
 
   listReminders = async (): Promise<ActionOutcome> => {
@@ -93,7 +96,11 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
         status: "succeeded",
         executed_via: "react_native",
         error_code: null,
-        data: { cancelled: matches.map((m) => m.title) },
+        data: {
+          cancelled: matches.map((m) => m.title),
+          // Cancelled on the server too (alarm-sync.ts), so the other devices drop their copies.
+          cancelled_sync_ids: matches.flatMap((m) => (m.sync_id ? [m.sync_id] : [])),
+        },
       };
     } catch {
       return { status: "failed", executed_via: "react_native", error_code: "NOTIFICATIONS_FAILED" };

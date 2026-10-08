@@ -5,7 +5,7 @@ import type { ScheduledItem } from "./scheduled";
 
 export async function scheduleNotification(
   _fireAtIso: string,
-  _content: { title: string; body?: string; ringtone?: boolean; kind?: string },
+  _content: { title: string; body?: string; ringtone?: boolean; kind?: string; syncId?: string },
 ): Promise<ActionOutcome> {
   return { status: "unsupported", executed_via: null, error_code: "WEB_NO_IPHONE_ACTIONS" };
 }

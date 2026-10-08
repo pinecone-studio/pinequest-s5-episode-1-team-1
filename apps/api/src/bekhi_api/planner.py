@@ -74,6 +74,14 @@ Tool choice:
 - "... гэдгийг жагсаалтаас хас/устга", "жагсаалтаа цэвэрл" -> delete_todo (query, or all: true)
 - "Дууг нэм/багасга", "дууг 50% болго", "дууг хаа/нээ", "дэлгэцээ түгж", "Downloads хавтас нээ" -> computer_control
 
+Alarms and timers on several devices:
+- create_alarm and set_timer ring on every device the user has linked (phone, computer): target "all". That is
+  the default; "бүх төхөөрөмж дээр сэрүүлэг тавь", "компьютер дээр ч дуугарга", "утас, компьютер хоёулан дээр"
+  -> target "all".
+- Use target "this" only when the user limits it to the device they are talking to: "зөвхөн утсан дээр",
+  "зөвхөн энэ компьютер дээр", "энд л дуугарга".
+- list_reminders and cancel_reminder already cover every linked device: cancelling there cancels it everywhere.
+
 Working in steps:
 - get_weather, get_current_time and web_search return their results to you. After you get them, answer the user
   with `reply` in your own words, briefly. If one search is not enough, search again with a better query
@@ -111,7 +119,7 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "open_app": "Open a program installed on the user's computer. app_name in its usual English name "
     "(VS Code, Chrome, Word, Spotify, Calculator). Not for websites; on a phone this is not possible yet.",
     "set_timer": "Start a timer that rings after duration_seconds. Use for 'N минутын таймер' or 'N минутын дараа дуугарга'.",
-    "list_reminders": "List the reminders, alarms and timers you have scheduled on this device.",
+    "list_reminders": "List the reminders, alarms and timers scheduled on this device and on the user's linked devices.",
     "cancel_reminder": "Cancel scheduled reminders, alarms or timers: by words from the title (query), by time (at), "
     "or all of them.",
     "add_todo": "Add an item to the user's to-do list. No time needed; it never rings (use create_reminder for that).",
@@ -129,6 +137,14 @@ FIELD_HINTS: dict[str, str] = {
     "end_at": "Absolute ISO-8601 with UTC offset",
     "timezone": "IANA timezone of the user, as given in the context",
     "date": "YYYY-MM-DD",
+    "target": "all = every linked device (default), this = only the device the user is talking to",
+}
+
+# Filled by the backend, never by the model (pipeline.py): the shared id of a synced alarm,
+# and a timer's end time from the server clock so every device rings at the same moment.
+BACKEND_FIELDS: dict[str, tuple[str, ...]] = {
+    "create_alarm": ("sync_id",),
+    "set_timer": ("sync_id", "fire_at"),
 }
 
 CONTROL_FUNCTIONS: list[FunctionSpec] = [
@@ -200,6 +216,10 @@ def _with_summary(params: dict[str, Any]) -> dict[str, Any]:
 def _llm_parameters(tool: str, schema: dict[str, Any], confirm: bool) -> dict[str, Any]:
     params = copy.deepcopy(schema)
     params.pop("$schema", None)
+    for name in BACKEND_FIELDS.get(tool, ()):
+        params.get("properties", {}).pop(name, None)
+        if name in params.get("required", []):
+            params["required"].remove(name)
     for name, prop in params.get("properties", {}).items():
         prop.pop("pattern", None)  # long regexes confuse models; the backend validates them
         if name in FIELD_HINTS:
@@ -228,11 +248,13 @@ def function_specs() -> list[FunctionSpec]:
 
 
 DEVICE_LINES = {
-    "ios": "The user is talking to you on their iPhone. Calls, messages, reminders, alarms and timers happen on the iPhone.",
-    "android": "The user is talking to you on their Android phone. Calls, messages, reminders, alarms and timers "
-    "happen on the phone.",
-    "web": "The user is talking to you in the browser on their Windows computer. Reminders, alarms, timers, notes, "
-    "programs and computer controls happen on that computer; calls and messages need the phone.",
+    "ios": "The user is talking to you on their iPhone. Calls, messages and reminders happen on the iPhone; alarms "
+    "and timers on the iPhone and the user's linked devices.",
+    "android": "The user is talking to you on their Android phone. Calls, messages and reminders happen on the phone; "
+    "alarms and timers on the phone and the user's linked devices.",
+    "web": "The user is talking to you in the browser on their Windows computer. Reminders, notes, programs and "
+    "computer controls happen on that computer, alarms and timers on it and the user's linked devices; calls and "
+    "messages need the phone.",
 }
 
 

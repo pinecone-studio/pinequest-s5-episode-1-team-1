@@ -11,6 +11,11 @@ import {
   DeviceCapabilities,
   DirectionsRequest,
   DirectionsResponse,
+  SyncCancelRequest,
+  SyncDeviceRequest,
+  SyncPublishRequest,
+  SyncPublishResponse,
+  SyncPullResponse,
   TOOL_ARGUMENT_SCHEMAS,
   TOOL_MANIFEST,
   TOOL_NAMES,
@@ -33,6 +38,11 @@ export function buildGeneratedFiles(): Record<string, string> {
     DirectionsRequest,
     DirectionsResponse,
     ApiError,
+    SyncDeviceRequest,
+    SyncPublishRequest,
+    SyncPublishResponse,
+    SyncCancelRequest,
+    SyncPullResponse,
   };
 
   const wireSchemas = Object.fromEntries(

@@ -33,6 +33,25 @@
       }
     },
     {
+      "id": "03b_alarm_all_devices",
+      "utterance": "Маргааш өглөө 7 цагт бүх төхөөрөмж дээр сэрүүлэг тавь.",
+      "variants": ["маргааш 7-д утас компьютер хоёулан дээр сэрээгээрэй"],
+      "expected": {
+        "tools": ["create_alarm"],
+        "arguments": [{ "fire_at": "2026-10-07T07:00:00+08:00", "target": "all" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "03c_timer_this_device_only",
+      "utterance": "Зөвхөн утсан дээр 10 минутын таймер тавь.",
+      "expected": {
+        "tools": ["set_timer"],
+        "arguments": [{ "duration_seconds": 600, "target": "this" }],
+        "requires_confirmation": false
+      }
+    },
+    {
       "id": "04_reminder_work_9",
       "utterance": "Маргааш 9 цагт ажилтайг минь сануулаарай.",
       "milestone": 1,

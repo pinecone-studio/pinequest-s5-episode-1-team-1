@@ -6,6 +6,7 @@ import { apiBaseUrl, connectAssistant } from "@/services/assistant/connect";
 import { buildContext } from "@/services/assistant/context";
 import { executeDeviceAction, iosActions } from "@/services/ios-actions";
 import { speak, stopSpeaking } from "@/services/speech/speak";
+import { startAlarmSync } from "@/services/sync/alarm-sync";
 import { fetchVoices, loadSavedVoice, saveVoice, type Voice } from "@/services/speech/voices";
 
 export type Phase =
@@ -198,6 +199,8 @@ export const useAssistant = create<AssistantState>((set, get) => {
       const client = await connectAssistant();
       set({ client });
       if (client.mode !== "live") return;
+      // Alarms and timers set on the user's other devices ring here too.
+      startAlarmSync();
       const list = await fetchVoices(apiBaseUrl());
       if (!list) return;
       const saved = loadSavedVoice();
