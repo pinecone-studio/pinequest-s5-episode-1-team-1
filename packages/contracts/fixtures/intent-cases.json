@@ -185,6 +185,20 @@
   ],
   "conversations": [
     {
+      "id": "c2_remembered_person",
+      "$comment": "A fact remembered in turn 1 resolves 'эхнэр' in turn 2.",
+      "turns": [
+        {
+          "utterance": "Миний эхнэрийг Сараа гэдэг гэдгийг санаж аваарай.",
+          "expected": { "tools": ["remember"], "argument_contains": [{ "fact": "сараа" }] }
+        },
+        {
+          "utterance": "Эхнэр рүүгээ залгаач.",
+          "expected": { "tools": ["call_contact"], "arguments": [{ "contact_name": "Сараа" }], "requires_confirmation": true }
+        }
+      ]
+    },
+    {
       "id": "c1_tomorrow_carries_over",
       "$comment": "'маргааш' from turn 1 must carry into turn 2.",
       "turns": [

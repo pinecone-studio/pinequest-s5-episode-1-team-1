@@ -676,7 +676,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -867,7 +869,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -1071,7 +1075,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -1269,7 +1275,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -1445,7 +1453,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -1629,7 +1639,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -1808,7 +1820,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -2000,7 +2014,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -2175,7 +2191,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -2347,7 +2365,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -2526,7 +2546,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -2708,7 +2730,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -2905,7 +2929,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -3071,7 +3097,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -3251,7 +3279,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -3449,7 +3479,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -3629,7 +3661,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -3809,7 +3843,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -3984,7 +4020,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -4159,7 +4197,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -4330,7 +4370,9 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -4512,7 +4554,364 @@
                               "complete_todo",
                               "delete_todo",
                               "daily_briefing",
-                              "create_routine"
+                              "create_routine",
+                              "remember",
+                              "forget"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "remember"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "fact": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200,
+                        "description": "One short sentence about the user, kept for later: 'Хэрэглэгчийн эхнэрийг Сараа гэдэг'"
+                      }
+                    },
+                    "required": [
+                      "fact"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "forget"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "type": "string",
+                        "maxLength": 100
+                      },
+                      "all": {
+                        "default": false,
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget"
                             ]
                           },
                           "status": {
@@ -4823,7 +5222,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -5014,7 +5415,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -5218,7 +5621,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -5416,7 +5821,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -5592,7 +5999,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -5776,7 +6185,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -5955,7 +6366,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -6147,7 +6560,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -6322,7 +6737,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -6494,7 +6911,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -6673,7 +7092,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -6855,7 +7276,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -7052,7 +7475,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -7218,7 +7643,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -7398,7 +7825,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -7596,7 +8025,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -7776,7 +8207,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -7956,7 +8389,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -8131,7 +8566,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -8306,7 +8743,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -8477,7 +8916,9 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -8659,7 +9100,364 @@
                         "complete_todo",
                         "delete_todo",
                         "daily_briefing",
-                        "create_routine"
+                        "create_routine",
+                        "remember",
+                        "forget"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "remember"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "fact": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200,
+                  "description": "One short sentence about the user, kept for later: 'Хэрэглэгчийн эхнэрийг Сараа гэдэг'"
+                }
+              },
+              "required": [
+                "fact"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "forget"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "all": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              }
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget"
                       ]
                     },
                     "status": {
@@ -8787,7 +9585,9 @@
             "complete_todo",
             "delete_todo",
             "daily_briefing",
-            "create_routine"
+            "create_routine",
+            "remember",
+            "forget"
           ]
         },
         "status": {
@@ -8916,7 +9716,9 @@
                   "complete_todo",
                   "delete_todo",
                   "daily_briefing",
-                  "create_routine"
+                  "create_routine",
+                  "remember",
+                  "forget"
                 ]
               },
               "status": {

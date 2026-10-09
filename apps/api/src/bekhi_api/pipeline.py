@@ -19,7 +19,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, briefing, todos
+from . import backend_tools, briefing, memory, todos
 from .compose import FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
@@ -66,6 +66,7 @@ class Deps:
     store: MemoryStore
     search: WebSearch | None = None
     todo_store: todos.TodoStore = field(default_factory=todos.FileTodoStore)
+    memory_store: memory.FactStore = field(default_factory=memory.FileFactStore)
     # The sync account of the device asking (sync.account_key): whose to-do list it is.
     account: str | None = None
 
@@ -84,6 +85,15 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
             log.warning("todo store failed: %s", type(e).__name__)
             return ActionResult(action_id=action_id, tool=tool, status="failed", executed_via="backend",
                                 error_code="TODO_UNAVAILABLE", data=None)
+    if tool in ("remember", "forget"):
+        try:
+            if tool == "remember":
+                return await memory.remember(action_id, args, ctx.client_now, deps.memory_store, deps.account)
+            return await memory.forget(action_id, args, deps.memory_store, deps.account)
+        except httpx.HTTPError as e:
+            log.warning("memory store failed: %s", type(e).__name__)
+            return ActionResult(action_id=action_id, tool=tool, status="failed", executed_via="backend",
+                                error_code="MEMORY_UNAVAILABLE", data=None)
     return await backend_tools.web_search(action_id, args, deps.search)
 
 
@@ -138,8 +148,9 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
     conversation_id, conv = deps.store.get_or_create(ctx.conversation_id)
     manifest = tool_manifest()
 
+    facts = await memory.facts_for(deps.memory_store, deps.account)
     calls = await deps.llm.plan(
-        system=system_prompt(ctx.client_now, ctx.timezone, ctx.device.platform),
+        system=system_prompt(ctx.client_now, ctx.timezone, ctx.device.platform, facts),
         history=list(conv.history),
         user_text=text,
         functions=function_specs(),

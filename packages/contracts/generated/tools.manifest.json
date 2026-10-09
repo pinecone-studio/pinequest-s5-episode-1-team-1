@@ -766,6 +766,59 @@
           "time"
         ]
       }
+    },
+    {
+      "name": "remember",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Keeps a short fact about the user for the account (the sync code's devices); the planner gets the facts with every request. At most 50.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "fact": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "One short sentence about the user, kept for later: 'Хэрэглэгчийн эхнэрийг Сараа гэдэг'"
+          }
+        },
+        "required": [
+          "fact"
+        ]
+      }
+    },
+    {
+      "name": "forget",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Forgets the remembered facts containing the query words, or all of them.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "all": {
+            "default": false,
+            "type": "boolean"
+          }
+        }
+      }
     }
   ]
 }
