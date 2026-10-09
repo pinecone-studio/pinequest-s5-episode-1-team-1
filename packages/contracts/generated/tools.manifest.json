@@ -709,6 +709,28 @@
           }
         }
       }
+    },
+    {
+      "name": "daily_briefing",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The day at a glance, returned inline: a greeting for the time of day, today's weather and the to-dos due today or overdue. Planned together with list_reminders, so the device adds what it has scheduled today.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "location_name": {
+            "type": "string",
+            "maxLength": 100
+          }
+        }
+      }
     }
   ]
 }

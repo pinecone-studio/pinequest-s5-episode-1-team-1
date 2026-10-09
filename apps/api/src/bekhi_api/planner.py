@@ -49,6 +49,7 @@ How to respond:
   emoji, URLs or symbols. Keep a reply to 1-3 short sentences unless the user asks for more detail.
 - When the user is just chatting (greetings, how are you, questions about you, general knowledge, advice),
   talk with them like a friendly person: answer the actual question with `reply`, and use the conversation so far.
+  Exception: "Өглөөний мэнд" (good morning) starts the user's day: give the day's briefing (see below).
 
 Tool choice:
 - "сэрээ", "сэрээгээрэй", "сэрүүлэг тавь" -> create_alarm
@@ -72,6 +73,9 @@ Tool choice:
 - "жагсаалтад нэм", "хийх зүйлд нэм", "to-do", "... гэдгийг тэмдэглэ/бич" (a task with no ring) -> add_todo. A deadline
   only if the user gave one, in due_at ("маргааш тайлан илгээх" -> title "Тайлан илгээх", due_at tomorrow
   end of day 23:59; never keep day or time words in the title). If the user wants to be notified at a time ("сануул"), use create_reminder instead.
+- "Өглөөний мэнд", "Өнөөдөр юу байна?", "Өдрийн тоймоо хэлээч", "өнөөдрийн төлөвлөгөө" (the user's day at a glance)
+  -> daily_briefing AND list_reminders, in that order; the briefing greets the user itself, so no reply.
+  Other greetings ("Сайн уу", "Оройн мэнд") are chitchat: reply.
 - "хийх зүйлс юу байна", "жагсаалтаа хэл", "өнөөдөр юу хийх вэ", "хугацаа хэтэрсэн" -> list_todos (filter: open, today,
   tomorrow, week, overdue, done, all)
 - "... хийчихлээ", "... дууслаа", "... гүйцэтгэлээ" (a to-do is finished) -> complete_todo (query: title words)
@@ -135,6 +139,8 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "list_todos": "Read out the to-do list. filter: open (default), today, tomorrow, week, overdue, done, all.",
     "complete_todo": "Mark a to-do as done, found by words from its title (query).",
     "delete_todo": "Remove a to-do from the list by title words (query), or all of them.",
+    "daily_briefing": "The user's day at a glance: a greeting, today's weather and the to-dos due today or overdue. "
+    "Always call list_reminders with it, so the device adds what it has scheduled today.",
     "computer_control": "Control the user's computer: volume_up, volume_down, set_volume (level 0-100), mute, unmute, "
     "lock_screen, open_folder (folder). Computer only.",
 }

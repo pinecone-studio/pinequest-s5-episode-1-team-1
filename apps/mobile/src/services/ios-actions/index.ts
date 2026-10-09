@@ -109,6 +109,7 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
     case "list_todos":
     case "complete_todo":
     case "delete_todo":
+    case "daily_briefing":
       return Promise.resolve({ status: "failed" as const, executed_via: null, error_code: "BACKEND_TOOL_ON_DEVICE" });
   }
 }

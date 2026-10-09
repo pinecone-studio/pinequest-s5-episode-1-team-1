@@ -19,7 +19,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, todos
+from . import backend_tools, briefing, todos
 from .compose import FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
@@ -75,6 +75,8 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
+    if tool == "daily_briefing":
+        return await briefing.daily_briefing(action_id, args, ctx.client_now, deps.http, deps.todo_store, deps.account)
     if tool in TODO_TOOLS:
         try:
             return await _run_todo_tool(action_id, tool, args, ctx, deps)

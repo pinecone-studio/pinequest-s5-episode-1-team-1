@@ -42,6 +42,7 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "list_reminders": ("сануулгуудыг харах", "сануулгуудыг харахад"),
     "cancel_reminder": ("сануулга цуцлах", "сануулга цуцлахад"),
     "computer_control": ("компьютер удирдах", "компьютер удирдахад"),
+    "daily_briefing": ("өдрийн тойм гаргах", "өдрийн тойм гаргахад"),
 }
 
 FOLDER_NAMES = {
@@ -294,13 +295,36 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
     return template.format(name=a.get("contact_name", ""), app=a.get("app_name", ""))
 
 
+def _today_schedule(r: ActionResult, now_iso: str) -> str:
+    """In the day's briefing: only what the device has scheduled today, and nothing when it
+    cannot list them (a browser without the PC's API)."""
+    if r.status != "succeeded":
+        return ""
+    today = now_iso[:10]
+    items = [i for i in (r.data or {}).get("items") or [] if str(i.get("fire_at", ""))[:10] == today]
+    if not items:
+        return ""
+    lines = [
+        f"{format_when_mn(i['fire_at'], now_iso).removeprefix('өнөөдөр ')} "
+        f"{i.get('title') or KIND_MN.get(i.get('kind', ''), 'сануулга')}"
+        for i in items[:5]
+    ]
+    return "Өнөөдөр товлосон: " + ", ".join(lines) + "."
+
+
 def compose(actions: list[ActionRequest], results: list[ActionResult], now_iso: str) -> str:
     by_id = {a.id: a for a in actions}
-    parts = [sentence_for(by_id[r.action_id], r, now_iso) for r in results if r.action_id in by_id]
+    briefing = any(a.tool == "daily_briefing" for a in actions)
+    parts = [
+        _today_schedule(r, now_iso) if briefing and by_id[r.action_id].tool == "list_reminders"
+        else sentence_for(by_id[r.action_id], r, now_iso)
+        for r in results
+        if r.action_id in by_id
+    ]
     # Collapse repeated identical sentences (e.g. several "болиулчихлаа").
     seen: list[str] = []
     for p in parts:
-        if p not in seen:
+        if p and p not in seen:
             seen.append(p)
     return " ".join(seen)
 

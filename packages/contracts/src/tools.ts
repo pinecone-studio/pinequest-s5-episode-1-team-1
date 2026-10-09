@@ -22,6 +22,7 @@ export const TOOL_NAMES = [
   "list_todos",
   "complete_todo",
   "delete_todo",
+  "daily_briefing",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -222,6 +223,11 @@ export const DeleteTodoArgs = z.object({
   all: z.boolean().default(false),
 });
 
+export const DailyBriefingArgs = z.object({
+  /** For the weather; omitted => the user's default city. */
+  location_name: z.string().max(100).optional(),
+});
+
 export const ComputerFolder = z.enum(["downloads", "documents", "desktop", "pictures", "music", "videos"]);
 export type ComputerFolder = z.infer<typeof ComputerFolder>;
 
@@ -254,6 +260,7 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   list_todos: ListTodosArgs,
   complete_todo: CompleteTodoArgs,
   delete_todo: DeleteTodoArgs,
+  daily_briefing: DailyBriefingArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -486,6 +493,17 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes: "Deletes the to-do matching the title words, or all of them.",
+  },
+  daily_briefing: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The day at a glance, returned inline: a greeting for the time of day, today's weather and the to-dos due " +
+      "today or overdue. Planned together with list_reminders, so the device adds what it has scheduled today.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 
