@@ -1,14 +1,15 @@
 import { ActionStatus, type ToolArguments, type ToolName } from "@bekhi/contracts";
-import { apiBaseUrl } from "@/services/assistant/connect";
+import { desktopBaseUrl, PC_AGENT_URL } from "@/services/assistant/connect";
 import { appWebsite, findCatalogApp } from "./app-catalog";
 import type { ActionOutcome } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
 import { googleMapsUrl } from "./maps";
 
 /**
- * The web app on the Windows PC that runs the BEKHI API: reminders, alarms, event reminders
- * and notes are done on this PC by the API (apps/api desktop.py). Calls and messages need
- * a phone. In any other browser the API answers 404 and the action is unsupported.
+ * The web app on a Windows PC: reminders, alarms, event reminders, notes, apps and the volume
+ * are done on this PC (apps/api desktop.py), by the API itself when it runs here, or by BEKHI's
+ * PC agent (agent.py) when the API is in the cloud. Calls and messages need a phone. In any
+ * other browser the action is unsupported.
  */
 export class DesktopActionService extends LinkingIOSActionService {
   createReminder = (args: ToolArguments<"create_reminder">) => this.onPc("create_reminder", args);
@@ -36,14 +37,17 @@ export class DesktopActionService extends LinkingIOSActionService {
   };
 
   private async onPc(tool: ToolName, args: unknown): Promise<ActionOutcome> {
+    const base = desktopBaseUrl();
     let res: Response;
     try {
-      res = await fetch(`${apiBaseUrl()}/api/v1/desktop/actions`, {
+      res = await fetch(`${base}/api/v1/desktop/actions`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ tool, arguments: args }),
       });
     } catch {
+      // The cloud web app with no PC agent running here (or the browser did not allow it).
+      if (base === PC_AGENT_URL) return { status: "unsupported", executed_via: null, error_code: "DESKTOP_AGENT_OFF" };
       return { status: "failed", executed_via: null, error_code: "DESKTOP_UNREACHABLE" };
     }
     if (res.status === 404) return { status: "unsupported", executed_via: null, error_code: this.nativeUnavailableCode };

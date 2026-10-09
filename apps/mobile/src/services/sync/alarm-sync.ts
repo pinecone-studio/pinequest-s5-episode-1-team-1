@@ -1,7 +1,7 @@
 import { AppState, Platform } from "react-native";
 import { SyncPublishResponse, SyncPullResponse, type SyncAlarm, type SyncPlatform } from "@bekhi/contracts";
 import { toLocalIso } from "@/lib/time";
-import { apiBaseUrl } from "@/services/assistant/connect";
+import { apiBaseUrl, desktopBaseUrl } from "@/services/assistant/connect";
 import { cancelScheduled, listScheduled, scheduleNotification } from "@/services/ios-actions/notifications";
 import { ensureIdentity, formatSyncCode, normalizeSyncCode, platform, setIdentity, syncHeaders } from "./identity";
 
@@ -49,14 +49,14 @@ async function call(path: string, init: { method?: string; body?: unknown } = {}
   }
 }
 
-/** Phone: "this device is linked". Web: link the PC's API itself, which rings the alarms. */
+/** Phone: "this device is linked". Web: link the PC's API or agent itself, which rings the alarms. */
 async function linkDevice(): Promise<void> {
   const id = ensureIdentity();
   if (Platform.OS !== "web") {
     await call("/api/v1/sync/devices", { method: "POST", body: { platform } });
     return;
   }
-  const res = await fetch(`${apiBaseUrl()}/api/v1/desktop/sync`, {
+  const res = await fetch(`${desktopBaseUrl()}/api/v1/desktop/sync`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ code: id.code }),

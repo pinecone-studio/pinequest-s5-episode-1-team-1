@@ -178,7 +178,44 @@ class SupabaseSyncStore:
         )
 
 
-def make_store(supabase_url: str | None, service_key: str | None, http: httpx.AsyncClient) -> SyncStore:
+class RemoteSyncStore:
+    """Another BEKHI API's sync endpoints (the cloud's), for a PC agent (agent.py): alarms set on the
+    user's other devices ring on this PC too. The cloud hashes the code itself, so here `account`
+    is the sync code, which stays on this PC (DesktopScheduler.link)."""
+
+    def __init__(self, base_url: str, http: httpx.AsyncClient) -> None:
+        self._base = base_url.rstrip("/") + "/api/v1/sync"
+        self._http = http
+        self._device: dict[str, str] = {}  # code -> this PC's device id, from touch_device
+
+    async def _call(self, method: str, path: str, code: str, device_id: str | None = None, json: Any = None) -> Any:
+        headers = {"X-Bekhi-Sync": code, "X-Bekhi-Device": device_id or self._device.get(code, "")}
+        r = await self._http.request(method, self._base + path, headers=headers, json=json)
+        r.raise_for_status()
+        return r.json()
+
+    async def touch_device(self, account: str, device_id: str, platform: str, now: datetime) -> None:
+        self._device[account] = device_id
+        await self._call("POST", "/devices", account, device_id, {"platform": platform})
+
+    async def other_devices(self, account: str, device_id: str, now: datetime) -> list[str]:
+        return []  # the web app publishes through the cloud itself and gets the list there
+
+    async def publish(self, account: str, device_id: str, alarm: dict[str, Any]) -> None:
+        await self._call("POST", "/alarms", account, device_id, alarm)
+
+    async def pull(self, account: str, now: datetime) -> tuple[list[dict[str, Any]], list[str]]:
+        body = await self._call("GET", "/alarms", account)
+        return list(body.get("active") or []), [str(i) for i in body.get("cancelled") or []]
+
+    async def cancel(self, account: str, ids: list[str], now: datetime) -> None:
+        await self._call("POST", "/alarms/cancel", account, json={"ids": ids})
+
+
+def make_store(supabase_url: str | None, service_key: str | None, http: httpx.AsyncClient,
+               remote_url: str | None = None) -> SyncStore:
     if supabase_url and service_key:
         return SupabaseSyncStore(supabase_url, service_key, http)
+    if remote_url:
+        return RemoteSyncStore(remote_url, http)
     return MemorySyncStore()

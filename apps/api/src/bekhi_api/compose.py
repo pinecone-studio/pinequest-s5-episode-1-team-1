@@ -71,6 +71,8 @@ UNSUPPORTED_BY_CODE = {
     "ANDROID_CANNOT_OPEN_APPS": "Expo Go дээр '{app}' аппыг нээж чадсангүй. БЭХИ-гийн Android апп суулгавал утсан "
     "дээрх ямар ч аппыг нэрээр нь нээнэ.",
     "ANDROID_NO_SYSTEM_CONTROL": "Android утсан дээр БЭХИ одоохондоо дууны түвшин өөрчлөх, утсыг түгжих боломжгүй.",
+    # The cloud web app on a PC without BEKHI's PC agent running (apps/api agent.py).
+    "DESKTOP_AGENT_OFF": "Компьютер дээр {verb} боломжгүй байна: энэ компьютерт БЭХИ агент асаагүй байна.",
 }
 
 PERMISSION_BY_CODE = {
