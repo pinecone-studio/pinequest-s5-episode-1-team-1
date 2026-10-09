@@ -12,6 +12,15 @@
       "android": {
         "buildType": "apk"
       }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://bekhi-api.onrender.com"
+      },
+      "autoIncrement": true
     }
+  },
+  "submit": {
+    "production": {}
   }
 }
