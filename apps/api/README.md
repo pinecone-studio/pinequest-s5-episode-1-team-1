@@ -67,7 +67,8 @@ not have (429).
 Desktop actions (`desktop.py`): reminders, alarms and event reminders become Windows toast
 notifications, kept in `%LOCALAPPDATA%\BEKHI\reminders.json` and fired by the running API (nothing is
 registered with Windows, so they only fire while the API runs). Notes are appended to
-`Documents\BEKHI тэмдэглэл.txt`. `open_app` launches an installed app found in the Start menu.
+`Documents\BEKHI тэмдэглэл.txt`. `open_app` launches an installed app found in the Start menu; the web
+app opens a known app's website when it is not there.
 `set_timer`, `list_reminders` and `cancel_reminder` work on the same scheduled items (the iPhone does
 the same with its local notifications). `computer_control` (`windows_controls.py`) sets the speaker
 volume and mute through Core Audio, locks the screen, and opens Downloads/Documents/... folders.

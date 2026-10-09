@@ -24,6 +24,16 @@
             "minLength": 1,
             "maxLength": 100,
             "description": "Contact name as the user said it, normalized to nominative case, e.g. 'Ээж', 'Бат'"
+          },
+          "name_spellings": {
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "description": "How the person is likely saved in the phone's contacts, which are often in Latin letters: 'Анка' -> ['Anka'], 'Майкл' -> ['Michael'], 'Ээж' -> ['Mom', 'Mama', 'Eej']"
           }
         },
         "required": [
@@ -300,6 +310,16 @@
             "maxLength": 100,
             "description": "Contact name as the user said it, normalized to nominative case, e.g. 'Ээж', 'Бат'"
           },
+          "name_spellings": {
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "description": "How the person is likely saved in the phone's contacts, which are often in Latin letters: 'Анка' -> ['Anka'], 'Майкл' -> ['Michael'], 'Ээж' -> ['Mom', 'Mama', 'Eej']"
+          },
           "body": {
             "type": "string",
             "minLength": 1,
@@ -395,13 +415,14 @@
       "name": "open_app",
       "executor": "device",
       "strategy": [
+        "url_scheme",
         "react_native"
       ],
       "confirmation": "never",
       "permissions": [],
       "min_ios": "17.0",
       "app_intent": null,
-      "notes": "Computer only: the web app asks the API running on the same Windows PC to launch a Start menu app whose name matches. iOS lets an app open other apps only through their URL schemes, so the iPhone reports unsupported; Android in Expo Go does too (it needs a native build).",
+      "notes": "Phones: well-known apps through their URL schemes and app links, searching for `query` inside the app where it has a search link, else their website. Android also opens any installed app by its name (the BEKHI build lists the home screen's apps; Expo Go cannot). iOS allows only the known URL schemes. Computer: the web app asks the API on the same Windows PC to launch the Start menu app whose name matches; a known app that is not installed there, or a search in it, opens its website in a new tab.",
       "parameters": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -409,7 +430,14 @@
           "app_name": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 100
+            "maxLength": 100,
+            "description": "The app in its usual name, as under its icon: 'YouTube', 'Spotify', 'Khan Bank', 'Камер', 'VS Code'"
+          },
+          "query": {
+            "description": "Only when the user wants something found or played in the app: what to search for there ('Монгол дуу')",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
           }
         },
         "required": [

@@ -106,12 +106,13 @@ def test_open_app_on_the_pc(tmp_path, monkeypatch):
 
 
 def test_open_outcomes(client, planner):
-    def report(tool, args, status, via, code=None):
+    def report(tool, args, status, via, code=None, data=None):
         planner.then((tool, {"user_request": "x", **args}))
         turn = chat(client, "нээ")
         r = client.post("/api/v1/assistant/actions/results", json={
             "conversation_id": turn["conversation_id"], "turn_id": turn["turn_id"],
-            "results": [{"action_id": "a1", "tool": tool, "status": status, "executed_via": via, "error_code": code}],
+            "results": [{"action_id": "a1", "tool": tool, "status": status, "executed_via": via, "error_code": code,
+                         "data": data}],
         })
         return r.json()["response"]
 
@@ -120,6 +121,21 @@ def test_open_outcomes(client, planner):
     assert "iOS" in report("open_app", {"app_name": "VS Code"}, "unsupported", None, "IOS_CANNOT_OPEN_APPS")
     assert "Android" in report("open_app", {"app_name": "VS Code"}, "unsupported", None, "ANDROID_CANNOT_OPEN_APPS")
     assert report("open_url", {"url": "https://youtube.com", "title": "YouTube"}, "handed_off", "url_scheme") == "За, YouTube нээлээ."
+
+    # On a phone: the app and search the device reports.
+    song = {"app_name": "YouTube", "query": "Монгол дуу"}
+    assert report("open_app", song, "handed_off", "url_scheme", data={"app": "YouTube", "searched": True}) == (
+        "За, YouTube дээр 'Монгол дуу' гэж хайлаа."
+    )
+    # It opened, but has no search link: the user searches there.
+    assert report("open_app", {"app_name": "Instagram", "query": "муур"}, "handed_off", "url_scheme",
+                  data={"app": "Instagram", "searched": False}) == "За, Instagram нээлээ. 'муур' гэж тэндээсээ хайгаарай."
+    # Named as the phone shows it.
+    assert report("open_app", {"app_name": "Khan Bank"}, "handed_off", "react_native",
+                  data={"app": "Хаан Банк", "searched": False}) == "За, Хаан Банк нээлээ."
+    assert report("open_app", {"app_name": "TDB"}, "failed", "react_native", "APP_NOT_INSTALLED") == (
+        "'TDB' гэсэн апп энэ утсанд олдсонгүй."
+    )
 
 
 async def test_gemini_follow_up_returns_the_model_turn_unchanged():

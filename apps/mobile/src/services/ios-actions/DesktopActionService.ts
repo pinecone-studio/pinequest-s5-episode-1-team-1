@@ -1,5 +1,6 @@
 import { ActionStatus, type ToolArguments, type ToolName } from "@bekhi/contracts";
 import { apiBaseUrl } from "@/services/assistant/connect";
+import { appWebsite, findCatalogApp } from "./app-catalog";
 import type { ActionOutcome } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
 import { googleMapsUrl } from "./maps";
@@ -14,13 +15,25 @@ export class DesktopActionService extends LinkingIOSActionService {
   createAlarm = (args: ToolArguments<"create_alarm">) => this.onPc("create_alarm", args);
   createCalendarEvent = (args: ToolArguments<"create_calendar_event">) => this.onPc("create_calendar_event", args);
   createNote = (args: ToolArguments<"create_note">) => this.onPc("create_note", args);
-  openApp = (args: ToolArguments<"open_app">) => this.onPc("open_app", args);
   setTimer = (args: ToolArguments<"set_timer">) => this.onPc("set_timer", args);
   listReminders = (args: ToolArguments<"list_reminders">) => this.onPc("list_reminders", args);
   cancelReminder = (args: ToolArguments<"cancel_reminder">) => this.onPc("cancel_reminder", args);
   computerControl = (args: ToolArguments<"computer_control">) => this.onPc("computer_control", args);
 
   openMaps = (args: ToolArguments<"open_maps">) => this.openUrl({ url: googleMapsUrl(args) });
+
+  /** The PC's own app; a search, or a known app this PC lacks (or no PC), goes to its website. */
+  openApp = async (args: ToolArguments<"open_app">): Promise<ActionOutcome> => {
+    const app = findCatalogApp(args.app_name);
+    const site = app && appWebsite(app, args.query);
+    if (!app || !site) return this.onPc("open_app", args);
+    if (!site.searched) {
+      const onPc = await this.onPc("open_app", args);
+      if (onPc.status === "succeeded") return onPc;
+    }
+    const outcome = await this.openUrl({ url: site.url });
+    return outcome.status === "handed_off" ? { ...outcome, data: { app: app.name, searched: site.searched } } : outcome;
+  };
 
   private async onPc(tool: ToolName, args: unknown): Promise<ActionOutcome> {
     let res: Response;

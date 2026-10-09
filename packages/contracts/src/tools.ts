@@ -72,12 +72,22 @@ const ContactName = z
   .max(100)
   .describe("Contact name as the user said it, normalized to nominative case, e.g. 'Ээж', 'Бат'");
 
+const NameSpellings = z
+  .array(z.string().trim().min(1).max(60))
+  .max(4)
+  .describe(
+    "How the person is likely saved in the phone's contacts, which are often in Latin letters: " +
+      "'Анка' -> ['Anka'], 'Майкл' -> ['Michael'], 'Ээж' -> ['Mom', 'Mama', 'Eej']",
+  );
+
 export const CallContactArgs = z.object({
   contact_name: ContactName,
+  name_spellings: NameSpellings.optional(),
 });
 
 export const SendMessageArgs = z.object({
   contact_name: ContactName,
+  name_spellings: NameSpellings.optional(),
   body: z.string().min(1).max(1000),
 });
 
@@ -153,8 +163,18 @@ export const OpenUrlArgs = z.object({
 });
 
 export const OpenAppArgs = z.object({
-  /** The app as the user named it, e.g. "VS Code", "Chrome", "Spotify". */
-  app_name: z.string().min(1).max(100),
+  app_name: z
+    .string()
+    .min(1)
+    .max(100)
+    .describe("The app in its usual name, as under its icon: 'YouTube', 'Spotify', 'Khan Bank', 'Камер', 'VS Code'"),
+  query: z
+    .string()
+    .trim()
+    .min(1)
+    .max(300)
+    .optional()
+    .describe("Only when the user wants something found or played in the app: what to search for there ('Монгол дуу')"),
 });
 
 export const SetTimerArgs = z.object({
@@ -373,16 +393,17 @@ export const TOOL_MANIFEST = {
   },
   open_app: {
     executor: "device",
-    strategy: ["react_native"],
+    strategy: ["url_scheme", "react_native"],
     confirmation: "never",
     permissions: [],
     min_ios: MIN_IOS,
     app_intent: null,
     notes:
-      "Computer only: the web app asks the API running on the same Windows PC to launch a Start menu app " +
-      "whose name matches. " +
-      "iOS lets an app open other apps only through their URL schemes, so the iPhone reports unsupported; " +
-      "Android in Expo Go does too (it needs a native build).",
+      "Phones: well-known apps through their URL schemes and app links, searching for `query` inside the app " +
+      "where it has a search link, else their website. Android also opens any installed app by its name " +
+      "(the BEKHI build lists the home screen's apps; Expo Go cannot). iOS allows only the known URL schemes. " +
+      "Computer: the web app asks the API on the same Windows PC to launch the Start menu app whose name " +
+      "matches; a known app that is not installed there, or a search in it, opens its website in a new tab.",
   },
   set_timer: {
     executor: "device",

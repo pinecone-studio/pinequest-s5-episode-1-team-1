@@ -6,9 +6,10 @@ import { NATIVE_UNAVAILABLE } from "./codes";
 import { DesktopActionService } from "./DesktopActionService";
 import { ExpoAndroidActionService } from "./ExpoAndroidActionService";
 import { ExpoIOSActionService } from "./ExpoIOSActionService";
-import type { ActionOutcome, IOSActionService } from "./IOSActionService";
+import type { ActionOutcome, ChosenContact, IOSActionService } from "./IOSActionService";
 
 export { NATIVE_UNAVAILABLE };
+export type { ChosenContact };
 
 const nativeUnavailable = isRunningInExpoGo() ? NATIVE_UNAVAILABLE.expoGo : NATIVE_UNAVAILABLE.notBuilt;
 
@@ -20,13 +21,20 @@ export const iosActions: IOSActionService =
       ? new ExpoAndroidActionService(nativeUnavailable)
       : new ExpoIOSActionService(nativeUnavailable);
 
-/** Runs one device action and wraps the outcome as a contract ActionResult. */
-export async function executeDeviceAction(service: IOSActionService, action: ActionRequest): Promise<ActionResult> {
+/**
+ * Runs one device action and wraps the outcome as a contract ActionResult.
+ * `chosen`: for a call or message, the contact the user picked on screen.
+ */
+export async function executeDeviceAction(
+  service: IOSActionService,
+  action: ActionRequest,
+  chosen?: ChosenContact,
+): Promise<ActionResult> {
   if (action.tool === "list_reminders" || action.tool === "cancel_reminder") {
     // Alarms set on the user's other devices are listed and cancelled here too.
     await refreshAlarms().catch((e: unknown) => console.warn("alarm sync failed", e));
   }
-  const outcome = await withSync(action, await dispatch(service, action));
+  const outcome = await withSync(action, await dispatch(service, action, chosen));
   return { action_id: action.id, tool: action.tool, ...outcome };
 }
 
@@ -66,12 +74,12 @@ async function withSync(action: ActionRequest, outcome: ActionOutcome): Promise<
   return outcome;
 }
 
-function dispatch(service: IOSActionService, action: ActionRequest) {
+function dispatch(service: IOSActionService, action: ActionRequest, chosen?: ChosenContact) {
   switch (action.tool) {
     case "call_contact":
-      return service.callContact(action.arguments);
+      return service.callContact(action.arguments, chosen);
     case "send_message":
-      return service.sendMessage(action.arguments);
+      return service.sendMessage(action.arguments, chosen);
     case "create_reminder":
       return service.createReminder(action.arguments);
     case "create_calendar_event":

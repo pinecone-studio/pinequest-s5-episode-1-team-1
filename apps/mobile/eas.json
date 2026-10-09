@@ -6,6 +6,9 @@
   "build": {
     "preview": {
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://bekhi-api.onrender.com"
+      },
       "android": {
         "buildType": "apk"
       }
