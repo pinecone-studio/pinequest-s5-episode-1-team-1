@@ -126,7 +126,8 @@ class DesktopScheduler:
             return None
 
     def link(self, account: str) -> str:
-        """Joins the PC to a sync account (the hash of the code, never the code); returns its device id."""
+        """Joins the PC to a sync account; returns its device id. The account is the hash of the code,
+        or for a PC agent the code itself (sync.RemoteSyncStore), kept only on this PC."""
         device_id = (self._link or {}).get("device_id") or f"pc-{uuid.uuid4().hex[:16]}"
         self._link = {"account": account, "device_id": device_id}
         self._link_file.write_text(json.dumps(self._link), encoding="utf-8")

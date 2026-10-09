@@ -215,6 +215,23 @@ npx expo start --go --tunnel
 
 Built in the cloud with EAS. See [apps/mobile/README.md](apps/mobile/README.md#install-on-android-as-an-app-apk).
 
+#### D. The cloud web app on your PC, with the PC agent
+
+https://bekhi.pages.dev talks to the cloud API (https://bekhi-api.onrender.com), so it needs nothing
+running on your PC to chat. To let it do things **on this PC** (reminders and alarms as Windows toasts,
+notes, opening apps and folders, the volume, locking the screen), start BEKHI's PC agent and keep its
+window open:
+
+```powershell
+cd apps/api
+.\bekhi-agent.cmd        # or: uv run python -m bekhi_api.agent
+```
+
+The agent is this same API on `127.0.0.1:8000`, answering only this PC's own requests; it needs no API
+keys. Alarms and timers you set on your phone (with the same sync code) are pulled from the cloud and
+ring on the PC too. The first time, the browser may ask whether bekhi.pages.dev may use apps on this
+device: allow it. Without the agent, BEKHI says the PC action is not possible.
+
 ### How the app finds the backend
 
 You don't configure an address. The app tries, in order:

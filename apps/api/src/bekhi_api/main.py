@@ -160,7 +160,7 @@ async def lifespan(app: FastAPI):
         app.state.http = http
         app.state.store = MemoryStore()
         settings = get_settings()
-        app.state.sync = sync.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
+        app.state.sync = sync.make_store(settings.supabase_url, settings.supabase_service_role_key, http, settings.sync_api_url)
         app.state.todos = todos.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
         app.state.desktop = None
         if settings.desktop_actions and desktop.available():
@@ -184,6 +184,8 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST"],
         allow_headers=["*"],
         expose_headers=[VOICE_FALLBACK_HEADER],
+        # The cloud web app (a public site) may call a PC agent on 127.0.0.1 (agent.py).
+        allow_private_network=settings.desktop_actions,
     )
 
     hits: dict[str, deque[float]] = defaultdict(deque)
@@ -388,7 +390,9 @@ def create_app() -> FastAPI:
         account = sync.account_key(body.code)
         if account is None:
             raise ApiException(401, "unauthorized", MN_SYNC_CODE_INVALID)
-        device_id = scheduler.link(account)
+        # A PC agent pulls from the cloud, which takes the code itself (it stays on this PC).
+        remote = isinstance(request.app.state.sync, sync.RemoteSyncStore)
+        device_id = scheduler.link(body.code if remote else account)
         try:
             await scheduler.sync_now()
         except Exception:

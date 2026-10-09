@@ -21,6 +21,20 @@ export function apiBaseUrl(): string {
   return current ?? configuredBaseUrl() ?? `http://localhost:${API_PORT}`;
 }
 
+/** BEKHI's PC agent (apps/api agent.py), where the cloud web app sends this PC's own actions. */
+export const PC_AGENT_URL = `http://127.0.0.1:${API_PORT}`;
+
+/**
+ * Where this PC's actions (reminders, apps, volume) run in the web app: the API itself when it
+ * runs on this PC, else BEKHI's PC agent here (the API is in the cloud).
+ */
+export function desktopBaseUrl(): string {
+  const base = apiBaseUrl();
+  const host = new URL(base).hostname;
+  const here = typeof window !== "undefined" ? window.location.hostname : "localhost";
+  return host === "localhost" || host === "127.0.0.1" || host === here ? base : PC_AGENT_URL;
+}
+
 /**
  * EXPO_PUBLIC_API_URL wins. Otherwise the same host that serves the app: the browser's
  * host on web, the dev machine's LAN address in Expo Go. An installed APK has neither.

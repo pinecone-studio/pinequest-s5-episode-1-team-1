@@ -77,6 +77,7 @@ class Settings:
     google_maps_api_key: str | None
     supabase_url: str | None
     supabase_service_role_key: str | None
+    sync_api_url: str | None
     log_level: str
     cors_origins: list[str] = field(default_factory=list)
 
@@ -130,6 +131,8 @@ def get_settings() -> Settings:
         # Alarm/timer sync between devices (sync.py). Unset: kept in this process instead.
         supabase_url=os.getenv("SUPABASE_URL") or None,
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,
+        # A PC agent (agent.py): pull the synced alarms from this API (the cloud) instead of keeping them.
+        sync_api_url=os.getenv("SYNC_API_URL") or None,
         log_level=os.getenv("LOG_LEVEL") or "INFO",
         cors_origins=_csv(os.getenv("CORS_ORIGINS")) or ["http://localhost:8081"],
     )
