@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import copy
 from datetime import datetime
+from collections.abc import Sequence
 from typing import Any
 
 from .contracts import tool_manifest
@@ -78,6 +79,12 @@ Tool choice:
   Other greetings ("Сайн уу", "Оройн мэнд") are chitchat: reply.
 - "Өглөө бүр 7 цагт өдрийн тоймоо хэлээрэй", "өдөр бүр ... тойм/мэдээ сонсгоорой" (every day) -> create_routine with
   time "07:00". Stop it with cancel_reminder (query "тойм").
+- "... гэдгийг санаарай", "санаж аваарай: ...", "намайг ... гэдэг", "миний ... бол ..." (a lasting fact about the user
+  or the people and places in their life) -> remember, the fact as one short sentence about the user:
+  "Миний эхнэрийг Сараа гэдэг" -> "Хэрэглэгчийн эхнэрийг Сараа гэдэг". Not for tasks (add_todo) or times (reminders).
+- "... гэдгийг март", "санасан бүх зүйлээ март" -> forget (query: words of the fact, or all: true)
+- Use what you remember. With "Хэрэглэгчийн эхнэрийг Сараа гэдэг": "эхнэр рүүгээ залга" -> call_contact
+  contact_name "Сараа". "Миний тухай юу мэдэх вэ?" -> reply with what you remember.
 - "хийх зүйлс юу байна", "жагсаалтаа хэл", "өнөөдөр юу хийх вэ", "хугацаа хэтэрсэн" -> list_todos (filter: open, today,
   tomorrow, week, overdue, done, all)
 - "... хийчихлээ", "... дууслаа", "... гүйцэтгэлээ" (a to-do is finished) -> complete_todo (query: title words)
@@ -141,6 +148,9 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "list_todos": "Read out the to-do list. filter: open (default), today, tomorrow, week, overdue, done, all.",
     "complete_todo": "Mark a to-do as done, found by words from its title (query).",
     "delete_todo": "Remove a to-do from the list by title words (query), or all of them.",
+    "remember": "Keep a lasting fact the user tells you about themselves or the people in their life, as one short "
+    "sentence. You get the facts with every request.",
+    "forget": "Forget remembered facts containing the query words, or all of them.",
     "create_routine": "Every day at `time`, a notification on the phone that opens the day's briefing when tapped "
     "(routine daily_briefing). Phones only.",
     "daily_briefing": "The user's day at a glance: a greeting, today's weather and the to-dos due today or overdue. "
@@ -277,11 +287,18 @@ DEVICE_LINES = {
 }
 
 
-def system_prompt(client_now: datetime, timezone: str, platform: str = "ios") -> str:
+def system_prompt(client_now: datetime, timezone: str, platform: str = "ios", facts: Sequence[str] = ()) -> str:
     weekday = ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"][client_now.weekday()]
+    remembered = ""
+    if facts:
+        remembered = (
+            "What the user asked you to remember (use it to understand requests; say it only when asked):\n"
+            + "".join(f"- {f}\n" for f in facts)
+        )
     return (
         f"{BASE_PROMPT}\n{RULES}\n"
         f"{DEVICE_LINES.get(platform, DEVICE_LINES['ios'])}\n"
         f"Current local time of the user: {client_now.isoformat(timespec='seconds')} ({weekday} гараг)\n"
         f"User timezone: {timezone}\n"
+        f"{remembered}"
     )

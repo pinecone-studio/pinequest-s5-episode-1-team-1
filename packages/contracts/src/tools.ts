@@ -24,6 +24,8 @@ export const TOOL_NAMES = [
   "delete_todo",
   "daily_briefing",
   "create_routine",
+  "remember",
+  "forget",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -241,6 +243,22 @@ export const CreateRoutineArgs = z.object({
   routine: RoutineKind.default("daily_briefing"),
 });
 
+export const RememberArgs = z.object({
+  fact: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .describe("One short sentence about the user, kept for later: 'Хэрэглэгчийн эхнэрийг Сараа гэдэг'"),
+});
+
+export const ForgetArgs = z.object({
+  /** Words of the fact to forget ("эхнэр"). */
+  query: z.string().max(100).optional(),
+  /** "Бүгдийг нь март". */
+  all: z.boolean().default(false),
+});
+
 export const ComputerFolder = z.enum(["downloads", "documents", "desktop", "pictures", "music", "videos"]);
 export type ComputerFolder = z.infer<typeof ComputerFolder>;
 
@@ -275,6 +293,8 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   delete_todo: DeleteTodoArgs,
   daily_briefing: DailyBriefingArgs,
   create_routine: CreateRoutineArgs,
+  remember: RememberArgs,
+  forget: ForgetArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -529,6 +549,26 @@ export const TOOL_MANIFEST = {
     notes:
       "A notification every day at `time` (replacing the routine's earlier time); tapping it opens BEKHI, which " +
       "then runs the routine (the day's briefing) and speaks it. Listed and cancelled like reminders. Phones only.",
+  },
+  remember: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Keeps a short fact about the user for the account (the sync code's devices); the planner gets the facts " +
+      "with every request. At most 50.",
+  },
+  forget: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "Forgets the remembered facts containing the query words, or all of them.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

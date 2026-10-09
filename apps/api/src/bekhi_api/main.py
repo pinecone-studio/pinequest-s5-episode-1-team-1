@@ -35,7 +35,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field, ValidationError
 
-from . import desktop, directions, sync, todos
+from . import desktop, directions, memory, sync, todos
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -162,6 +162,7 @@ async def lifespan(app: FastAPI):
         settings = get_settings()
         app.state.sync = sync.make_store(settings.supabase_url, settings.supabase_service_role_key, http, settings.sync_api_url)
         app.state.todos = todos.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
+        app.state.memory = memory.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
         app.state.desktop = None
         if settings.desktop_actions and desktop.available():
             app.state.desktop = desktop.DesktopScheduler(sync=app.state.sync)
@@ -227,6 +228,7 @@ def create_app() -> FastAPI:
         return Deps(
             llm=llm, http=http, store=request.app.state.store, search=get_search(http),
             todo_store=request.app.state.todos,
+            memory_store=request.app.state.memory,
             # The asking device's sync code picks its account's to-do list (sync.py).
             account=sync.account_key(request.headers.get(SYNC_CODE_HEADER)),
         )
