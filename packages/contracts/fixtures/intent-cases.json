@@ -163,6 +163,24 @@
         "tools": ["open_app"],
         "requires_confirmation": false
       }
+    },
+    {
+      "id": "16_daily_briefing",
+      "utterance": "Өглөөний мэнд!",
+      "variants": ["Өнөөдөр юу байна даа?", "Өдрийн тоймоо хэлээч"],
+      "expected": {
+        "tools": ["daily_briefing", "list_reminders"],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "17_daily_routine",
+      "utterance": "Өглөө бүр 7 цагт өдрийн тоймоо хэлж байгаарай.",
+      "expected": {
+        "tools": ["create_routine"],
+        "arguments": [{ "time": "07:00", "routine": "daily_briefing" }],
+        "requires_confirmation": false
+      }
     }
   ],
   "conversations": [

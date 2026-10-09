@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
 import { create } from "zustand";
-import { MN, type ActionRequest, type ActionResult, type AssistantTurn } from "@bekhi/contracts";
+import { MN, type ActionRequest, type ActionResult, type AssistantTurn, type RoutineKind } from "@bekhi/contracts";
 import { toward } from "@/lib/mongolian";
 import { AssistantError, type AssistantClient } from "@/services/assistant/AssistantClient";
 import { PreviewAssistantClient } from "@/services/assistant/PreviewAssistantClient";
@@ -64,6 +64,8 @@ interface AssistantState {
   /** Looking for the API; a sleeping cloud server takes up to a minute to answer. */
   connecting: boolean;
   connect(): Promise<void>;
+  /** Runs a routine the user set ("Өглөө бүр 7 цагт ..."), when its notification is tapped. */
+  runRoutine(routine: RoutineKind): Promise<void>;
   /** Pick a voice and hear a short sample in it. */
   chooseVoice(id: string): void;
   submitText(text: string): Promise<void>;
@@ -85,6 +87,13 @@ const OK = new Set<ActionResult["status"]>(["succeeded", "handed_off"]);
 const LISTEN_AFTER = new Set<Phase>(["idle", "success", "unavailable"]);
 let seq = 0;
 let speechSeq = 0;
+/** The connection being made (or made); a routine waits for it, the API may still be waking up. */
+let connection: Promise<void> | null = null;
+
+/** What a routine asks, as if the user said it. */
+const ROUTINE_REQUESTS: Record<RoutineKind, string> = {
+  daily_briefing: "Өдрийн тоймоо хэлээч",
+};
 const msg = (role: ChatMessage["role"], text: string, tone: Tone = "normal", understood?: string): ChatMessage => ({
   id: `m${++seq}`,
   role,
@@ -259,17 +268,25 @@ export const useAssistant = create<AssistantState>((set, get) => {
     voiceId: null,
     connecting: false,
 
-    async connect() {
-      set({ connecting: true });
-      const client = await connectAssistant().finally(() => set({ connecting: false }));
-      set({ client });
-      if (client.mode !== "live") return;
-      // Alarms and timers set on the user's other devices ring here too.
-      startAlarmSync();
-      const list = await fetchVoices(apiBaseUrl());
-      if (!list) return;
-      const saved = loadSavedVoice();
-      set({ voices: list.voices, voiceId: list.voices.some((v) => v.id === saved) ? saved : list.default });
+    connect() {
+      connection = (async () => {
+        set({ connecting: true });
+        const client = await connectAssistant().finally(() => set({ connecting: false }));
+        set({ client });
+        if (client.mode !== "live") return;
+        // Alarms and timers set on the user's other devices ring here too.
+        startAlarmSync();
+        const list = await fetchVoices(apiBaseUrl());
+        if (!list) return;
+        const saved = loadSavedVoice();
+        set({ voices: list.voices, voiceId: list.voices.some((v) => v.id === saved) ? saved : list.default });
+      })();
+      return connection;
+    },
+
+    async runRoutine(routine) {
+      await connection?.catch(() => {});
+      await get().submitText(ROUTINE_REQUESTS[routine]);
     },
 
     chooseVoice(id) {

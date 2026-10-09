@@ -102,6 +102,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
       return service.cancelReminder(action.arguments);
     case "computer_control":
       return service.computerControl(action.arguments);
+    case "create_routine":
+      return service.createRoutine(action.arguments);
     case "get_weather":
     case "web_search":
     case "get_current_time":
@@ -109,6 +111,7 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
     case "list_todos":
     case "complete_todo":
     case "delete_todo":
+    case "daily_briefing":
       return Promise.resolve({ status: "failed" as const, executed_via: null, error_code: "BACKEND_TOOL_ON_DEVICE" });
   }
 }

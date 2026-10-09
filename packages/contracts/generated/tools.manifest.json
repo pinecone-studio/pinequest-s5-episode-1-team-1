@@ -709,6 +709,63 @@
           }
         }
       }
+    },
+    {
+      "name": "daily_briefing",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The day at a glance, returned inline: a greeting for the time of day, today's weather and the to-dos due today or overdue. Planned together with list_reminders, so the device adds what it has scheduled today.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "location_name": {
+            "type": "string",
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    {
+      "name": "create_routine",
+      "executor": "device",
+      "strategy": [
+        "react_native"
+      ],
+      "confirmation": "never",
+      "permissions": [
+        "notifications"
+      ],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "A notification every day at `time` (replacing the routine's earlier time); tapping it opens BEKHI, which then runs the routine (the day's briefing) and speaks it. Listed and cancelled like reminders. Phones only.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Every day at this local time, 24-hour HH:MM: 'өглөө 7' -> '07:00', 'орой 9' -> '21:00'"
+          },
+          "routine": {
+            "default": "daily_briefing",
+            "type": "string",
+            "enum": [
+              "daily_briefing"
+            ]
+          }
+        },
+        "required": [
+          "time"
+        ]
+      }
     }
   ]
 }

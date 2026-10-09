@@ -247,6 +247,17 @@ text and reads it aloud. After a question it listens again for your answer, so y
 hands-free. It stops listening after 7 s of silence, when you type, or when you tap 🎙️ while it is
 speaking (that also cuts the reply short).
 
+Some things to say:
+
+| Say | What happens |
+|---|---|
+| "Өглөөний мэнд" / "Өнөөдөр юу байна?" | The day at a glance: weather, to-dos due today or overdue, what is scheduled today |
+| "Өглөө бүр 7 цагт өдрийн тоймоо хэлж байгаарай" | A notification every morning at 7; tap it and BEKHI tells you the day |
+| "YouTube-ээс Монгол дуу хай" / "Spotify асаа" / "Хаан банкны аппаа нээ" | Opens the app (and its search). Android's BEKHI app opens any installed app by name |
+| "Маргааш 8 цагт сэрээгээрэй" / "10 минутын таймер" | An alarm or timer on every linked device |
+| "Тайлан бичихийг жагсаалтад нэм" / "Хийх зүйлс юу байна?" | Your to-do list, shared by the devices linked with your sync code |
+| "Ээж рүү залга" | Finds the contact (any script) and asks before calling |
+
 ---
 
 ## Everyday workflow

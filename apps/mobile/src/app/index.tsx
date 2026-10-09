@@ -14,6 +14,7 @@ import { VoicePicker } from "@/components/VoicePicker";
 import { notify, tap } from "@/lib/haptics";
 import { SAMPLE_PHRASES } from "@/services/assistant/PreviewAssistantClient";
 import { useVoiceInput } from "@/services/audio/useVoiceInput";
+import { onRoutineOpened } from "@/services/ios-actions/notifications";
 import { type Phase, useAssistant } from "@/store/assistant";
 import { colors, MAX_CONTENT_WIDTH, radius } from "@/theme";
 
@@ -109,6 +110,9 @@ export default function Chat() {
     });
     return () => sub.remove();
   }, [connect]);
+
+  // A routine's notification was tapped ("Өдрийн тойм" every morning): run it.
+  useEffect(() => onRoutineOpened((routine) => void useAssistant.getState().runRoutine(routine)), []);
 
   useEffect(() => {
     if (!listening) Animated.timing(level, { toValue: 0, duration: 250, useNativeDriver: NATIVE }).start();

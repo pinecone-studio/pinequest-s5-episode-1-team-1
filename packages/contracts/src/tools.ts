@@ -22,6 +22,8 @@ export const TOOL_NAMES = [
   "list_todos",
   "complete_todo",
   "delete_todo",
+  "daily_briefing",
+  "create_routine",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -222,6 +224,23 @@ export const DeleteTodoArgs = z.object({
   all: z.boolean().default(false),
 });
 
+export const DailyBriefingArgs = z.object({
+  /** For the weather; omitted => the user's default city. */
+  location_name: z.string().max(100).optional(),
+});
+
+export const RoutineKind = z.enum(["daily_briefing"]);
+export type RoutineKind = z.infer<typeof RoutineKind>;
+
+export const CreateRoutineArgs = z.object({
+  time: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+    .describe("Every day at this local time, 24-hour HH:MM: 'өглөө 7' -> '07:00', 'орой 9' -> '21:00'"),
+  /** What runs at that time; the day's briefing is the only routine so far. */
+  routine: RoutineKind.default("daily_briefing"),
+});
+
 export const ComputerFolder = z.enum(["downloads", "documents", "desktop", "pictures", "music", "videos"]);
 export type ComputerFolder = z.infer<typeof ComputerFolder>;
 
@@ -254,6 +273,8 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   list_todos: ListTodosArgs,
   complete_todo: CompleteTodoArgs,
   delete_todo: DeleteTodoArgs,
+  daily_briefing: DailyBriefingArgs,
+  create_routine: CreateRoutineArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -486,6 +507,28 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes: "Deletes the to-do matching the title words, or all of them.",
+  },
+  daily_briefing: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The day at a glance, returned inline: a greeting for the time of day, today's weather and the to-dos due " +
+      "today or overdue. Planned together with list_reminders, so the device adds what it has scheduled today.",
+  },
+  create_routine: {
+    executor: "device",
+    strategy: ["react_native"],
+    confirmation: "never",
+    permissions: ["notifications"],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "A notification every day at `time` (replacing the routine's earlier time); tapping it opens BEKHI, which " +
+      "then runs the routine (the day's briefing) and speaks it. Listed and cancelled like reminders. Phones only.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

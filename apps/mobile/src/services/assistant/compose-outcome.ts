@@ -16,7 +16,7 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   web_search: { verb: "хайлт хийх", dative: "хайлт хийхэд" },
   get_current_time: { verb: "цаг харах", dative: "цаг харахад" },
   open_url: { verb: "вэб хуудас нээх", dative: "вэб хуудас нээхэд" },
-  open_app: { verb: "програм нээх", dative: "програм нээхэд" },
+  open_app: { verb: "апп нээх", dative: "апп нээхэд" },
   set_timer: { verb: "таймер тавих", dative: "таймер тавихад" },
   list_reminders: { verb: "сануулгуудыг харах", dative: "сануулгуудыг харахад" },
   cancel_reminder: { verb: "сануулга цуцлах", dative: "сануулга цуцлахад" },
@@ -25,6 +25,8 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   list_todos: { verb: "жагсаалт харах", dative: "жагсаалт харахад" },
   complete_todo: { verb: "тэмдэглэх", dative: "тэмдэглэхэд" },
   delete_todo: { verb: "устгах", dative: "устгахад" },
+  daily_briefing: { verb: "өдрийн тойм гаргах", dative: "өдрийн тойм гаргахад" },
+  create_routine: { verb: "өдөр бүрийн тойм тохируулах", dative: "өдөр бүрийн тойм тохируулахад" },
 };
 
 /**

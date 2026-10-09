@@ -34,6 +34,7 @@ export class LinkingIOSActionService implements IOSActionService {
   listReminders: IOSActionService["listReminders"] = async () => unsupported(this.nativeUnavailableCode);
   cancelReminder: IOSActionService["cancelReminder"] = async () => unsupported(this.nativeUnavailableCode);
   computerControl: IOSActionService["computerControl"] = async () => unsupported(this.nativeUnavailableCode);
+  createRoutine: IOSActionService["createRoutine"] = async () => unsupported(this.nativeUnavailableCode);
 
   executeShortcut = async (name: string, input?: string): Promise<ActionOutcome> => {
     let url = `shortcuts://run-shortcut?name=${encodeURIComponent(name)}`;
