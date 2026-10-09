@@ -3,6 +3,7 @@ from datetime import date, datetime
 import pytest
 
 from bekhi_api import briefing
+from bekhi_api.compose import clock_mn
 
 from .conftest import context
 
@@ -76,3 +77,19 @@ def test_briefing_says_nothing_about_a_schedule_it_cannot_see(client, planner):
     })
     said = r.json()["response"]
     assert said.startswith("Өдрийн мэнд! ") and "browser" not in said
+
+
+def test_clock_mn():
+    assert [clock_mn("07:00"), clock_mn("21:30"), clock_mn("12:00")] == ["өглөө 7 цагт", "орой 9:30-д", "өдөр 12 цагт"]
+
+
+def test_a_routine_is_set_for_every_day(client, planner):
+    planner.then(("create_routine", {"user_request": "x", "time": "07:00"}))
+    turn = client.post("/api/v1/assistant/chat", json={"text": "x", "context": context()}).json()
+    assert turn["actions"][0]["arguments"] == {"time": "07:00", "routine": "daily_briefing"}
+    r = client.post("/api/v1/assistant/actions/results", json={
+        "conversation_id": turn["conversation_id"], "turn_id": turn["turn_id"],
+        "results": [{"action_id": "a1", "tool": "create_routine", "status": "succeeded", "executed_via": "react_native",
+                     "error_code": None}],
+    })
+    assert r.json()["response"].startswith("За, өдөр бүр өглөө 7 цагт өдрийн тоймын мэдэгдэл ирнэ.")

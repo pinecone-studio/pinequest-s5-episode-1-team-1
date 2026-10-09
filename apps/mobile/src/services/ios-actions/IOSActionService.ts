@@ -38,6 +38,7 @@ export interface IOSActionService {
   listReminders(args: ToolArguments<"list_reminders">): Promise<ActionOutcome>;
   cancelReminder(args: ToolArguments<"cancel_reminder">): Promise<ActionOutcome>;
   computerControl(args: ToolArguments<"computer_control">): Promise<ActionOutcome>;
+  createRoutine(args: ToolArguments<"create_routine">): Promise<ActionOutcome>;
   executeShortcut(name: string, input?: string): Promise<ActionOutcome>;
 }
 

@@ -26,6 +26,7 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   complete_todo: { verb: "тэмдэглэх", dative: "тэмдэглэхэд" },
   delete_todo: { verb: "устгах", dative: "устгахад" },
   daily_briefing: { verb: "өдрийн тойм гаргах", dative: "өдрийн тойм гаргахад" },
+  create_routine: { verb: "өдөр бүрийн тойм тохируулах", dative: "өдөр бүрийн тойм тохируулахад" },
 };
 
 /**

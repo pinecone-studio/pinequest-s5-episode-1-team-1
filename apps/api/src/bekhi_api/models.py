@@ -31,6 +31,7 @@ ToolName = Literal[
     "complete_todo",
     "delete_todo",
     "daily_briefing",
+    "create_routine",
 ]
 ExecutionTarget = Literal["backend", "react_native", "native_swift", "app_intent", "shortcut", "url_scheme"]
 ActionStatus = Literal[

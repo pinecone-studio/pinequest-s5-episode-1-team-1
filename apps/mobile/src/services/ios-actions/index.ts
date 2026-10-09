@@ -102,6 +102,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
       return service.cancelReminder(action.arguments);
     case "computer_control":
       return service.computerControl(action.arguments);
+    case "create_routine":
+      return service.createRoutine(action.arguments);
     case "get_weather":
     case "web_search":
     case "get_current_time":

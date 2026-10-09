@@ -43,6 +43,7 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "cancel_reminder": ("сануулга цуцлах", "сануулга цуцлахад"),
     "computer_control": ("компьютер удирдах", "компьютер удирдахад"),
     "daily_briefing": ("өдрийн тойм гаргах", "өдрийн тойм гаргахад"),
+    "create_routine": ("өдөр бүрийн тойм тохируулах", "өдөр бүрийн тойм тохируулахад"),
 }
 
 FOLDER_NAMES = {
@@ -53,7 +54,7 @@ FOLDER_NAMES = {
     "music": "Music",
     "videos": "Videos",
 }
-KIND_MN = {"reminder": "сануулга", "alarm": "сэрүүлэг", "timer": "таймер", "event": "уулзалт"}
+KIND_MN = {"reminder": "сануулга", "alarm": "сэрүүлэг", "timer": "таймер", "event": "уулзалт", "routine": "өдрийн тойм"}
 DEVICE_MN = {"ios": "iPhone", "android": "Android утас", "web": "компьютер"}
 MN_SYNC_FAILED = "Бусад төхөөрөмж рүү илгээж чадсангүй, зөвхөн энд тавигдлаа."
 MN_SYNC_CANCEL_FAILED = "Гэхдээ бусад төхөөрөмж дээр цуцалж чадсангүй."
@@ -132,6 +133,12 @@ def format_when_mn(iso: str, now_iso: str) -> str:
     h12 = 12 if h % 12 == 0 else h % 12
     clock = f"{h12} цагт" if m == 0 else f"{h12}:{m:02d}-д"
     return f"{day} {part} {clock}"
+
+
+def clock_mn(hhmm: str) -> str:
+    """"07:00" -> "өглөө 7 цагт", "21:30" -> "орой 9:30-д" (a time of day, no date)."""
+    day = "2000-01-01"
+    return format_when_mn(f"{day}T{hhmm}:00+00:00", f"{day}T00:00:00+00:00").removeprefix("өнөөдөр ")
 
 
 def duration_mn(seconds: int) -> str:
@@ -228,6 +235,11 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return f"За, {', '.join(cancelled)} цуцаллаа." if cancelled else "За, цуцаллаа."
             case "computer_control":
                 return _computer_sentence(a, data)
+            case "create_routine":
+                return (
+                    f"За, өдөр бүр {clock_mn(a['time'])} өдрийн тоймын мэдэгдэл ирнэ. "
+                    "Дарахад нь цаг агаар, хийх зүйлсийг тань хэлж өгье."
+                )
         if r.executed_via == "backend":
             # Done on the Windows PC (desktop.py): toasts while BEKHI runs, notes in a file.
             match action.tool:

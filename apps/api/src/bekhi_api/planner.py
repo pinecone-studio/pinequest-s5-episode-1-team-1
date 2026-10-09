@@ -76,6 +76,8 @@ Tool choice:
 - "Өглөөний мэнд", "Өнөөдөр юу байна?", "Өдрийн тоймоо хэлээч", "өнөөдрийн төлөвлөгөө" (the user's day at a glance)
   -> daily_briefing AND list_reminders, in that order; the briefing greets the user itself, so no reply.
   Other greetings ("Сайн уу", "Оройн мэнд") are chitchat: reply.
+- "Өглөө бүр 7 цагт өдрийн тоймоо хэлээрэй", "өдөр бүр ... тойм/мэдээ сонсгоорой" (every day) -> create_routine with
+  time "07:00". Stop it with cancel_reminder (query "тойм").
 - "хийх зүйлс юу байна", "жагсаалтаа хэл", "өнөөдөр юу хийх вэ", "хугацаа хэтэрсэн" -> list_todos (filter: open, today,
   tomorrow, week, overdue, done, all)
 - "... хийчихлээ", "... дууслаа", "... гүйцэтгэлээ" (a to-do is finished) -> complete_todo (query: title words)
@@ -139,6 +141,8 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "list_todos": "Read out the to-do list. filter: open (default), today, tomorrow, week, overdue, done, all.",
     "complete_todo": "Mark a to-do as done, found by words from its title (query).",
     "delete_todo": "Remove a to-do from the list by title words (query), or all of them.",
+    "create_routine": "Every day at `time`, a notification on the phone that opens the day's briefing when tapped "
+    "(routine daily_briefing). Phones only.",
     "daily_briefing": "The user's day at a glance: a greeting, today's weather and the to-dos due today or overdue. "
     "Always call list_reminders with it, so the device adds what it has scheduled today.",
     "computer_control": "Control the user's computer: volume_up, volume_down, set_volume (level 0-100), mute, unmute, "

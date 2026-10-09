@@ -7,7 +7,7 @@ import { lookupPhone, type ContactLookup } from "./contacts";
 import { type ActionOutcome, type ChosenContact, type NotificationRequest, unsupported } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
 import { openInAppMap } from "./maps";
-import { cancelScheduled, listScheduled, scheduleNotification } from "./notifications";
+import { cancelScheduled, listScheduled, scheduleNotification, scheduleRoutine } from "./notifications";
 import { pickScheduled } from "./scheduled";
 
 /**
@@ -110,6 +110,8 @@ export class ExpoIOSActionService extends LinkingIOSActionService {
 
   // iOS does not let apps change the volume, lock the phone or open folders.
   computerControl = async () => unsupported("IOS_NO_SYSTEM_CONTROL");
+
+  createRoutine = (args: ToolArguments<"create_routine">) => scheduleRoutine(args.time, args.routine);
 
   createNotification = (req: NotificationRequest) => scheduleNotification(req.fire_at, { title: req.title, body: req.body });
 
