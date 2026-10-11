@@ -17,6 +17,7 @@ Endpoints (Phase 3/4):
 
 from __future__ import annotations
 
+import asyncio
 import html
 import io
 import ipaddress
@@ -69,6 +70,9 @@ log = logging.getLogger("bekhi_api")
 MN_STT_FAILED = "Уучлаарай, сайн сонсогдсонгүй. Дахин хэлээд өгөөч."
 MN_MIC_SILENT = "Бичлэгт дуу огт алга байна. Микрофон тань дуугүй (mute) болсон эсэхийг шалгана уу."
 MN_AI_FAILED = "Уучлаарай, одоогоор ойлгоход асуудал гарлаа."
+MN_AI_BUSY = "Одоо хэт олон хүсэлт ирж байна. Түр хүлээгээд дахин асуугаарай."
+# The app waits 30 s for an answer; a turn that would take longer is stopped first, with a clear reply.
+PLAN_TIMEOUT_SECONDS = 27
 MN_NOT_CONFIGURED = "Gemini API key тохируулаагүй байна (apps/api/.env)."
 MN_KEY_MISSING = "{} API key тохируулаагүй байна (apps/api/.env)."
 PROVIDER_NAMES = {"gemini": "Gemini", "duudlaga": "Duudlaga", "elevenlabs": "ElevenLabs"}
@@ -303,12 +307,19 @@ def create_app() -> FastAPI:
     async def run_plan(text: str, ctx: AssistantContext, request: Request) -> AssistantTurn:
         d = deps(request)
         try:
-            return await plan_turn(text, ctx, d)
+            async with asyncio.timeout(PLAN_TIMEOUT_SECONDS):
+                return await plan_turn(text, ctx, d)
         except ContractViolation as e:
             raise ApiException(500, "internal", MN_AI_FAILED) from e
         except ApiException:
             raise
+        except TimeoutError as e:
+            log.warning("planning timed out rid=%s", request.state.request_id)
+            raise ApiException(503, "llm_failed", MN_AI_BUSY) from e
         except Exception as e:  # provider/network errors
+            if getattr(e, "code", None) == 429:  # every model out of quota, also after waiting
+                log.warning("planning out of quota rid=%s", request.state.request_id)
+                raise ApiException(503, "llm_failed", MN_AI_BUSY) from e
             log.exception("planning failed rid=%s", request.state.request_id)
             raise ApiException(502, "llm_failed", MN_AI_FAILED) from e
 

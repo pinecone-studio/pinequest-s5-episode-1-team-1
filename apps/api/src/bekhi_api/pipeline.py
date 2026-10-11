@@ -13,6 +13,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, get_args
@@ -21,7 +22,7 @@ from uuid import UUID, uuid4
 import httpx
 
 from . import backend_tools, briefing, google_link, media, memory, pc_files, todos, webpage
-from .compose import FAILED_BY_CODE, compose
+from .compose import ACTION_MN, FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
     ActionRequest,
@@ -152,6 +153,14 @@ def _fallback_confirmation(tool: str, args: dict[str, Any]) -> str:
     return f"{who}: залгах уу?" if tool == "call_contact" else f"{who}: '{args.get('body', '')}' гэж явуулах уу?"
 
 
+# A tool's name that slipped into words for the user ("open_app ашиглаж болно") becomes plain Mongolian.
+_TOOL_WORDS = re.compile(r"`?\b(" + "|".join(sorted(ACTION_MN, key=len, reverse=True)) + r")\b`?")
+
+
+def _plain(text: str) -> str:
+    return _TOOL_WORDS.sub(lambda m: ACTION_MN[m.group(1)][0], text)
+
+
 def _history_note(actions: list[ActionRequest]) -> str:
     """What the assistant planned, so follow-ups ("тэгээд 9 цагт") can reuse dates."""
     return "; ".join(f"[{a.tool} {json.dumps(a.arguments, ensure_ascii=False)}]" for a in actions)
@@ -225,7 +234,7 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                 actions.append(action)
                 continue
             if call.name == "reply" and call.args.get("text"):
-                replies.append(str(call.args["text"]).strip())
+                replies.append(_plain(str(call.args["text"]).strip()))
             elif call.name == "ask_clarification" and call.args.get("question"):
                 clarification = Clarification(
                     question=str(call.args["question"]).strip(),
@@ -238,8 +247,8 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                 limitations.append(
                     Limitation(
                         code=code if code in LIMITATION_CODES else "other",
-                        message=str(call.args["message"]).strip(),
-                        alternative=Alternative(kind=kind, description=str(call.args.get("alternative_description") or "").strip())
+                        message=_plain(str(call.args["message"]).strip()),
+                        alternative=Alternative(kind=kind, description=_plain(str(call.args.get("alternative_description") or "").strip()))
                         if kind != "none"
                         else None,
                     )

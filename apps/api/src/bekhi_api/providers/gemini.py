@@ -34,6 +34,9 @@ RETRYABLE = {429, 500, 503, 504}
 QUOTA_COOLDOWN_SECONDS = 120
 _quota_exhausted_until: dict[str, float] = {}
 
+# Every model out of quota at once (the free tier's requests per minute): wait this long, once.
+QUOTA_RETRY_SECONDS = 6
+
 LIVE_TIMEOUT_SECONDS = 10
 LIVE_CHUNK_BYTES = 32_000  # 1 s of 16 kHz 16-bit mono
 
@@ -61,22 +64,30 @@ async def _generate(
 ) -> tuple[Any, str]:
     """The response and the model that produced it."""
     last: Exception | None = None
-    for model in _by_availability(models):
-        try:
-            resp = await client.aio.models.generate_content(
-                model=model,
-                contents=contents,
-                config=config.model_copy(update={"thinking_config": thinking_for(model)}) if thinking else config,
-            )
-            return resp, model
-        except (errors.ServerError, errors.ClientError) as e:
-            code = getattr(e, "code", None)
-            if code not in RETRYABLE:
-                raise
-            if code == 429:
-                _quota_exhausted_until[model] = time.monotonic() + QUOTA_COOLDOWN_SECONDS
-            log.warning("gemini model %s unavailable (%s), trying next", model, code)
-            last = e
+    for attempt in range(2):
+        codes: set[int | None] = set()
+        for model in _by_availability(models):
+            try:
+                resp = await client.aio.models.generate_content(
+                    model=model,
+                    contents=contents,
+                    config=config.model_copy(update={"thinking_config": thinking_for(model)}) if thinking else config,
+                )
+                return resp, model
+            except (errors.ServerError, errors.ClientError) as e:
+                code = getattr(e, "code", None)
+                if code not in RETRYABLE:
+                    raise
+                if code == 429:
+                    _quota_exhausted_until[model] = time.monotonic() + QUOTA_COOLDOWN_SECONDS
+                log.warning("gemini model %s unavailable (%s), trying next", model, code)
+                codes.add(code)
+                last = e
+        # A per-minute quota frees up within seconds; anything else will not get better by waiting.
+        if attempt == 0 and codes == {429}:
+            await asyncio.sleep(QUOTA_RETRY_SECONDS)
+            continue
+        break
     assert last is not None
     raise last
 
