@@ -74,6 +74,11 @@ Tool choice:
   (query: what to play). Searching without playing ("YouTube-ээс ... хай") stays open_app with query.
 - "Дууг зогсоо", "үргэлжлүүл", "дараагийн дуу", "өмнөх дуу" (what is playing) -> computer_control media_play_pause,
   media_next or media_previous.
+- "Downloads-ийн хамгийн сүүлийн PDF-ийг нээ", "илтгэлийн файлаа ол", "тайлан гэдэг файлыг нээ" (on the computer)
+  -> find_files, then open_file with the id it gave. "... файлд юу байгааг хэл/товчил" -> find_files, then
+  read_file, then reply in a few sentences. Several files fit: open the newest, say which; none: say so.
+- "энэ сайтад юу бичсэн байна", "... сайтаас уншаад хэл" -> read_webpage (a URL the user gave or web_search found),
+  then reply from what it says.
 - "Компьютер дээр ... гэж бич", "Word дээр бичээд өг: ...", "компьютерт бичээрэй: ..." -> type_text with exactly the
   dictated words (add punctuation, fix nothing else). It is typed where the cursor is on the computer.
 - "10 минутын таймер", "5 минутын дараа дуугарга" -> set_timer (duration_seconds: 10 минут = 600)
@@ -170,6 +175,11 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "play_video": "Play a song or video from YouTube: the first result for the query starts playing (the YouTube app on "
     "a phone, a BEKHI window on the computer).",
     "type_text": "Type dictated text where the cursor is on the user's computer (Word, a chat, a form).",
+    "find_files": "Find the user's files on this computer by words of the name, folder and kind; newest first. Returns "
+    "ids for open_file and read_file.",
+    "open_file": "Open a file find_files found (by its id) in its usual app on the computer.",
+    "read_file": "Read the text of a file find_files found (by its id), to answer about it.",
+    "read_webpage": "Read the text of a public web page, to answer from it.",
 }
 
 FIELD_HINTS: dict[str, str] = {
@@ -276,9 +286,15 @@ def _llm_parameters(tool: str, schema: dict[str, Any], confirm: bool) -> dict[st
     return _with_summary(params)
 
 
-def function_specs() -> list[FunctionSpec]:
+# The user's files: only when this API runs on their computer (desktop.py).
+PC_ONLY_TOOLS = {"find_files", "open_file", "read_file"}
+
+
+def function_specs(on_pc: bool = False) -> list[FunctionSpec]:
     specs = []
     for name, entry in tool_manifest().items():
+        if name in PC_ONLY_TOOLS and not on_pc:
+            continue
         confirm = entry["confirmation"] == "always"
         specs.append(
             FunctionSpec(
@@ -289,6 +305,11 @@ def function_specs() -> list[FunctionSpec]:
         )
     return [*specs, *(FunctionSpec(f.name, f.description, _with_summary(f.parameters)) for f in CONTROL_FUNCTIONS)]
 
+
+PC_LINE = (
+    "You run on the user's computer: find_files, open_file and read_file work on its files, read_webpage on web "
+    "pages. Use them in steps: find, then open or read, then answer.\n"
+)
 
 DEVICE_LINES = {
     "ios": "The user is talking to you on their iPhone. Calls, messages and reminders happen on the iPhone; alarms "
@@ -303,7 +324,8 @@ DEVICE_LINES = {
 }
 
 
-def system_prompt(client_now: datetime, timezone: str, platform: str = "ios", facts: Sequence[str] = ()) -> str:
+def system_prompt(client_now: datetime, timezone: str, platform: str = "ios", facts: Sequence[str] = (),
+                  on_pc: bool = False) -> str:
     weekday = ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"][client_now.weekday()]
     remembered = ""
     if facts:
@@ -316,5 +338,6 @@ def system_prompt(client_now: datetime, timezone: str, platform: str = "ios", fa
         f"{DEVICE_LINES.get(platform, DEVICE_LINES['ios'])}\n"
         f"Current local time of the user: {client_now.isoformat(timespec='seconds')} ({weekday} гараг)\n"
         f"User timezone: {timezone}\n"
+        f"{PC_LINE if on_pc else ''}"
         f"{remembered}"
     )

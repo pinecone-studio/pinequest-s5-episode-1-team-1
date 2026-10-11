@@ -910,6 +910,141 @@
           "query"
         ]
       }
+    },
+    {
+      "name": "find_files",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The user's own files (Downloads, Documents, Desktop, Pictures, Music, Videos), newest first, returned to the model with ids for open_file and read_file. Offered only when the API runs on the user's computer.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "Words from the file's name, if the user gave any ('тайлан', 'илтгэл')",
+            "type": "string",
+            "maxLength": 100
+          },
+          "folder": {
+            "description": "Where to look; omitted: all of the user's folders",
+            "type": "string",
+            "enum": [
+              "downloads",
+              "documents",
+              "desktop",
+              "pictures",
+              "music",
+              "videos"
+            ]
+          },
+          "kind": {
+            "default": "any",
+            "type": "string",
+            "enum": [
+              "any",
+              "pdf",
+              "document",
+              "spreadsheet",
+              "presentation",
+              "image",
+              "video",
+              "audio",
+              "text"
+            ]
+          },
+          "limit": {
+            "default": 5,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        }
+      }
+    },
+    {
+      "name": "open_file",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Opens a file find_files found, in its usual app on the computer. Documents and media only, never programs.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "pattern": "^f\\d{1,4}$",
+            "description": "The id find_files gave the file, e.g. 'f1'"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    },
+    {
+      "name": "read_file",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "pattern": "^f\\d{1,4}$",
+            "description": "The id find_files gave the file, e.g. 'f1'"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    },
+    {
+      "name": "read_webpage",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The readable text of a public https page (no private addresses), for the model to answer from.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2000,
+            "format": "uri",
+            "description": "The page to read, e.g. a web_search result"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
     }
   ]
 }

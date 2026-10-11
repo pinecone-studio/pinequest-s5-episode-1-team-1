@@ -31,6 +31,10 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   forget: { verb: "мартах", dative: "мартахад" },
   type_text: { verb: "компьютер дээр бичих", dative: "компьютер дээр бичихэд" },
   play_video: { verb: "тоглуулах", dative: "тоглуулахад" },
+  find_files: { verb: "файл хайх", dative: "файл хайхад" },
+  open_file: { verb: "файл нээх", dative: "файл нээхэд" },
+  read_file: { verb: "файл унших", dative: "файл уншихад" },
+  read_webpage: { verb: "хуудас унших", dative: "хуудас уншихад" },
 };
 
 /**

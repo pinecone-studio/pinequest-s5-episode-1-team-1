@@ -295,6 +295,8 @@ Some things to say:
 | "Ээж рүү залга" | Finds the contact (any script) and asks before calling |
 | "Компьютерийн дууг багасга" / "Компьютер дээр ... гэж бич" (to the phone) | The linked computer does it: volume, apps, typing |
 | "Хүрдийн Бусгүйг тоглуул" / "Дараагийн дуу" / "Дууг зогсоо" | Finds the first YouTube video and plays it (the YouTube app on a phone, a player window on the computer); media keys for what is playing |
+| "Downloads-ийн сүүлийн PDF-ийг нээ" / "Тайлан файлд юу байгааг хэл" (BEKHI on the computer) | Finds the file in your folders, then opens or reads it, in steps |
+| "Энэ сайтад юу бичсэн байна: …" | Reads the page and answers from it |
 
 ---
 

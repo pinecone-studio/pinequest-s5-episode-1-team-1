@@ -28,6 +28,10 @@ export const TOOL_NAMES = [
   "forget",
   "type_text",
   "play_video",
+  "find_files",
+  "open_file",
+  "read_file",
+  "read_webpage",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -292,6 +296,24 @@ export const ForgetArgs = z.object({
 });
 
 export const ComputerFolder = z.enum(["downloads", "documents", "desktop", "pictures", "music", "videos"]);
+
+export const FileKind = z.enum(["any", "pdf", "document", "spreadsheet", "presentation", "image", "video", "audio", "text"]);
+
+export const FindFilesArgs = z.object({
+  query: z.string().max(100).optional().describe("Words from the file's name, if the user gave any ('тайлан', 'илтгэл')"),
+  folder: ComputerFolder.optional().describe("Where to look; omitted: all of the user's folders"),
+  kind: FileKind.default("any"),
+  limit: z.number().int().min(1).max(10).default(5),
+});
+
+/** A file from find_files' results, by its id ("f2"): nothing else can be opened or read. */
+const FoundFile = z.string().regex(/^f\d{1,4}$/).describe("The id find_files gave the file, e.g. 'f1'");
+export const OpenFileArgs = z.object({ file: FoundFile });
+export const ReadFileArgs = z.object({ file: FoundFile });
+
+export const ReadWebpageArgs = z.object({
+  url: z.url({ protocol: /^https$/ }).max(2000).describe("The page to read, e.g. a web_search result"),
+});
 export type ComputerFolder = z.infer<typeof ComputerFolder>;
 
 export const ComputerControlArgs = z.object({
@@ -341,6 +363,10 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   forget: ForgetArgs,
   type_text: TypeTextArgs,
   play_video: PlayVideoArgs,
+  find_files: FindFilesArgs,
+  open_file: OpenFileArgs,
+  read_file: ReadFileArgs,
+  read_webpage: ReadWebpageArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -637,6 +663,44 @@ export const TOOL_MANIFEST = {
     notes:
       "Plays the first YouTube video for the query (the backend finds it and sets url and title): the YouTube " +
       "app on a phone, BEKHI's own browser window on the computer, where it starts with sound.",
+  },
+  find_files: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The user's own files (Downloads, Documents, Desktop, Pictures, Music, Videos), newest first, returned to the " +
+      "model with ids for open_file and read_file. Offered only when the API runs on the user's computer.",
+  },
+  open_file: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "Opens a file find_files found, in its usual app on the computer. Documents and media only, never programs.",
+  },
+  read_file: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from.",
+  },
+  read_webpage: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "The readable text of a public https page (no private addresses), for the model to answer from.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

@@ -92,5 +92,9 @@ export const ActionRequest = z.discriminatedUnion("tool", [
   actionRequest("forget"),
   actionRequest("type_text"),
   actionRequest("play_video"),
+  actionRequest("find_files"),
+  actionRequest("open_file"),
+  actionRequest("read_file"),
+  actionRequest("read_webpage"),
 ]);
 export type ActionRequest = z.infer<typeof ActionRequest>;

@@ -264,6 +264,7 @@ def create_app() -> FastAPI:
             llm=llm, http=http, store=request.app.state.store, search=get_search(http),
             todo_store=request.app.state.todos,
             memory_store=request.app.state.memory,
+            on_pc=request.app.state.desktop is not None,
             # The asking device's sync code picks its account's to-do list (sync.py).
             account=sync.account_key(request.headers.get(SYNC_CODE_HEADER)),
         )

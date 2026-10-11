@@ -153,6 +153,10 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
     case "daily_briefing":
     case "remember":
     case "forget":
+    case "find_files":
+    case "open_file":
+    case "read_file":
+    case "read_webpage":
       return Promise.resolve({ status: "failed" as const, executed_via: null, error_code: "BACKEND_TOOL_ON_DEVICE" });
   }
 }

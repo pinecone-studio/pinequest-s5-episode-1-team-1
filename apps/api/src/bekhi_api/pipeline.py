@@ -10,6 +10,7 @@ phrases a pending device action as done. Rules enforced here, in code:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 from dataclasses import dataclass, field
@@ -19,7 +20,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, briefing, media, memory, todos
+from . import backend_tools, briefing, media, memory, pc_files, todos, webpage
 from .compose import FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
@@ -69,6 +70,8 @@ class Deps:
     memory_store: memory.FactStore = field(default_factory=memory.FileFactStore)
     # The sync account of the device asking (sync.account_key): whose to-do list it is.
     account: str | None = None
+    # This API runs on the user's computer (desktop.py): the agent may find, open and read its files.
+    on_pc: bool = False
 
 
 async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx: AssistantContext, deps: Deps) -> ActionResult:
@@ -76,6 +79,13 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
+    if tool in pc_files.PC_TOOLS:
+        if not deps.on_pc:
+            return ActionResult(action_id=action_id, tool=tool, status="unsupported", executed_via=None,
+                                error_code="NOT_ON_COMPUTER", data=None)
+        return await asyncio.to_thread(pc_files.PC_TOOLS[tool], action_id, args)
+    if tool == "read_webpage":
+        return await webpage.read_webpage(action_id, args, deps.http)
     if tool == "daily_briefing":
         return await briefing.daily_briefing(action_id, args, ctx.client_now, deps.http, deps.todo_store, deps.account)
     if tool in TODO_TOOLS:
@@ -150,10 +160,10 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
 
     facts = await memory.facts_for(deps.memory_store, deps.account)
     calls = await deps.llm.plan(
-        system=system_prompt(ctx.client_now, ctx.timezone, ctx.device.platform, facts),
+        system=system_prompt(ctx.client_now, ctx.timezone, ctx.device.platform, facts, on_pc=deps.on_pc),
         history=list(conv.history),
         user_text=text,
-        functions=function_specs(),
+        functions=function_specs(on_pc=deps.on_pc),
     )
 
     actions: list[ActionRequest] = []
