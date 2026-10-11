@@ -328,7 +328,7 @@ DEVICE_LINES = {
     "android": "The user is talking to you on their Android phone. Calls, messages and reminders happen on the phone; "
     "alarms and timers on the phone and the user's linked devices. Their linked computer does computer_control, "
     "type_text and anything with device computer.",
-    "web": "The user is talking to you on their Windows computer. Reminders, notes, programs and computer controls "
+    "web": "The user is talking to you on their computer (Windows or Mac). Reminders, notes, programs and computer controls "
     "happen on that computer, alarms and timers on it and the user's linked devices; calls and messages are passed "
     "to their linked phone.",
 }

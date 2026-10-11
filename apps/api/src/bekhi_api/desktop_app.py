@@ -1,10 +1,11 @@
-"""BEKHI as an app on the computer: one click on the desktop shortcut (install-desktop.ps1) starts
-this API on the PC and opens BEKHI in its own window, Microsoft Edge in app mode with no browser bar.
-The API serves that window (the web app built into apps/api/web), talks to the speech and language
-providers with the keys in apps/api/.env, and does the PC's own actions: apps, volume, typing,
-reminders as toasts. Phones on the same Wi-Fi can use it too. Closing the window stops BEKHI.
+"""BEKHI as an app on the computer: one click on the desktop shortcut (install-desktop.ps1) or on
+BEKHI in a Mac's Applications (install-desktop.sh) starts this API on the computer and opens BEKHI
+in its own window, Edge or Chrome in app mode with no browser bar. The API serves that window (the
+web app built into apps/api/web), talks to the speech and language providers with the keys in
+apps/api/.env, and does the computer's own actions: apps, volume, typing, reminders as
+notifications. Phones on the same Wi-Fi can use it too. Closing the window stops BEKHI.
 
-    pythonw bekhi_desktop.pyw    (what the shortcut runs: no console window)
+    pythonw bekhi_desktop.pyw    (what the Windows shortcut runs: no console window)
 """
 
 from __future__ import annotations
@@ -16,19 +17,12 @@ import threading
 import time
 import urllib.request
 import webbrowser
-from pathlib import Path
 
-from . import config
-from .desktop import EDGE_PATHS
+from . import config, system
+from .desktop import browser
 
 PORT = 8000  # the web app finds the API on the port it was served from
 URL = f"http://127.0.0.1:{PORT}/"
-
-
-def _data_dir() -> Path:
-    path = Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "BEKHI"
-    path.mkdir(parents=True, exist_ok=True)
-    return path
 
 
 def _running() -> bool:
@@ -41,21 +35,23 @@ def _running() -> bool:
 
 
 def _open_window() -> subprocess.Popen | None:
-    browser = next((p for p in EDGE_PATHS if p.is_file()), None)
-    if browser is None:
+    exe = browser()
+    if exe is None:
         webbrowser.open(URL)
         return None
     # Its own profile: a separate browser process (it ends when the window closes) that keeps the
     # microphone permission and this window's sync code.
     return subprocess.Popen([
-        str(browser), f"--app={URL}", f"--user-data-dir={_data_dir() / 'window'}",
+        str(exe), f"--app={URL}", f"--user-data-dir={system.data_dir() / 'window'}",
         "--window-size=460,900", "--no-first-run", "--no-default-browser-check",
     ])
 
 
 def main() -> None:
-    if sys.stdout is None or sys.stderr is None:  # pythonw: no console, so the log goes to a file
-        log = open(_data_dir() / "bekhi.log", "a", encoding="utf-8", buffering=1)  # noqa: SIM115
+    # Started from a shortcut or the Dock (pythonw has no console; a Mac app's output goes nowhere):
+    # the log goes to a file.
+    if sys.stdout is None or sys.stderr is None or not sys.stderr.isatty():
+        log = open(system.data_dir() / "bekhi.log", "a", encoding="utf-8", buffering=1)  # noqa: SIM115
         sys.stdout = sys.stderr = log
     if _running():
         _open_window()

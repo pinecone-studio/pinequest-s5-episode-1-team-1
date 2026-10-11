@@ -71,7 +71,7 @@ def test_the_pc_plays_one_video_at_a_time(tmp_path, monkeypatch):
 
     monkeypatch.setattr(desktop.subprocess, "Popen", Window)
     monkeypatch.setattr(desktop, "_player", None)
-    monkeypatch.setattr(desktop, "EDGE_PATHS", [tmp_path / "msedge.exe"])
+    monkeypatch.setattr(desktop.system, "browsers", lambda: [tmp_path / "msedge.exe"])
     (tmp_path / "msedge.exe").write_bytes(b"")
     s = desktop.DesktopScheduler(tmp_path / "r.json")
     for v in ("aaaaaaaaaaa", "bbbbbbbbbbb"):
@@ -82,10 +82,8 @@ def test_the_pc_plays_one_video_at_a_time(tmp_path, monkeypatch):
 
 
 def test_media_keys_on_the_pc(tmp_path, monkeypatch):
-    from bekhi_api import windows_controls
-
     pressed = []
-    monkeypatch.setattr(windows_controls, "press_media_key", lambda action: pressed.append(action) or True)
+    monkeypatch.setattr(desktop.system.controls(), "press_media_key", lambda action: pressed.append(action) or True)
     s = desktop.DesktopScheduler(tmp_path / "r.json")
     for action in ("media_play_pause", "media_next"):
         assert desktop.run("computer_control", {"action": action}, s)["status"] == "succeeded"

@@ -13,7 +13,6 @@ from __future__ import annotations
 import base64
 import json
 import logging
-import os
 import re
 import secrets
 import time
@@ -25,6 +24,7 @@ from urllib.parse import urlencode
 import httpx
 from cryptography.fernet import Fernet, InvalidToken
 
+from . import system
 from .models import ActionResult
 from .sync import supabase_headers
 
@@ -305,4 +305,4 @@ async def run_tool(action_id: str, tool: str, args: dict[str, Any], google: Goog
 
 
 def local_data_dir() -> Path:
-    return Path(os.environ.get("LOCALAPPDATA") or Path.home()) / "BEKHI"
+    return system.data_dir(create=False)

@@ -305,7 +305,7 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                     "Дарахад нь цаг агаар, хийх зүйлсийг тань хэлж өгье."
                 )
         if r.executed_via == "backend":
-            # Done on the Windows PC (desktop.py): toasts while BEKHI runs, notes in a file.
+            # Done on the computer (desktop.py): toasts while BEKHI runs, notes in a file.
             match action.tool:
                 case "create_reminder":
                     return f"За, {format_when_mn(a['due_at'], now_iso)} компьютер дээр мэдэгдлээр сануулъя."

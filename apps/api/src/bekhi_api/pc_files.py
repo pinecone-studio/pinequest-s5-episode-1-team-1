@@ -1,6 +1,6 @@
-"""The user's own files on this PC, for the agent (find_files, open_file, read_file).
+"""The user's own files on this computer, for the agent (find_files, open_file, read_file).
 
-Only the user's folders are searched (Downloads, Documents, Desktop, Pictures, Music, Videos),
+Only the user's folders are searched (Downloads, Documents, Desktop, Pictures, Music, Videos/Movies),
 only documents and media are listed, and a file can be opened or read only by the id find_files
 gave it, so the model can never name a path, a program or a system file.
 """
@@ -15,11 +15,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from . import system
 from .models import ActionResult
 
 FOLDERS = ("downloads", "documents", "desktop", "pictures", "music", "videos")
 FOLDER_MN = {"downloads": "Downloads", "documents": "Documents", "desktop": "Desktop", "pictures": "Pictures",
-             "music": "Music", "videos": "Videos"}
+             "music": "Music", "videos": "Movies" if system.IS_MAC else "Videos"}
 KINDS = {
     "pdf": {".pdf"},
     "document": {".doc", ".docx", ".odt", ".rtf", ".txt", ".md"},
@@ -33,6 +34,8 @@ KINDS = {
 OPENABLE = set().union(*KINDS.values())
 READABLE = {".txt", ".md", ".csv", ".json", ".html", ".htm", ".docx"}
 SKIP_DIRS = {"node_modules", "appdata", "$recycle.bin", "__pycache__", ".git", ".venv"}
+# Mac folders that are really one item (an app, the Photos or Music library): never searched inside.
+PACKAGES = {".app", ".photoslibrary", ".musiclibrary", ".tvlibrary", ".imovielibrary", ".fcpbundle"}
 MAX_DEPTH = 4
 MAX_ENTRIES = 30_000  # stop a search in a huge folder rather than keep the user waiting
 MAX_TEXT = 8_000  # characters of a file the model gets
@@ -58,9 +61,7 @@ def _matches(name: str, words: list[str]) -> bool:
 
 
 def _folder_path(folder: str) -> Path:
-    from . import windows_controls as win
-
-    return Path(win.known_folder(folder))
+    return Path(system.controls().known_folder(folder))
 
 
 def _walk(root: Path, exts: set[str], words: list[str], budget: list[int]) -> list[tuple[float, Path]]:
@@ -79,7 +80,8 @@ def _walk(root: Path, exts: set[str], words: list[str], budget: list[int]) -> li
                 continue
             try:
                 if e.is_dir(follow_symlinks=False):
-                    if depth < MAX_DEPTH and name.casefold() not in SKIP_DIRS:
+                    if (depth < MAX_DEPTH and name.casefold() not in SKIP_DIRS
+                            and Path(name).suffix.casefold() not in PACKAGES):
                         stack.append((Path(e.path), depth + 1))
                 elif Path(name).suffix.casefold() in exts and _matches(name, words):
                     found.append((e.stat().st_mtime, Path(e.path)))
@@ -147,7 +149,7 @@ def open_file(action_id: str, args: dict[str, Any]) -> ActionResult:
         return _fail(action_id, "open_file", "FILE_NOT_FOUND")
     if path.suffix.casefold() not in OPENABLE:
         return _fail(action_id, "open_file", "FILE_NOT_ALLOWED")
-    os.startfile(path)
+    system.open_path(path)
     return _ok(action_id, "open_file", f"За, '{path.name}'-ийг нээлээ.", name=path.name)
 
 

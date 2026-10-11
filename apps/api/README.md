@@ -72,6 +72,10 @@ app opens a known app's website when it is not there.
 `set_timer`, `list_reminders` and `cancel_reminder` work on the same scheduled items (the iPhone does
 the same with its local notifications). `computer_control` (`windows_controls.py`) sets the speaker
 volume and mute through Core Audio, locks the screen, and opens Downloads/Documents/... folders.
+On a Mac (`system.py` picks the platform) the same actions use `mac_controls.py`: AppleScript for the
+volume, typing (clipboard + ⌘V), Spotify/Music and notifications, `open` for apps, folders and links,
+apps from `/Applications`, data in `~/Library/Application Support/BEKHI`; `install-desktop.sh` makes
+BEKHI.app.
 
 ## Speech providers
 

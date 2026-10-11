@@ -51,7 +51,7 @@ def test_files_are_found_by_name_in_either_script_newest_first(folders):
 
 def test_only_found_files_open_and_text_files_are_read(folders, monkeypatch):
     opened = []
-    monkeypatch.setattr(pc_files.os, "startfile", opened.append, raising=False)
+    monkeypatch.setattr(pc_files.system, "open_path", opened.append)
     found = pc_files.find_files("a", {"query": "тайлан"}).data["files"]
     assert pc_files.open_file("o", {"file": found[1]["id"]}).status == "succeeded"
     assert [p.name for p in opened] == ["Tailan_sar.pdf"]
@@ -90,7 +90,7 @@ def test_web_pages_are_read_but_never_private_addresses(monkeypatch):
 
 def test_the_agent_finds_then_opens_a_file_on_the_computer(client, planner, folders, monkeypatch):
     opened = []
-    monkeypatch.setattr(pc_files.os, "startfile", opened.append, raising=False)
+    monkeypatch.setattr(pc_files.system, "open_path", opened.append)
     class ThisPc:  # this API runs on the user's computer
         async def stop(self):
             pass

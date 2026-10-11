@@ -12,7 +12,7 @@ Endpoints (Phase 3/4):
   GET  /api/v1/sync/alarms                 alarms/timers to ring on every linked device
   POST /api/v1/sync/alarms                 publish one this device has set
   POST /api/v1/sync/alarms/cancel          cancel some on every linked device
-  POST /api/v1/desktop/sync                link this Windows PC (the API's own scheduler) to a sync code
+  POST /api/v1/desktop/sync                link this computer (the API's own scheduler) to a sync code
 """
 
 from __future__ import annotations
@@ -448,7 +448,7 @@ def create_app() -> FastAPI:
 
     @app.post("/api/v1/desktop/actions")
     async def desktop_action(body: DesktopActionRequest, request: Request):
-        """The web app on this Windows PC: run a device action here (reminder, alarm, note...)."""
+        """The web app on this computer: run a device action here (reminder, alarm, note...)."""
         scheduler = request.app.state.desktop
         if scheduler is None or not _is_local(request):
             raise ApiException(404, "invalid_request", MN_DESKTOP_UNAVAILABLE)
@@ -465,7 +465,7 @@ def create_app() -> FastAPI:
 
     @app.post("/api/v1/desktop/sync")
     async def desktop_sync(body: DesktopSyncRequest, request: Request):
-        """The web app on this Windows PC links the PC itself, so it rings synced alarms with the browser closed."""
+        """The web app on this computer links the computer itself, so it rings synced alarms with the browser closed."""
         scheduler = request.app.state.desktop
         if scheduler is None or not _is_local(request):
             raise ApiException(404, "invalid_request", MN_DESKTOP_UNAVAILABLE)
