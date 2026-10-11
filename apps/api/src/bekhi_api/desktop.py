@@ -322,6 +322,19 @@ BUILTIN_APPS = {
 }
 
 
+# Windows settings pages, by the names the phone's app catalog uses too ("Wi-Fi тохиргоо").
+SETTINGS_PAGES = {
+    "wifi": "ms-settings:network-wifi",
+    "wifiтохиргоо": "ms-settings:network-wifi",
+    "вайфай": "ms-settings:network-wifi",
+    "bluetooth": "ms-settings:bluetooth",
+    "bluetoothтохиргоо": "ms-settings:bluetooth",
+    "блютүүс": "ms-settings:bluetooth",
+    "тохиргоо": "ms-settings:",
+    "settings": "ms-settings:",
+}
+
+
 def _norm(name: str) -> str:
     return "".join(ch for ch in name.lower() if ch.isalnum())
 
@@ -339,6 +352,8 @@ def find_app(name: str, start_menu: list[Path] | None = None) -> str | None:
     key = _norm(wanted)
     if not key:
         return None
+    if key in SETTINGS_PAGES:
+        return SETTINGS_PAGES[key]
     for builtin, exe in BUILTIN_APPS.items():
         if _norm(builtin) == key:
             return exe

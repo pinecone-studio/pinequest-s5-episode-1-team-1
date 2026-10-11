@@ -47,6 +47,12 @@ class ElevenLabsTextToSpeech:
                 "key-ээ засаад Text to Speech-ийг асаана уу.",
                 "tts_failed",
             )
+        if "quota_exceeded" in detail or r.status_code == 402 and "quota" in detail.lower():
+            # ElevenLabs answers 401 when the month's credits are spent: not a wrong key.
+            raise ProviderUserError(
+                "ElevenLabs-ийн энэ сарын кредит дууссан байна. elevenlabs.io дээр багцаа нэмэх эсвэл өөр key тавина уу.",
+                "tts_failed",
+            )
         if r.status_code == 401 or "invalid_api_key" in detail:
             raise ProviderUserError(
                 "ElevenLabs API key буруу байна (apps/api/.env). Key-г бүтнээр нь хуулж тавина уу.", "tts_failed"
