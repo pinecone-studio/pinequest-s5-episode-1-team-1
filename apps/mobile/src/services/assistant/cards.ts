@@ -1,4 +1,4 @@
-import type { ActionResult } from "@bekhi/contracts";
+import { BriefingPart, type ActionResult } from "@bekhi/contracts";
 import { localDate } from "@/lib/time";
 
 /**
@@ -11,7 +11,10 @@ export type Card =
   | { kind: "weather"; place: string; date: string; max: number; min: number; rain: number | null; condition: string; code: number | null }
   | { kind: "emails"; emails: { from: string; subject: string; snippet: string; unread: boolean }[] }
   | { kind: "email"; subject: string; from: string; text: string }
-  | { kind: "scheduled"; items: { title: string; kind: string; fire_at: string }[] };
+  | { kind: "scheduled"; items: { title: string; kind: string; fire_at: string }[] }
+  | { kind: "news"; items: { title: string; url: string; source: string }[] }
+  /** The briefing asks what to tell from now on: the parts it told this time are picked. */
+  | { kind: "briefing_choice"; parts: BriefingPart[] };
 
 type Data = Record<string, unknown>;
 
@@ -40,29 +43,48 @@ function weather(d: Data): Card | null {
   };
 }
 
-function cardsOf(r: ActionResult, briefing: boolean): Card[] {
+function emails(v: unknown): Card | null {
+  const items = list(v)
+    .filter((e) => isText(e.from) || isText(e.subject))
+    .map((e) => ({
+      from: isText(e.from) ? e.from : "",
+      subject: isText(e.subject) ? e.subject : "",
+      snippet: isText(e.snippet) ? e.snippet : "",
+      unread: e.unread === true,
+    }));
+  return items.length > 0 ? { kind: "emails", emails: items } : null;
+}
+
+function news(v: unknown): Card | null {
+  const items = list(v)
+    .filter((i) => isText(i.title) && isText(i.url) && /^https?:\/\//.test(i.url))
+    .map((i) => ({ title: i.title as string, url: i.url as string, source: isText(i.source) ? i.source : "" }));
+  return items.length > 0 ? { kind: "news", items } : null;
+}
+
+/** The parts a briefing told (its `parts`), or null when it does not say. */
+function briefingParts(d: Data): BriefingPart[] | null {
+  const parsed = BriefingPart.array().safeParse(d.parts);
+  return parsed.success ? parsed.data : null;
+}
+
+const present = (c: Card | null): c is Card => c !== null;
+
+function cardsOf(r: ActionResult, briefing: BriefingPart[] | "none"): Card[] {
   const d = r.data;
   if (r.status !== "succeeded" || !d) return [];
   switch (r.tool) {
     case "list_todos":
-      return [todos(d.items)].filter((c): c is Card => c !== null);
+      return [todos(d.items)].filter(present);
     case "get_weather":
-      return [weather(d)].filter((c): c is Card => c !== null);
+      return [weather(d)].filter(present);
     case "daily_briefing": {
       const w = typeof d.weather === "object" && d.weather !== null ? weather(d.weather as Data) : null;
-      return [w, todos(d.todos)].filter((c): c is Card => c !== null);
+      const ask: Card | null = isText(d.ask_mn) ? { kind: "briefing_choice", parts: briefingParts(d) ?? [] } : null;
+      return [w, todos(d.todos), emails(d.emails), news(d.news), ask].filter(present);
     }
-    case "check_email": {
-      const emails = list(d.emails)
-        .filter((e) => isText(e.from) || isText(e.subject))
-        .map((e) => ({
-          from: isText(e.from) ? e.from : "",
-          subject: isText(e.subject) ? e.subject : "",
-          snippet: isText(e.snippet) ? e.snippet : "",
-          unread: e.unread === true,
-        }));
-      return emails.length > 0 ? [{ kind: "emails", emails }] : [];
-    }
+    case "check_email":
+      return [emails(d.emails)].filter(present);
     case "read_email":
       return isText(d.text) && d.text.trim()
         ? [{ kind: "email", subject: isText(d.subject) ? d.subject : "", from: isText(d.from) ? d.from : "", text: d.text }]
@@ -71,7 +93,7 @@ function cardsOf(r: ActionResult, briefing: boolean): Card[] {
       const today = localDate(new Date());
       const items = list(d.items)
         .filter((i) => isText(i.title) && isText(i.fire_at))
-        .filter((i) => !briefing || (i.fire_at as string).slice(0, 10) === today) // the day at a glance: today only
+        .filter((i) => briefing === "none" || (i.fire_at as string).slice(0, 10) === today) // the day at a glance: today only
         .map((i) => ({ title: i.title as string, kind: isText(i.kind) ? i.kind : "reminder", fire_at: i.fire_at as string }));
       return items.length > 0 ? [{ kind: "scheduled", items }] : [];
     }
@@ -80,10 +102,17 @@ function cardsOf(r: ActionResult, briefing: boolean): Card[] {
   }
 }
 
-/** The cards for the results of one turn (a briefing gives the weather, the to-dos and today's schedule). */
+/**
+ * The cards for the results of one turn. A briefing gives what the user chose (weather, to-dos,
+ * mail, news) and today's schedule if they want it; its question comes last.
+ */
 export function cardsFor(results: ActionResult[]): Card[] {
-  const briefing = results.some((r) => r.tool === "daily_briefing");
-  return results.flatMap((r) => cardsOf(r, briefing));
+  const b = results.find((r) => r.tool === "daily_briefing" && r.data);
+  const briefing = b ? (briefingParts(b.data as Data) ?? ["schedule"]) : "none";
+  const cards = results
+    .filter((r) => !(r.tool === "list_reminders" && briefing !== "none" && !briefing.includes("schedule")))
+    .flatMap((r) => cardsOf(r, briefing));
+  return [...cards.filter((c) => c.kind !== "briefing_choice"), ...cards.filter((c) => c.kind === "briefing_choice")];
 }
 
 /** "Өнөөдөр 18:00", "Маргааш", "10 сарын 15 09:30": short, for a card. The ISO time is read as written. */

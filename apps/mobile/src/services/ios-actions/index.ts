@@ -153,6 +153,7 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
     case "daily_briefing":
     case "remember":
     case "forget":
+    case "set_profile":
     case "find_files":
     case "open_file":
     case "read_file":

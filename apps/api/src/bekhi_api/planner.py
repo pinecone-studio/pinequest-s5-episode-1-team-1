@@ -100,7 +100,11 @@ Tool choice:
   Other greetings ("Сайн уу", "Оройн мэнд") are chitchat: reply.
 - "Өглөө бүр 7 цагт өдрийн тоймоо хэлээрэй", "өдөр бүр ... тойм/мэдээ сонсгоорой" (every day) -> create_routine with
   time "07:00". Stop it with cancel_reminder (query "тойм").
-- "... гэдгийг санаарай", "санаж аваарай: ...", "намайг ... гэдэг", "миний ... бол ..." (a lasting fact about the user
+- "Намайг Нандин гэдэг", "Би Дарханд амьдардаг" (the user's own name or home city), and what the day's briefing should
+  tell ("өглөө мэдээ бас хэлж байгаарай", "тоймд имэйл хэрэггүй", or an answer to the briefing's question "Өглөө бүр юу
+  мэдмээр байна?": "цаг агаар, мэдээ") -> set_profile (name, city; briefing: exactly what they listed, or briefing_add /
+  briefing_remove). Parts: weather, todos, schedule (reminders, alarms, events), email, news.
+- "... гэдгийг санаарай", "санаж аваарай: ...", "миний ... бол ..." (a lasting fact about the user
   or the people and places in their life) -> remember, the fact as one short sentence about the user:
   "Миний эхнэрийг Сараа гэдэг" -> "Хэрэглэгчийн эхнэрийг Сараа гэдэг". Not for tasks (add_todo) or times (reminders).
 - "... гэдгийг март", "санасан бүх зүйлээ март" -> forget (query: words of the fact, or all: true)
@@ -174,8 +178,10 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "forget": "Forget remembered facts containing the query words, or all of them.",
     "create_routine": "Every day at `time`, a notification on the phone that opens the day's briefing when tapped "
     "(routine daily_briefing). Phones only.",
-    "daily_briefing": "The user's day at a glance: a greeting, today's weather and the to-dos due today or overdue. "
-    "Always call list_reminders with it, so the device adds what it has scheduled today.",
+    "daily_briefing": "The user's day at a glance: a greeting, then what they chose (weather, to-dos due, unread "
+    "mail, the news). Always call list_reminders with it, so the device adds what it has scheduled today.",
+    "set_profile": "Save the user's name, home city (the weather's place when none is said) or what the day's "
+    "briefing tells (weather, todos, schedule, email, news).",
     "computer_control": "Control the user's computer: volume_up, volume_down, set_volume (level 0-100), mute, unmute, "
     "lock_screen, open_folder (folder), media_play_pause, media_next, media_previous (what is playing). Said to the "
     "phone, the linked computer does it.",
@@ -335,7 +341,7 @@ DEVICE_LINES = {
 
 
 def system_prompt(client_now: datetime, timezone: str, platform: str = "ios", facts: Sequence[str] = (),
-                  on_pc: bool = False) -> str:
+                  on_pc: bool = False, about: str = "") -> str:
     weekday = ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"][client_now.weekday()]
     remembered = ""
     if facts:
@@ -349,5 +355,6 @@ def system_prompt(client_now: datetime, timezone: str, platform: str = "ios", fa
         f"Current local time of the user: {client_now.isoformat(timespec='seconds')} ({weekday} гараг)\n"
         f"User timezone: {timezone}\n"
         f"{PC_LINE if on_pc else ''}"
+        f"{about + chr(10) if about else ''}"
         f"{remembered}"
     )

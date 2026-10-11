@@ -34,6 +34,7 @@ ToolName = Literal[
     "create_routine",
     "remember",
     "forget",
+    "set_profile",
     "type_text",
     "play_video",
     "find_files",

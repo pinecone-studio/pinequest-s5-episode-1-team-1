@@ -5,6 +5,7 @@ import { wakeKey } from "@/services/assistant/wake";
 import type { Voice } from "@/services/speech/voices";
 import { colors, radius } from "@/theme";
 import { LinkSection } from "./LinkSection";
+import { ProfileSection } from "./ProfileSection";
 import { settingStyles as s } from "./settingStyles";
 
 interface Props {
@@ -119,6 +120,7 @@ export function Settings({ live, voices, voiceId, onChooseVoice, voiceReplies, o
                 )}
               </View>
 
+              {live && <ProfileSection shown={open} />}
               {live && <LinkSection shown={open} />}
 
               <Text style={s.section}>Бусад</Text>

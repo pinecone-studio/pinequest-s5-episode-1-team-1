@@ -22,6 +22,7 @@ from uuid import UUID, uuid4
 import httpx
 
 from . import backend_tools, briefing, google_link, media, memory, pc_files, todos, webpage
+from . import profile as profiles
 from .compose import ACTION_MN, FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
@@ -69,6 +70,7 @@ class Deps:
     search: WebSearch | None = None
     todo_store: todos.TodoStore = field(default_factory=todos.FileTodoStore)
     memory_store: memory.FactStore = field(default_factory=memory.FileFactStore)
+    profile_store: profiles.ProfileStore = field(default_factory=profiles.FileProfileStore)
     # The sync account of the device asking (sync.account_key): whose to-do list it is.
     account: str | None = None
     # This API runs on the user's computer (desktop.py): the agent may find, open and read its files.
@@ -76,8 +78,18 @@ class Deps:
     google: google_link.Google | None = None
 
 
+async def _profile(deps: Deps) -> dict[str, Any]:
+    try:
+        return profiles.clean(await deps.profile_store.get(deps.account))
+    except httpx.HTTPError as e:
+        log.warning("profile store failed: %s", type(e).__name__)
+        return {}
+
+
 async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx: AssistantContext, deps: Deps) -> ActionResult:
     if tool == "get_weather":
+        if not args.get("location_name"):  # the user's own city, once they said it (profile.py)
+            args = {**args, "location_name": (await _profile(deps)).get("city")}
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
@@ -91,7 +103,15 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
     if tool == "read_webpage":
         return await webpage.read_webpage(action_id, args, deps.http)
     if tool == "daily_briefing":
-        return await briefing.daily_briefing(action_id, args, ctx.client_now, deps.http, deps.todo_store, deps.account)
+        return await briefing.daily_briefing(action_id, args, ctx.client_now, deps.http, deps.todo_store, deps.account,
+                                             profile=await _profile(deps), google=deps.google, search=deps.search)
+    if tool == "set_profile":
+        try:
+            return await profiles.set_profile(action_id, args, deps.profile_store, deps.account)
+        except httpx.HTTPError as e:
+            log.warning("profile store failed: %s", type(e).__name__)
+            return ActionResult(action_id=action_id, tool=tool, status="failed", executed_via="backend",
+                                error_code="PROFILE_UNAVAILABLE", data=None)
     if tool in TODO_TOOLS:
         try:
             return await _run_todo_tool(action_id, tool, args, ctx, deps)
@@ -171,8 +191,9 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
     manifest = tool_manifest()
 
     facts = await memory.facts_for(deps.memory_store, deps.account)
+    about = profiles.prompt_line(await _profile(deps))
     calls = await deps.llm.plan(
-        system=system_prompt(ctx.client_now, ctx.timezone, ctx.device.platform, facts, on_pc=deps.on_pc),
+        system=system_prompt(ctx.client_now, ctx.timezone, ctx.device.platform, facts, on_pc=deps.on_pc, about=about),
         history=list(conv.history),
         user_text=text,
         functions=function_specs(on_pc=deps.on_pc),

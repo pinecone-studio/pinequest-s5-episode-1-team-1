@@ -26,6 +26,7 @@ export const TOOL_NAMES = [
   "create_routine",
   "remember",
   "forget",
+  "set_profile",
   "type_text",
   "play_video",
   "find_files",
@@ -290,6 +291,40 @@ export const RememberArgs = z.object({
     .describe("One short sentence about the user, kept for later: 'Хэрэглэгчийн эхнэрийг Сараа гэдэг'"),
 });
 
+/** What the day's briefing can tell: the user picks (set_profile, the app's Settings). */
+export const BriefingPart = z.enum(["weather", "todos", "schedule", "email", "news"]);
+export type BriefingPart = z.infer<typeof BriefingPart>;
+
+export const SetProfileArgs = z.object({
+  name: z
+    .string()
+    .trim()
+    .max(40)
+    .optional()
+    .describe("What to call the user: 'Намайг Нандин гэдэг' -> 'Нандин'. Empty to stop using a name"),
+  city: z
+    .string()
+    .trim()
+    .max(60)
+    .optional()
+    .describe("The user's own city or aimag, for the weather: 'Би Дарханд амьдардаг' -> 'Дархан'"),
+  briefing: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Exactly what the day's briefing should tell, when the user lists it"),
+  briefing_add: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Add to the briefing: 'өглөө мэдээ бас хэлж байгаарай' -> ['news']"),
+  briefing_remove: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Leave out of the briefing: 'тоймд имэйл хэрэггүй' -> ['email']"),
+});
+
 export const ForgetArgs = z.object({
   /** Words of the fact to forget ("эхнэр"). */
   query: z.string().max(100).optional(),
@@ -376,6 +411,7 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   create_routine: CreateRoutineArgs,
   remember: RememberArgs,
   forget: ForgetArgs,
+  set_profile: SetProfileArgs,
   type_text: TypeTextArgs,
   play_video: PlayVideoArgs,
   find_files: FindFilesArgs,
@@ -625,8 +661,9 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes:
-      "The day at a glance, returned inline: a greeting for the time of day, today's weather and the to-dos due " +
-      "today or overdue. Planned together with list_reminders, so the device adds what it has scheduled today.",
+      "The day at a glance, returned inline: a greeting for the time of day, then what the user chose in their " +
+      "profile: today's weather, the to-dos due today or overdue, unread mail, the news. Planned together with " +
+      "list_reminders, so the device adds what it has scheduled today. Asks what to tell until the user chooses.",
   },
   create_routine: {
     executor: "device",
@@ -658,6 +695,17 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes: "Forgets the remembered facts containing the query words, or all of them.",
+  },
+  set_profile: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The user's profile for the account: their name (the briefing greets them by it), their city (the weather's " +
+      "default place) and what the day's briefing tells (weather, todos, schedule, email, news).",
   },
   type_text: {
     executor: "device",

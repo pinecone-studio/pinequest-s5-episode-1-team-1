@@ -42,6 +42,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, Field, ValidationError
 
 from . import commands, desktop, directions, google_link, hotkey, memory, sync, system, todos
+from . import profile as profiles
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -123,6 +124,12 @@ class DesktopSyncRequest(BaseModel):
     # The user typed this code to join it. Otherwise a browser opening BEKHI on a computer that is
     # already linked joins the computer's code, rather than taking the computer over.
     replace: bool = False
+
+
+class ProfileRequest(BaseModel):
+    name: str | None = Field(None, max_length=profiles.MAX_NAME)
+    city: str | None = Field(None, max_length=profiles.MAX_CITY)
+    briefing: list[Literal["weather", "todos", "schedule", "email", "news"]] | None = None
 
 
 class SendCommandRequest(BaseModel):
@@ -227,6 +234,7 @@ async def lifespan(app: FastAPI):
         app.state.sync = sync.make_store(settings.supabase_url, settings.supabase_service_role_key, http, settings.sync_api_url)
         app.state.todos = todos.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
         app.state.memory = memory.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
+        app.state.profiles = profiles.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
         app.state.commands = commands.CommandStore()
         # On the user's PC (agent.py): commands for a device not listening here go on to the cloud.
         app.state.remote_commands = commands.RemoteCommands(settings.sync_api_url, http) if settings.sync_api_url else None
@@ -319,6 +327,7 @@ def create_app() -> FastAPI:
             llm=llm, http=http, store=request.app.state.store, search=get_search(http),
             todo_store=request.app.state.todos,
             memory_store=request.app.state.memory,
+            profile_store=request.app.state.profiles,
             on_pc=request.app.state.desktop is not None,
             google=request.app.state.google,
             # The asking device's sync code picks its account's to-do list (sync.py).
@@ -648,6 +657,22 @@ def create_app() -> FastAPI:
         return _google_page(f"Google холбогдлоо: {email}",
                             "Gmail, Google Tasks бэлэн. Энэ цонхыг хаагаад БЭХИ-д 'Шинэ имэйл байна уу?' гэж асуугаарай.",
                             close=True)
+
+    @app.get("/api/v1/profile")
+    async def get_profile(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """The account's profile (profile.py); `briefing` is null until the user chooses."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        p = profiles.clean(await request.app.state.profiles.get(account))
+        return {"name": p.get("name"), "city": p.get("city"), "briefing": p.get("briefing"),
+                "parts": list(profiles.BRIEFING_PARTS), "default_briefing": profiles.DEFAULT_BRIEFING}
+
+    @app.post("/api/v1/profile")
+    async def post_profile(body: ProfileRequest, request: Request, x_bekhi_sync: str | None = Header(None),
+                           x_bekhi_device: str | None = Header(None)):
+        """Changes the given fields: a name or city ("" drops it), the briefing's parts."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        p = await profiles.update(request.app.state.profiles, account, body.model_dump(exclude_unset=True))
+        return {"name": p.get("name"), "city": p.get("city"), "briefing": p.get("briefing")}
 
     @app.get("/api/v1/auth/google")
     async def google_status(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):

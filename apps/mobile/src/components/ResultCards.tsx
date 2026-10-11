@@ -1,6 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import type { BriefingPart } from "@bekhi/contracts";
 import { type Card, isOverdue, shortWhen } from "@/services/assistant/cards";
+import { BRIEFING_PARTS, DEFAULT_BRIEFING, saveProfile } from "@/services/profile";
 import { colors, radius } from "@/theme";
 
 const MAX_ROWS = 8;
@@ -127,6 +130,30 @@ function ResultCard({ card }: { card: Card }) {
           <More count={card.emails.length} />
         </View>
       );
+    case "news":
+      return (
+        <View style={styles.card}>
+          <Header icon="newspaper-outline" title="Өнөөдрийн мэдээ" />
+          {card.items.map((item, i) => (
+            <Pressable
+              key={i}
+              accessibilityRole="link"
+              onPress={() => void Linking.openURL(item.url)}
+              style={({ pressed }) => [styles.newsRow, pressed && { opacity: 0.6 }]}
+            >
+              <View style={styles.flex}>
+                <Text style={styles.rowTitle} numberOfLines={2}>
+                  {item.title}
+                </Text>
+                {item.source !== "" && <Text style={styles.secondary}>{item.source}</Text>}
+              </View>
+              <Ionicons name="open-outline" size={16} color={colors.tertiaryLabel} />
+            </Pressable>
+          ))}
+        </View>
+      );
+    case "briefing_choice":
+      return <BriefingChoice told={card.parts} />;
     case "email":
       return (
         <View style={styles.card}>
@@ -138,6 +165,58 @@ function ResultCard({ card }: { card: Card }) {
         </View>
       );
   }
+}
+
+/** The briefing's question as buttons: pick what it tells every time, then save (or answer by voice). */
+function BriefingChoice({ told }: { told: BriefingPart[] }) {
+  const [picked, setPicked] = useState<BriefingPart[]>(told.length > 0 ? told : DEFAULT_BRIEFING);
+  const [state, setState] = useState<"choosing" | "saving" | "saved" | "failed">("choosing");
+
+  function toggle(part: BriefingPart) {
+    setState("choosing");
+    setPicked((now) => (now.includes(part) ? now.filter((p) => p !== part) : [...now, part]));
+  }
+
+  async function save() {
+    setState("saving");
+    setState((await saveProfile({ briefing: picked })) ? "saved" : "failed");
+  }
+
+  return (
+    <View style={styles.card}>
+      <Header icon="sunny-outline" title="Өдрийн тоймд юу хэлэх вэ?" />
+      <View style={styles.chips}>
+        {BRIEFING_PARTS.map(({ part, label }) => {
+          const on = picked.includes(part);
+          return (
+            <Pressable
+              key={part}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: on }}
+              onPress={() => toggle(part)}
+              style={[styles.chip, on && styles.chipOn]}
+            >
+              {on && <Ionicons name="checkmark" size={14} color={colors.background} />}
+              <Text style={[styles.chipText, on && { color: colors.background }]}>{label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      <View style={styles.saveRow}>
+        <Text style={[styles.secondary, styles.flex, state === "failed" && { color: colors.warning }]}>
+          {state === "saved" ? "Хадгаллаа. Дараагийн тойм ийм байна." : state === "failed" ? "Хадгалж чадсангүй." : "Дуугаар хариулж ч болно."}
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => void save()}
+          disabled={state === "saving" || state === "saved"}
+          style={({ pressed }) => [styles.save, (pressed || state === "saved") && { opacity: 0.6 }]}
+        >
+          <Text style={styles.saveText}>{state === "saved" ? "Хадгалсан" : "Хадгалах"}</Text>
+        </Pressable>
+      </View>
+    </View>
+  );
 }
 
 function Header({ icon, title, count }: { icon: IconName; title: string; count?: number }) {
@@ -185,4 +264,21 @@ const styles = StyleSheet.create({
   from: { fontSize: 14, fontWeight: "700", color: colors.label },
   body: { fontSize: 15, lineHeight: 21, color: colors.label },
   more: { fontSize: 13, color: colors.tertiaryLabel },
+  newsRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 2 },
+  chips: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.chip,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
+  chipOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  chipText: { fontSize: 14, color: colors.label },
+  saveRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 },
+  save: { height: 38, paddingHorizontal: 16, borderRadius: radius.chip, alignItems: "center", justifyContent: "center", backgroundColor: colors.accent },
+  saveText: { fontSize: 14, fontWeight: "700", color: colors.background },
 });

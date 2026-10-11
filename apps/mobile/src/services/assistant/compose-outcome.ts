@@ -29,6 +29,7 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   create_routine: { verb: "өдөр бүрийн тойм тохируулах", dative: "өдөр бүрийн тойм тохируулахад" },
   remember: { verb: "санах", dative: "санахад" },
   forget: { verb: "мартах", dative: "мартахад" },
+  set_profile: { verb: "хадгалах", dative: "хадгалахад" },
   type_text: { verb: "компьютер дээр бичих", dative: "компьютер дээр бичихэд" },
   play_video: { verb: "тоглуулах", dative: "тоглуулахад" },
   find_files: { verb: "файл хайх", dative: "файл хайхад" },

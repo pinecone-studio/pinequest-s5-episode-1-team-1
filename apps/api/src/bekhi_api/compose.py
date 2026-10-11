@@ -46,6 +46,7 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "create_routine": ("өдөр бүрийн тойм тохируулах", "өдөр бүрийн тойм тохируулахад"),
     "remember": ("санах", "санахад"),
     "forget": ("мартах", "мартахад"),
+    "set_profile": ("хадгалах", "хадгалахад"),
     "type_text": ("компьютер дээр бичих", "компьютер дээр бичихэд"),
     "play_video": ("тоглуулах", "тоглуулахад"),
     "find_files": ("файл хайх", "файл хайхад"),
@@ -129,6 +130,7 @@ FAILED_BY_CODE = {
     "MEMORY_FULL": "Санах зүйл дүүрсэн байна. Заримыг нь мартуулаарай.",
     "MEMORY_NOT_FOUND": "Тийм зүйл санаагүй байна.",
     "MEMORY_UNAVAILABLE": "Санах ой руу одоо хандаж чадсангүй. Түр хүлээгээд дахин хэлээрэй.",
+    "PROFILE_UNAVAILABLE": "Таны тохиргоог одоо хадгалж чадсангүй. Түр хүлээгээд дахин хэлээрэй.",
     "REMINDER_NOT_FOUND": "Тийм сануулга олдсонгүй.",
     "VOLUME_UNAVAILABLE": "Компьютерын дууны төхөөрөмж олдсонгүй.",
 }
@@ -392,13 +394,19 @@ def _today_schedule(r: ActionResult, now_iso: str) -> str:
 
 def compose(actions: list[ActionRequest], results: list[ActionResult], now_iso: str) -> str:
     by_id = {a.id: a for a in actions}
-    briefing = any(a.tool == "daily_briefing" for a in actions)
+    briefing = next((r.data for r in results if r.action_id in by_id and by_id[r.action_id].tool == "daily_briefing"
+                     and r.status == "succeeded" and r.data), None)
+    # The briefing tells today's schedule only if the user wants it (profile.py).
+    schedule = briefing is None or "schedule" in (briefing.get("parts") or ["schedule"])
     parts = [
-        _today_schedule(r, now_iso) if briefing and by_id[r.action_id].tool == "list_reminders"
+        (_today_schedule(r, now_iso) if schedule else "") if briefing is not None and by_id[r.action_id].tool == "list_reminders"
         else sentence_for(by_id[r.action_id], r, now_iso)
         for r in results
         if r.action_id in by_id
     ]
+    # A briefing that asks the user what to tell next time asks it last, so they can answer.
+    if briefing is not None and briefing.get("ask_mn"):
+        parts.append(str(briefing["ask_mn"]))
     # Collapse repeated identical sentences (e.g. several "болиулчихлаа").
     seen: list[str] = []
     for p in parts:

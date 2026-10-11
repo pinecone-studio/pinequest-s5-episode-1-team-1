@@ -739,7 +739,7 @@
       "permissions": [],
       "min_ios": "17.0",
       "app_intent": null,
-      "notes": "The day at a glance, returned inline: a greeting for the time of day, today's weather and the to-dos due today or overdue. Planned together with list_reminders, so the device adds what it has scheduled today.",
+      "notes": "The day at a glance, returned inline: a greeting for the time of day, then what the user chose in their profile: today's weather, the to-dos due today or overdue, unread mail, the news. Planned together with list_reminders, so the device adds what it has scheduled today. Asks what to tell until the user chooses.",
       "parameters": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -835,6 +835,79 @@
           "all": {
             "default": false,
             "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "set_profile",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The user's profile for the account: their name (the briefing greets them by it), their city (the weather's default place) and what the day's briefing tells (weather, todos, schedule, email, news).",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "What to call the user: 'Намайг Нандин гэдэг' -> 'Нандин'. Empty to stop using a name",
+            "type": "string",
+            "maxLength": 40
+          },
+          "city": {
+            "description": "The user's own city or aimag, for the weather: 'Би Дарханд амьдардаг' -> 'Дархан'",
+            "type": "string",
+            "maxLength": 60
+          },
+          "briefing": {
+            "description": "Exactly what the day's briefing should tell, when the user lists it",
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weather",
+                "todos",
+                "schedule",
+                "email",
+                "news"
+              ]
+            }
+          },
+          "briefing_add": {
+            "description": "Add to the briefing: 'өглөө мэдээ бас хэлж байгаарай' -> ['news']",
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weather",
+                "todos",
+                "schedule",
+                "email",
+                "news"
+              ]
+            }
+          },
+          "briefing_remove": {
+            "description": "Leave out of the briefing: 'тоймд имэйл хэрэггүй' -> ['email']",
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weather",
+                "todos",
+                "schedule",
+                "email",
+                "news"
+              ]
+            }
           }
         }
       }

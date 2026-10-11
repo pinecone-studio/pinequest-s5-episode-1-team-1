@@ -89,6 +89,7 @@ export const ActionRequest = z.discriminatedUnion("tool", [
   actionRequest("daily_briefing"),
   actionRequest("create_routine"),
   actionRequest("remember"),
+  actionRequest("set_profile"),
   actionRequest("forget"),
   actionRequest("type_text"),
   actionRequest("play_video"),

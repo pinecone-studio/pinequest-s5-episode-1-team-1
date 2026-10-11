@@ -15,7 +15,15 @@ src/bekhi_api/
   backend_tools.py   get_weather (Open-Meteo), get_current_time, web_search (Tavily)
   providers/         STT / TTS / LLM interfaces; Duudlaga, ElevenLabs and Gemini implementations, fallbacks
   store.py           in-memory conversations (Supabase in Phase 8)
+  todos.py memory.py profile.py   per account (the sync code): to-dos (or Google Tasks), remembered facts,
+                     the profile (name, city, what the daily briefing tells); Supabase tables in supabase/migrations
+  briefing.py        the daily briefing from the profile: weather, to-dos, unread mail, news (Tavily, Mongolian sites)
+  hotkey.py          Ctrl+Space on Windows: BEKHI's window comes up and listens
 ```
+
+Each account's profile lives in Supabase's `profiles` table (`supabase/migrations/20261012000000_profiles.sql`):
+run that SQL once in the Supabase SQL editor. Until then profiles are kept in a file on the machine
+running the API (`apps/api/data/`), which on a cloud host is lost on every deploy.
 
 ## Run
 
