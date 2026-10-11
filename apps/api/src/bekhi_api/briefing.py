@@ -13,6 +13,7 @@ from . import backend_tools, todos
 from .models import ActionResult
 
 MAX_TITLES = 5
+MAX_CARD_TODOS = 8
 
 
 def greeting(now: datetime) -> str:
@@ -55,20 +56,31 @@ def todo_sentence(items: list[dict[str, Any]], today: date) -> str:
     return " ".join(parts)
 
 
+def card_todos(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The open to-dos for the app's card, those with a due time first, soonest first."""
+    open_items = [i for i in items if not i["done"]]
+    open_items.sort(key=lambda i: (i.get("due_at") is None, i.get("due_at") or ""))
+    return [{"title": i["title"], "due_at": i.get("due_at"), "done": False} for i in open_items[:MAX_CARD_TODOS]]
+
+
 async def daily_briefing(action_id: str, args: dict[str, Any], client_now: datetime, http: httpx.AsyncClient,
                          store: todos.TodoStore, account: str | None) -> ActionResult:
     parts = [greeting(client_now)]
+    # weather and todos: what the app shows as cards under the spoken summary.
+    data: dict[str, Any] = {}
     weather = await backend_tools.get_weather(action_id, {"location_name": args.get("location_name")}, client_now, http)
     if weather.status == "succeeded" and weather.data:
         parts.append(str(weather.data["summary_mn"]))
+        data["weather"] = {k: v for k, v in weather.data.items() if k != "summary_mn"}
     else:
         parts.append("Цаг агаарын мэдээг одоо авч чадсангүй.")
     try:
         items = await store.items(account)
         parts.append(todo_sentence(items, client_now.date()))
+        data["todos"] = card_todos(items)
     except httpx.HTTPError:
         parts.append("Хийх зүйлийн жагсаалтыг одоо харж чадсангүй.")
     return ActionResult(
         action_id=action_id, tool="daily_briefing", status="succeeded", executed_via="backend", error_code=None,
-        data={"summary_mn": " ".join(parts)},
+        data={**data, "summary_mn": " ".join(parts)},
     )

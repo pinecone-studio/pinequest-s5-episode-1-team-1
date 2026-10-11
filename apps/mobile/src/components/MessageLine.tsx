@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
 import type { ChatMessage } from "@/store/assistant";
 import { colors } from "@/theme";
+import { ResultCards } from "./ResultCards";
 
 /** One line of the conversation, Siri style: your words small and grey, BEKHI's answer large and white. */
 export function MessageLine({ message, dim }: { message: ChatMessage; dim: boolean }) {
-  const { role, text, tone, understood } = message;
+  const { role, text, tone, understood, cards } = message;
   if (role === "user") {
     return (
       <View style={[styles.userRow, dim && styles.dim]}>
@@ -21,6 +22,7 @@ export function MessageLine({ message, dim }: { message: ChatMessage; dim: boole
       <Text selectable style={styles.bekhi}>
         {text}
       </Text>
+      {cards && <ResultCards cards={cards} />}
     </View>
   );
 }

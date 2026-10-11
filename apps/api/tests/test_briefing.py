@@ -36,6 +36,8 @@ def test_todos_due_today_and_overdue_come_first():
     )
     assert briefing.todo_sentence([item("Сүү авах")], TODAY) == "Жагсаалтад 1 зүйл байна: Сүү авах."
     assert briefing.todo_sentence([], TODAY) == "Хийх зүйлийн жагсаалт хоосон байна."
+    # The app's card: open ones only, those with a time first, soonest first.
+    assert [i["title"] for i in briefing.card_todos(items)] == ["Ном буцаах", "Тайлан илгээх", "Сүү авах"]
 
 
 def test_briefing_with_what_the_phone_has_scheduled_today(client, planner):
@@ -45,6 +47,8 @@ def test_briefing_with_what_the_phone_has_scheduled_today(client, planner):
     planner.then(("daily_briefing", {"user_request": "Өдрийн тойм"}), ("list_reminders", {"user_request": "x"}))
     turn = client.post("/api/v1/assistant/chat", json={"text": "Өнөөдөр юу байна?", "context": context()}).json()
     assert turn["stage"] == "awaiting_device"  # nothing is said before the phone lists its schedule
+    assert turn["actions"][0]["result"]["data"]["todos"] == [
+        {"title": "Тайлан илгээх", "due_at": "2026-10-06T23:59:00+08:00", "done": False}]  # for the app's card
 
     def report(status, data=None):
         # The app reports every action: the briefing's inline result, then what the phone listed.
