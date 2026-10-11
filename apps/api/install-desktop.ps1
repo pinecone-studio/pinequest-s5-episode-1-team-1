@@ -44,7 +44,10 @@ $w.Write([UInt16]0); $w.Write([UInt16]1); $w.Write([UInt16]1)
 $w.Write([Byte]0); $w.Write([Byte]0); $w.Write([Byte]0); $w.Write([Byte]0)
 $w.Write([UInt16]1); $w.Write([UInt16]32); $w.Write([UInt32]$data.Length); $w.Write([UInt32]22)
 $w.Write($data)
-$iconPath = Join-Path $api 'web\bekhi.ico'
+# Kept outside web/, which every build replaces.
+$iconDir = Join-Path $env:LOCALAPPDATA 'BEKHI'
+New-Item -ItemType Directory -Force $iconDir | Out-Null
+$iconPath = Join-Path $iconDir 'bekhi.ico'
 [System.IO.File]::WriteAllBytes($iconPath, $ico.ToArray())
 
 Write-Host '4/4 Desktop shortcut'
