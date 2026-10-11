@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Platform, Pressable, StyleSheet, Text, TextInput, type TextStyle, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { googleStatus, linkGoogle, unlinkGoogle, type GoogleStatus } from "@/services/google";
 import { linkWithCode, syncCode } from "@/services/sync/alarm-sync";
 import { colors, radius } from "@/theme";
 
@@ -10,20 +11,55 @@ type Status = { kind: "idle" } | { kind: "busy" } | { kind: "done" } | { kind: "
 
 /**
  * Header button: this device's sync code, and a field for another device's code. Devices
- * with the same code share alarms and timers (alarm-sync.ts).
+ * with the same code share alarms and timers (alarm-sync.ts), the to-do list, and Gmail.
  */
 export function SyncLink({ live }: { live: boolean }) {
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
   const [mine, setMine] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const [google, setGoogle] = useState<GoogleStatus | null>(null);
+  const [googleNote, setGoogleNote] = useState<string | null>(null);
+  const [waitingForGoogle, setWaitingForGoogle] = useState(false);
+
+  // After the Google sign-in window opens: check every few seconds until the link shows up.
+  useEffect(() => {
+    if (!open || !waitingForGoogle) return;
+    const timer = setInterval(() => {
+      void googleStatus().then((next) => {
+        if (!next?.linked) return;
+        setGoogle(next);
+        setWaitingForGoogle(false);
+      });
+    }, 2500);
+    const giveUp = setTimeout(() => setWaitingForGoogle(false), 180_000);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(giveUp);
+    };
+  }, [open, waitingForGoogle]);
+
   if (!live) return null;
 
   function show() {
     setMine(syncCode());
     setCode("");
     setStatus({ kind: "idle" });
+    setGoogleNote(null);
     setOpen(true);
+    void googleStatus().then(setGoogle);
+  }
+
+  async function connectGoogle() {
+    setGoogleNote(null);
+    const problem = await linkGoogle();
+    if (problem) setGoogleNote(problem);
+    else setWaitingForGoogle(true);
+  }
+
+  async function disconnectGoogle() {
+    await unlinkGoogle();
+    setGoogle(await googleStatus());
   }
 
   async function link() {
@@ -94,6 +130,26 @@ export function SyncLink({ live }: { live: boolean }) {
             </View>
             {status.kind === "done" && <Text style={[styles.status, { color: colors.success }]}>Холбогдлоо.</Text>}
             {status.kind === "error" && <Text style={[styles.status, { color: colors.warning }]}>{status.message}</Text>}
+
+            {google?.available && (
+              <>
+                <Text style={styles.section}>Gmail</Text>
+                <View style={styles.row}>
+                  <Text style={[styles.body, { flex: 1 }]} numberOfLines={1}>
+                    {google.linked ? `Холбогдсон: ${google.email ?? ""}` : waitingForGoogle ? "Google цонхонд нэвтэрнэ үү…" : "Холбогдоогүй"}
+                  </Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => void (google.linked ? disconnectGoogle() : connectGoogle())}
+                    style={({ pressed }) => [google.linked ? styles.quiet : styles.button, pressed && { opacity: 0.7 }]}
+                  >
+                    <Text style={google.linked ? styles.quietText : styles.buttonText}>{google.linked ? "Салгах" : "Gmail холбох"}</Text>
+                  </Pressable>
+                </View>
+                {googleNote && <Text style={[styles.status, { color: colors.warning }]}>{googleNote}</Text>}
+                <Text style={styles.hint}>БЭХИ имэйлийг зөвхөн уншина, хадгалахгүй. "Шинэ имэйл байна уу?" гэж асуугаарай.</Text>
+              </>
+            )}
             <Text style={styles.hint}>
               Утас БЭХИ нээлттэй үед бусад төхөөрөмжийн сэрүүлгийг татаж авна. Компьютер дээр БЭХИ API ажиллаж байх хэрэгтэй.
             </Text>
@@ -148,6 +204,8 @@ const styles = StyleSheet.create({
   },
   button: { height: 44, paddingHorizontal: 18, borderRadius: radius.chip, alignItems: "center", justifyContent: "center", backgroundColor: colors.accent },
   buttonText: { fontSize: 15, fontWeight: "700", color: colors.background },
+  quiet: { height: 44, paddingHorizontal: 16, borderRadius: radius.chip, alignItems: "center", justifyContent: "center", borderWidth: StyleSheet.hairlineWidth, borderColor: colors.border },
+  quietText: { fontSize: 15, fontWeight: "600", color: colors.secondaryLabel },
   status: { fontSize: 13, marginTop: 8 },
   hint: { fontSize: 12, lineHeight: 17, color: colors.tertiaryLabel, marginTop: 16 },
 });

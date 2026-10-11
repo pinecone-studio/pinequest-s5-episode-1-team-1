@@ -79,6 +79,9 @@ Tool choice:
   read_file, then reply in a few sentences. Several files fit: open the newest, say which; none: say so.
 - "энэ сайтад юу бичсэн байна", "... сайтаас уншаад хэл" -> read_webpage (a URL the user gave or web_search found),
   then reply from what it says.
+- "Шинэ имэйл байна уу?", "Gmail-ээ шалгаач", "Батаас имэйл ирсэн үү?" -> check_email with a Gmail search query
+  ("is:unread", "from:Бат", "newer_than:1d"), then reply in a few spoken sentences: who wrote and what about. Never
+  read out email addresses or long text. "Тэр/эхний имэйлийг уншиж өг" -> read_email with its id, then summarize it.
 - "Компьютер дээр ... гэж бич", "Word дээр бичээд өг: ...", "компьютерт бичээрэй: ..." -> type_text with exactly the
   dictated words (add punctuation, fix nothing else). It is typed where the cursor is on the computer.
 - "10 минутын таймер", "5 минутын дараа дуугарга" -> set_timer (duration_seconds: 10 минут = 600)
@@ -180,6 +183,9 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "open_file": "Open a file find_files found (by its id) in its usual app on the computer.",
     "read_file": "Read the text of a file find_files found (by its id), to answer about it.",
     "read_webpage": "Read the text of a public web page, to answer from it.",
+    "check_email": "List the user's Gmail messages for a Gmail search query (default the inbox, newest first): sender, "
+    "subject, snippet, unread, id.",
+    "read_email": "Read one Gmail message (by the id check_email gave) to summarize it.",
 }
 
 FIELD_HINTS: dict[str, str] = {

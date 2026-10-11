@@ -20,7 +20,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, briefing, media, memory, pc_files, todos, webpage
+from . import backend_tools, briefing, google_link, media, memory, pc_files, todos, webpage
 from .compose import FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
@@ -72,6 +72,7 @@ class Deps:
     account: str | None = None
     # This API runs on the user's computer (desktop.py): the agent may find, open and read its files.
     on_pc: bool = False
+    google: google_link.Google | None = None
 
 
 async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx: AssistantContext, deps: Deps) -> ActionResult:
@@ -84,6 +85,8 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
             return ActionResult(action_id=action_id, tool=tool, status="unsupported", executed_via=None,
                                 error_code="NOT_ON_COMPUTER", data=None)
         return await asyncio.to_thread(pc_files.PC_TOOLS[tool], action_id, args)
+    if tool in ("check_email", "read_email"):
+        return await google_link.run_tool(action_id, tool, args, deps.google, deps.account)
     if tool == "read_webpage":
         return await webpage.read_webpage(action_id, args, deps.http)
     if tool == "daily_briefing":

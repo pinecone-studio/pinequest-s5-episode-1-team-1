@@ -17,7 +17,9 @@ Endpoints (Phase 3/4):
 
 from __future__ import annotations
 
+import html
 import io
+import ipaddress
 import logging
 import math
 import time
@@ -33,12 +35,12 @@ import httpx
 from fastapi import FastAPI, File, Form, Header, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, Field, ValidationError
 
-from . import commands, desktop, directions, memory, sync, todos
+from . import commands, desktop, directions, google_link, memory, sync, todos
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -85,6 +87,8 @@ MN_DIRECTIONS = {
 RATE_LIMITED_PATHS = ("/api/v1/assistant", "/api/v1/maps", "/api/v1/sync")
 MN_SYNC_CODE_INVALID = "Холбох код буруу байна."
 MN_SYNC_FAILED = "Бусад төхөөрөмжтэй холбогдож чадсангүй."
+MN_GOOGLE_UNAVAILABLE = "Gmail холболт энэ сервер дээр тохируулагдаагүй байна."
+MN_GOOGLE_FROM_PC = "Gmail-ийг компьютер дээрх БЭХИ-ээс холбоно уу. Холбогдсоны дараа утсан дээр ч ажиллана."
 LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost"}
 
 WAV_TYPES = {"audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"}
@@ -124,6 +128,30 @@ class CommandOutcome(BaseModel):
     executed_via: str | None = Field(default=None, max_length=32)
     error_code: str | None = Field(default=None, max_length=64)
     data: dict | None = None
+
+
+def _google_redirect(request: Request) -> str | None:
+    """Google's callback on this API, as registered in Google Cloud: http://127.0.0.1:8000 on the user's
+    PC, https on a public host. None from a LAN address (a phone on the PC's Wi-Fi), which Google refuses."""
+    host = request.url.hostname or ""
+    if host in LOCAL_HOSTS:
+        return f"http://127.0.0.1:{request.url.port or 80}/api/v1/auth/google/callback"
+    try:
+        if not ipaddress.ip_address(host).is_global:
+            return None
+    except ValueError:
+        pass
+    return f"https://{host}/api/v1/auth/google/callback"
+
+
+def _google_page(title: str, body: str, close: bool = False) -> HTMLResponse:
+    script = "<script>setTimeout(function(){window.close()},2500)</script>" if close else ""
+    return HTMLResponse(
+        "<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<title>BEKHI</title><body style='font-family:system-ui,sans-serif;background:#05060b;color:#f2f4f8;"
+        "display:grid;place-items:center;min-height:100vh;margin:0;padding:24px;text-align:center'><div>"
+        f"<h2>{html.escape(title)}</h2><p style='color:#a9b1bf'>{html.escape(body)}</p></div>{script}"
+    )
 
 
 def _is_local(request: Request) -> bool:
@@ -194,6 +222,8 @@ async def lifespan(app: FastAPI):
         app.state.commands = commands.CommandStore()
         # On the user's PC (agent.py): commands for a device not listening here go on to the cloud.
         app.state.remote_commands = commands.RemoteCommands(settings.sync_api_url, http) if settings.sync_api_url else None
+        app.state.google = google_link.make(settings, http, on_pc=settings.desktop_actions and desktop.available(),
+                                            data_dir=google_link.local_data_dir())
         app.state.desktop = None
         if settings.desktop_actions and desktop.available():
             app.state.desktop = desktop.DesktopScheduler(
@@ -265,6 +295,7 @@ def create_app() -> FastAPI:
             todo_store=request.app.state.todos,
             memory_store=request.app.state.memory,
             on_pc=request.app.state.desktop is not None,
+            google=request.app.state.google,
             # The asking device's sync code picks its account's to-do list (sync.py).
             account=sync.account_key(request.headers.get(SYNC_CODE_HEADER)),
         )
@@ -540,6 +571,47 @@ def create_app() -> FastAPI:
         log.info("command %s %s rid=%s", body.status, body.error_code or "-", request.state.request_id)
         if not request.app.state.commands.finish(account, command_id, body.model_dump()):
             raise ApiException(404, "invalid_request", MN_INVALID)
+        return {"ok": True}
+
+    def google_or_404(request: Request) -> google_link.Google:
+        if request.app.state.google is None:
+            raise ApiException(404, "invalid_request", MN_GOOGLE_UNAVAILABLE)
+        return request.app.state.google
+
+    @app.post("/api/v1/auth/google/start")
+    async def google_start(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """The Google sign-in page for linking Gmail to this account; the app opens `url`."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        google = google_or_404(request)
+        redirect = _google_redirect(request)
+        if redirect is None:
+            raise ApiException(400, "invalid_request", MN_GOOGLE_FROM_PC)
+        return {"url": google.start(account, redirect)}
+
+    @app.get("/api/v1/auth/google/callback")
+    async def google_callback(request: Request, state: str = "", code: str = "", error: str = ""):
+        google = google_or_404(request)
+        if error or not code:
+            return _google_page("Google холболт цуцлагдлаа.", "Дахин оролдохдоо БЭХИ дээр 'Gmail холбох' дарна уу.")
+        try:
+            email = await google.finish(state, code)
+        except PermissionError:
+            return _google_page("Холбож чадсангүй.", "Gmail унших зөвшөөрлийг тэмдэглээд дахин оролдоно уу.")
+        except httpx.HTTPError:
+            log.warning("google sign-in failed rid=%s", request.state.request_id)
+            return _google_page("Холбож чадсангүй.", "Google-тэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.")
+        return _google_page(f"Gmail холбогдлоо: {email}", "Энэ цонхыг хаагаад БЭХИ-д 'Шинэ имэйл байна уу?' гэж асуугаарай.", close=True)
+
+    @app.get("/api/v1/auth/google")
+    async def google_status(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        google = request.app.state.google
+        return {"available": google is not None, **(await google.status(account) if google else {"linked": False, "email": None})}
+
+    @app.post("/api/v1/auth/google/unlink")
+    async def google_unlink(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        await google_or_404(request).unlink(account)
         return {"ok": True}
 
     @app.post("/api/v1/assistant/actions/results", response_model=ActionResultsResponse)

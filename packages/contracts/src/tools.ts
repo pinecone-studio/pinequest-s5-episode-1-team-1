@@ -32,6 +32,8 @@ export const TOOL_NAMES = [
   "open_file",
   "read_file",
   "read_webpage",
+  "check_email",
+  "read_email",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -311,6 +313,19 @@ const FoundFile = z.string().regex(/^f\d{1,4}$/).describe("The id find_files gav
 export const OpenFileArgs = z.object({ file: FoundFile });
 export const ReadFileArgs = z.object({ file: FoundFile });
 
+export const CheckEmailArgs = z.object({
+  query: z
+    .string()
+    .max(200)
+    .optional()
+    .describe("Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox"),
+  limit: z.number().int().min(1).max(10).default(5),
+});
+
+export const ReadEmailArgs = z.object({
+  id: z.string().regex(/^[0-9a-zA-Z]{8,40}$/).describe("The id check_email gave the message"),
+});
+
 export const ReadWebpageArgs = z.object({
   url: z.url({ protocol: /^https$/ }).max(2000).describe("The page to read, e.g. a web_search result"),
 });
@@ -367,6 +382,8 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   open_file: OpenFileArgs,
   read_file: ReadFileArgs,
   read_webpage: ReadWebpageArgs,
+  check_email: CheckEmailArgs,
+  read_email: ReadEmailArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -701,6 +718,26 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes: "The readable text of a public https page (no private addresses), for the model to answer from.",
+  },
+  check_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The account's Gmail (linked once with Google sign-in, read-only): sender names, subjects, snippets and ids " +
+      "for a Gmail search, returned to the model. Nothing is stored.",
+  },
+  read_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "The text of one Gmail message check_email found, for the model to summarize.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

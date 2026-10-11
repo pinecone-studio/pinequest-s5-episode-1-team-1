@@ -1045,6 +1045,61 @@
           "url"
         ]
       }
+    },
+    {
+      "name": "check_email",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The account's Gmail (linked once with Google sign-in, read-only): sender names, subjects, snippets and ids for a Gmail search, returned to the model. Nothing is stored.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox",
+            "type": "string",
+            "maxLength": 200
+          },
+          "limit": {
+            "default": 5,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        }
+      }
+    },
+    {
+      "name": "read_email",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The text of one Gmail message check_email found, for the model to summarize.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-zA-Z]{8,40}$",
+            "description": "The id check_email gave the message"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
     }
   ]
 }

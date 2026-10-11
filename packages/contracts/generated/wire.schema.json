@@ -684,7 +684,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -883,7 +885,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1095,7 +1099,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1301,7 +1307,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1485,7 +1493,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1677,7 +1687,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1864,7 +1876,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2064,7 +2078,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2247,7 +2263,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2427,7 +2445,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2622,7 +2642,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2820,7 +2842,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3025,7 +3049,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3199,7 +3225,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3387,7 +3415,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3596,7 +3626,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3784,7 +3816,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3972,7 +4006,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4155,7 +4191,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4338,7 +4376,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4517,7 +4557,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4707,7 +4749,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4891,7 +4935,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -5074,7 +5120,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -5258,7 +5306,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -5459,7 +5509,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -5672,7 +5724,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -5855,7 +5909,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -6038,7 +6094,9 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -6222,7 +6280,382 @@
                               "find_files",
                               "open_file",
                               "read_file",
-                              "read_webpage"
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "check_email"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "description": "Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox",
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      "limit": {
+                        "default": 5,
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10
+                      }
+                    }
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "read_email"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[0-9a-zA-Z]{8,40}$",
+                        "description": "The id check_email gave the message"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -6541,7 +6974,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -6740,7 +7175,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -6952,7 +7389,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7158,7 +7597,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7342,7 +7783,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7534,7 +7977,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7721,7 +8166,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7921,7 +8368,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8104,7 +8553,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8284,7 +8735,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8479,7 +8932,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8677,7 +9132,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8882,7 +9339,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9056,7 +9515,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9244,7 +9705,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9453,7 +9916,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9641,7 +10106,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9829,7 +10296,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10012,7 +10481,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10195,7 +10666,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10374,7 +10847,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10564,7 +11039,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10748,7 +11225,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10931,7 +11410,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -11115,7 +11596,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -11316,7 +11799,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -11529,7 +12014,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -11712,7 +12199,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -11895,7 +12384,9 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -12079,7 +12570,382 @@
                         "find_files",
                         "open_file",
                         "read_file",
-                        "read_webpage"
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "check_email"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "description": "Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox",
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "limit": {
+                  "default": 5,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                }
+              }
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "read_email"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-zA-Z]{8,40}$",
+                  "description": "The id check_email gave the message"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -12215,7 +13081,9 @@
             "find_files",
             "open_file",
             "read_file",
-            "read_webpage"
+            "read_webpage",
+            "check_email",
+            "read_email"
           ]
         },
         "status": {
@@ -12352,7 +13220,9 @@
                   "find_files",
                   "open_file",
                   "read_file",
-                  "read_webpage"
+                  "read_webpage",
+                  "check_email",
+                  "read_email"
                 ]
               },
               "status": {

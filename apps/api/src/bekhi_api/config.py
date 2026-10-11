@@ -79,6 +79,9 @@ class Settings:
     supabase_service_role_key: str | None
     sync_api_url: str | None
     web_dir: Path | None
+    google_client_id: str | None
+    google_client_secret: str | None
+    google_token_key: str | None
     log_level: str
     cors_origins: list[str] = field(default_factory=list)
 
@@ -136,6 +139,10 @@ def get_settings() -> Settings:
         sync_api_url=os.getenv("SYNC_API_URL") or None,
         # BEKHI on the computer (desktop_app.py): the web app built for this API, served at /.
         web_dir=Path(os.environ["WEB_DIR"]) if os.getenv("WEB_DIR") else None,
+        # Gmail (google_link.py): the Google Cloud OAuth client, and the key that encrypts stored tokens.
+        google_client_id=os.getenv("GOOGLE_CLIENT_ID") or None,
+        google_client_secret=os.getenv("GOOGLE_CLIENT_SECRET") or None,
+        google_token_key=os.getenv("GOOGLE_TOKEN_KEY") or None,
         log_level=os.getenv("LOG_LEVEL") or "INFO",
         cors_origins=_csv(os.getenv("CORS_ORIGINS")) or ["http://localhost:8081"],
     )

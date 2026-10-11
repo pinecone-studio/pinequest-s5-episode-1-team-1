@@ -226,6 +226,15 @@
         "arguments": [{ "action": "media_next" }],
         "requires_confirmation": false
       }
+    },
+    {
+      "id": "23_check_email",
+      "utterance": "Шинэ имэйл ирсэн үү?",
+      "variants": ["Gmail-ээ шалгаад өгөөч"],
+      "expected": {
+        "tools": ["check_email"],
+        "requires_confirmation": false
+      }
     }
   ],
   "conversations": [

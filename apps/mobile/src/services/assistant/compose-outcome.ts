@@ -35,6 +35,8 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   open_file: { verb: "файл нээх", dative: "файл нээхэд" },
   read_file: { verb: "файл унших", dative: "файл уншихад" },
   read_webpage: { verb: "хуудас унших", dative: "хуудас уншихад" },
+  check_email: { verb: "имэйл шалгах", dative: "имэйл шалгахад" },
+  read_email: { verb: "имэйл унших", dative: "имэйл уншихад" },
 };
 
 /**
