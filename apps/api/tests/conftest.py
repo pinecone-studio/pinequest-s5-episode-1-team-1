@@ -5,6 +5,7 @@ from typing import Any
 
 # Tests never touch this PC: no desktop scheduler, real toasts or notes file.
 os.environ["DESKTOP_ACTIONS"] = "false"
+os.environ["DESKTOP_HOTKEY"] = "false"
 # Nor the real database or cloud API: set empty, apps/api/.env's values are not loaded.
 for _name in ("SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SYNC_API_URL", "WEB_DIR", "GOOGLE_CLIENT_ID",
               "GOOGLE_CLIENT_SECRET", "GOOGLE_TOKEN_KEY"):

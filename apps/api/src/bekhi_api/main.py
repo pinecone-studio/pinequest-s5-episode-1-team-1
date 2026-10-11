@@ -41,7 +41,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, Field, ValidationError
 
-from . import commands, desktop, directions, google_link, memory, sync, todos
+from . import commands, desktop, directions, google_link, hotkey, memory, sync, system, todos
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -88,6 +88,7 @@ MN_DIRECTIONS = {
 }
 # Billed per request, so these share the assistant's per-minute limit. Sync too: a sync code
 # must not be guessable by trying many.
+WAKE_WAIT_SECONDS = 25
 RATE_LIMITED_PATHS = ("/api/v1/assistant", "/api/v1/maps", "/api/v1/sync")
 MN_SYNC_CODE_INVALID = "Холбох код буруу байна."
 MN_SYNC_FAILED = "Бусад төхөөрөмжтэй холбогдож чадсангүй."
@@ -234,14 +235,27 @@ async def lifespan(app: FastAPI):
         if app.state.google is not None:  # a linked account's to-dos are its Google Tasks
             app.state.todos = todos.GoogleTasksTodoStore(app.state.google, app.state.todos)
         app.state.desktop = None
+        app.state.wakeups = hotkey.Wakeups()
+        app.state.wakeups.bind(asyncio.get_running_loop())
+        key = None
         if settings.desktop_actions and desktop.available():
             app.state.desktop = desktop.DesktopScheduler(
                 sync=app.state.sync, commands=app.state.commands, remote_commands=app.state.remote_commands
             )
             app.state.desktop.start()
+            if settings.desktop_hotkey and system.IS_WINDOWS:
+                def wake() -> None:
+                    hotkey.bring_to_front(system.controls().BEKHI_WINDOW_TITLE)
+                    app.state.wakeups.press()
+
+                key = hotkey.Hotkey(wake)
+                key.start()
+        app.state.hotkey = key
         try:
             yield
         finally:
+            if key:
+                key.stop()
             if app.state.desktop:
                 await app.state.desktop.stop()
 
@@ -279,6 +293,8 @@ def create_app() -> FastAPI:
             window.append(now)
         start = time.perf_counter()
         response = await call_next(request)
+        if request.url.path == "/api/v1/desktop/wake":
+            return response  # the window waits there all day: not worth a log line every 25 s
         # Safe logging: method, path, status, latency. Never bodies, audio or transcripts.
         log.info("%s %s %s %.0fms rid=%s", request.method, request.url.path, response.status_code,
                  (time.perf_counter() - start) * 1000, request.state.request_id)
@@ -465,6 +481,16 @@ def create_app() -> FastAPI:
         except Exception:
             log.exception("desktop action failed rid=%s", request.state.request_id)
             return {"status": "failed", "executed_via": "backend", "error_code": "DESKTOP_FAILED"}
+
+    @app.get("/api/v1/desktop/wake")
+    async def desktop_wake(request: Request, after: int = -1):
+        """BEKHI's window on this computer waits here; the answer comes when the key (hotkey.py) is pressed
+        (a count above `after`), or after a while with nothing new. `key`: the key, when there is one."""
+        if request.app.state.desktop is None or not _is_local(request):
+            raise ApiException(404, "invalid_request", MN_DESKTOP_UNAVAILABLE)
+        count = await request.app.state.wakeups.after(after, WAKE_WAIT_SECONDS)
+        key = request.app.state.hotkey
+        return {"count": count, "key": key.label if key else None}
 
     @app.post("/api/v1/desktop/sync")
     async def desktop_sync(body: DesktopSyncRequest, request: Request):

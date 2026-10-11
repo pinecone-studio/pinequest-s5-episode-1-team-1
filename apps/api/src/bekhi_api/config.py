@@ -72,6 +72,7 @@ class Settings:
     max_audio_bytes: int
     rate_limit_per_minute: int
     desktop_actions: bool
+    desktop_hotkey: bool
     web_search_provider: str | None
     tavily_api_key: str | None
     google_maps_api_key: str | None
@@ -126,6 +127,8 @@ def get_settings() -> Settings:
         rate_limit_per_minute=int(os.getenv("RATE_LIMIT_PER_MINUTE") or 30),
         # Windows: the web app on this PC can set reminders/alarms/notes here (desktop.py). Local requests only.
         desktop_actions=(os.getenv("DESKTOP_ACTIONS") or "true").lower() in ("1", "true", "yes"),
+        # With desktop actions on Windows: Ctrl+Space anywhere calls BEKHI's window (hotkey.py).
+        desktop_hotkey=(os.getenv("DESKTOP_HOTKEY") or "true").lower() in ("1", "true", "yes"),
         # tavily: 1,000 free searches a month (TAVILY_API_KEY). gemini: Google Search grounding, which
         # needs billing on the Gemini key (the free tier answers 429).
         web_search_provider=os.getenv("WEB_SEARCH_PROVIDER", "tavily") or None,

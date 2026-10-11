@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Modal, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { wakeKey } from "@/services/assistant/wake";
 import type { Voice } from "@/services/speech/voices";
 import { colors, radius } from "@/theme";
 import { LinkSection } from "./LinkSection";
@@ -135,7 +136,10 @@ export function Settings({ live, voices, voiceId, onChooseVoice, voiceReplies, o
               </Pressable>
 
               {Platform.OS === "web" && (
-                <Text style={[s.hint, styles.footer]}>Компьютер дээр Space товч дарж ярьж болно. Ярьж дуусахад БЭХИ өөрөө ойлгоно.</Text>
+                <Text style={[s.hint, styles.footer]}>
+                  Space дарж ярина{wakeKey() ? `. Өөр програм дээр байхдаа ${wakeKey()} дарвал БЭХИ гарч ирээд сонсоно` : ""}.
+                  Ярьж дуусахад БЭХИ өөрөө ойлгоно.
+                </Text>
               )}
             </ScrollView>
           </Pressable>

@@ -12,6 +12,7 @@ import { type OrbState, SiriOrb } from "@/components/SiriOrb";
 import { TypeBar } from "@/components/TypeBar";
 import { notify, tap } from "@/lib/haptics";
 import { SAMPLE_PHRASES } from "@/services/assistant/PreviewAssistantClient";
+import { onWakeKey } from "@/services/assistant/wake";
 import { useVoiceInput } from "@/services/audio/useVoiceInput";
 import { onRoutineOpened } from "@/services/ios-actions/notifications";
 import { type Phase, useAssistant } from "@/store/assistant";
@@ -160,6 +161,12 @@ export default function Chat() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  // Ctrl+Space from any program on the computer (apps/api hotkey.py): the window is in front now, so listen
+  // (or, while listening, send what was said), unless BEKHI is busy with the last request.
+  const idleRef = useRef(true);
+  idleRef.current = !busy && !confirming;
+  useEffect(() => onWakeKey(() => idleRef.current && void orbRef.current()), []);
 
   async function cancelListening() {
     tap();

@@ -24,7 +24,7 @@ BEKHI_WINDOW_TITLE = "BEKHI"
 
 
 def osascript(script: str, timeout: float = 10) -> str:
-    result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=timeout)
+    result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=timeout, check=False)
     if result.returncode != 0:
         raise OSError(result.stderr.strip() or "osascript failed")
     return result.stdout.strip()
@@ -63,7 +63,7 @@ def lock_screen() -> bool:
         osascript('tell application "System Events" to keystroke "q" using {control down, command down}')
         return True
     except (OSError, subprocess.SubprocessError):
-        return subprocess.run(["pmset", "displaysleepnow"], timeout=10).returncode == 0
+        return subprocess.run(["pmset", "displaysleepnow"], timeout=10, check=False).returncode == 0
 
 
 def known_folder(name: str) -> str:
@@ -82,7 +82,7 @@ def type_text(text: str) -> bool:
     """Types `text` where the cursor is: through the clipboard and ⌘V, which keeps any script (Cyrillic)
     intact. The clipboard is put back afterwards."""
     try:
-        previous = subprocess.run(["pbpaste"], capture_output=True, timeout=5).stdout
+        previous = subprocess.run(["pbpaste"], capture_output=True, timeout=5, check=False).stdout
         subprocess.run(["pbcopy"], input=text.encode("utf-8"), check=True, timeout=5)
         try:
             if _front_window_title() == BEKHI_WINDOW_TITLE:
@@ -93,7 +93,7 @@ def type_text(text: str) -> bool:
             time.sleep(0.3)
         finally:
             if previous:  # text the user had copied (a copied picture cannot be put back this way)
-                subprocess.run(["pbcopy"], input=previous, timeout=5)
+                subprocess.run(["pbcopy"], input=previous, timeout=5, check=False)
         return True
     except (OSError, subprocess.SubprocessError):
         return False
@@ -119,4 +119,4 @@ def notify(title: str, body: str, alarm: bool = False) -> None:
     osascript(f"display notification {_quote(body)} with title {_quote(title)} sound name \"Glass\"")
     if alarm:
         for _ in range(3):
-            subprocess.run(["afplay", "/System/Library/Sounds/Glass.aiff"], timeout=10)
+            subprocess.run(["afplay", "/System/Library/Sounds/Glass.aiff"], timeout=10, check=False)

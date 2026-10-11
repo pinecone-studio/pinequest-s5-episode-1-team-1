@@ -44,6 +44,8 @@ def _open_window() -> subprocess.Popen | None:
     return subprocess.Popen([
         str(exe), f"--app={URL}", f"--user-data-dir={system.data_dir() / 'window'}",
         "--window-size=460,900", "--no-first-run", "--no-default-browser-check",
+        # Called up with Ctrl+Space (hotkey.py), it listens and speaks before anyone clicks in it.
+        "--autoplay-policy=no-user-gesture-required",
     ])
 
 
