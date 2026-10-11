@@ -228,6 +228,8 @@ async def lifespan(app: FastAPI):
         app.state.remote_commands = commands.RemoteCommands(settings.sync_api_url, http) if settings.sync_api_url else None
         app.state.google = google_link.make(settings, http, on_pc=settings.desktop_actions and desktop.available(),
                                             data_dir=google_link.local_data_dir())
+        if app.state.google is not None:  # a linked account's to-dos are its Google Tasks
+            app.state.todos = todos.GoogleTasksTodoStore(app.state.google, app.state.todos)
         app.state.desktop = None
         if settings.desktop_actions and desktop.available():
             app.state.desktop = desktop.DesktopScheduler(
@@ -611,7 +613,9 @@ def create_app() -> FastAPI:
         except httpx.HTTPError:
             log.warning("google sign-in failed rid=%s", request.state.request_id)
             return _google_page("Холбож чадсангүй.", "Google-тэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.")
-        return _google_page(f"Gmail холбогдлоо: {email}", "Энэ цонхыг хаагаад БЭХИ-д 'Шинэ имэйл байна уу?' гэж асуугаарай.", close=True)
+        return _google_page(f"Google холбогдлоо: {email}",
+                            "Gmail, Google Tasks бэлэн. Энэ цонхыг хаагаад БЭХИ-д 'Шинэ имэйл байна уу?' гэж асуугаарай.",
+                            close=True)
 
     @app.get("/api/v1/auth/google")
     async def google_status(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):

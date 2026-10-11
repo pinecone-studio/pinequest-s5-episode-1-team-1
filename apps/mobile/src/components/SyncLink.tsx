@@ -133,7 +133,7 @@ export function SyncLink({ live }: { live: boolean }) {
 
             {google?.available && (
               <>
-                <Text style={styles.section}>Gmail</Text>
+                <Text style={styles.section}>Google: Gmail, Tasks</Text>
                 <View style={styles.row}>
                   <Text style={[styles.body, { flex: 1 }]} numberOfLines={1}>
                     {google.linked ? `Холбогдсон: ${google.email ?? ""}` : waitingForGoogle ? "Google цонхонд нэвтэрнэ үү…" : "Холбогдоогүй"}
@@ -143,11 +143,14 @@ export function SyncLink({ live }: { live: boolean }) {
                     onPress={() => void (google.linked ? disconnectGoogle() : connectGoogle())}
                     style={({ pressed }) => [google.linked ? styles.quiet : styles.button, pressed && { opacity: 0.7 }]}
                   >
-                    <Text style={google.linked ? styles.quietText : styles.buttonText}>{google.linked ? "Салгах" : "Gmail холбох"}</Text>
+                    <Text style={google.linked ? styles.quietText : styles.buttonText}>{google.linked ? "Салгах" : "Google холбох"}</Text>
                   </Pressable>
                 </View>
                 {googleNote && <Text style={[styles.status, { color: colors.warning }]}>{googleNote}</Text>}
-                <Text style={styles.hint}>БЭХИ имэйлийг зөвхөн уншина, хадгалахгүй. "Шинэ имэйл байна уу?" гэж асуугаарай.</Text>
+                <Text style={styles.hint}>
+                  БЭХИ имэйлийг зөвхөн уншина, хадгалахгүй. Хийх зүйлсийн жагсаалт тань Google Tasks болно: утасны Google Tasks
+                  апп, Gmail-д ижил жагсаалт харагдана.
+                </Text>
               </>
             )}
             <Text style={styles.hint}>

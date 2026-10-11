@@ -1,5 +1,6 @@
-"""Gmail for BEKHI: the user links their Google account once (OAuth, read-only Gmail), then the
-agent can check and read their mail (check_email, read_email) and tell it in Mongolian.
+"""Google for BEKHI: the user links their Google account once (OAuth). Then the agent can check and
+read their mail (check_email, read_email; read-only) and the to-do list is their Google Tasks list,
+the same one their phones' Google Tasks app and Gmail show (todos.GoogleTasksTodoStore).
 
 The link belongs to the sync account, so every device linked with the same code can use it. The
 refresh token is encrypted (GOOGLE_TOKEN_KEY). On the user's own computer (desktop.py) it is
@@ -34,7 +35,9 @@ TOKEN_URL = "https://oauth2.googleapis.com/token"
 REVOKE_URL = "https://oauth2.googleapis.com/revoke"
 USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me"
-SCOPES = "openid email profile https://www.googleapis.com/auth/gmail.readonly"
+TASKS = "https://tasks.googleapis.com/tasks/v1/lists/@default/tasks"
+TASKS_SCOPE = "https://www.googleapis.com/auth/tasks"
+SCOPES = f"openid email profile https://www.googleapis.com/auth/gmail.readonly {TASKS_SCOPE}"
 STATE_TTL = 600  # seconds the user has to finish signing in
 MAX_TEXT = 6_000
 
@@ -142,13 +145,28 @@ class Google:
         await self._store.put(pending.account, {
             "email": info.get("email", ""), "name": info.get("name", ""),
             "refresh_token": self._fernet.encrypt(refresh.encode()).decode(),
+            "scopes": tokens.get("scope", ""),
         })
         self._access[pending.account] = (tokens["access_token"], time.time() + int(tokens.get("expires_in", 3600)) - 60)
         return str(info.get("email", ""))
 
     async def status(self, account: str) -> dict[str, Any]:
         link = await self._store.get(account)
-        return {"linked": bool(link), "email": link.get("email") if link else None}
+        return {"linked": bool(link), "email": link.get("email") if link else None,
+                "tasks": bool(link and TASKS_SCOPE in (link.get("scopes") or ""))}
+
+    async def has_tasks(self, account: str) -> bool:
+        link = await self._store.get(account)
+        return bool(link and TASKS_SCOPE in (link.get("scopes") or ""))
+
+    async def tasks_call(self, account: str, method: str, path: str = "", **kw: Any) -> Any:
+        """Google Tasks, the user's default list ("My Tasks")."""
+        token = await self._token(account)
+        if token is None:
+            raise LookupError("not linked")
+        r = await self._http.request(method, TASKS + path, headers={"Authorization": f"Bearer {token}"}, **kw)
+        r.raise_for_status()
+        return r.json() if r.content else None
 
     async def unlink(self, account: str) -> None:
         link = await self._store.get(account)
