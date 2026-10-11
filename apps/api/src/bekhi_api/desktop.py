@@ -135,11 +135,12 @@ class DesktopScheduler:
         except (OSError, ValueError):
             return None
 
-    def link(self, account: str) -> str:
+    def link(self, account: str, code: str | None = None) -> str:
         """Joins the PC to a sync account; returns its device id. The account is the hash of the code,
-        or for a PC agent the code itself (sync.RemoteSyncStore), kept only on this PC."""
+        or for a PC agent the code itself (sync.RemoteSyncStore). The code is also kept, only on this
+        PC, to wait for the phone's commands on the cloud API."""
         device_id = (self._link or {}).get("device_id") or f"pc-{uuid.uuid4().hex[:16]}"
-        self._link = {"account": account, "device_id": device_id}
+        self._link = {"account": account, "device_id": device_id, **({"code": code} if code else {})}
         self._link_file.write_text(json.dumps(self._link), encoding="utf-8")
         return device_id
 
@@ -237,17 +238,25 @@ class DesktopScheduler:
         if account is not None:
             self._commands.finish(account, command_id, outcome)
 
+    def _code(self) -> str | None:
+        """The sync code itself, which the cloud API asks for (it hashes it)."""
+        link = self._link or {}
+        if link.get("code"):
+            return link["code"]
+        account = link.get("account")
+        return account if account and not re.fullmatch(r"[0-9a-f]{64}", account) else None
+
     async def _take_remote(self) -> list[dict[str, Any]]:
-        link = self._link
-        if link is None or re.fullmatch(r"[0-9a-f]{64}", link["account"]):
+        code = self._code()
+        if code is None or self._link is None:
             await asyncio.sleep(COMMAND_RETRY_SECONDS)  # not linked with a code the cloud understands
             return []
-        return await self._remote_commands.take(link["account"], link["device_id"], "computer", COMMAND_WAIT_SECONDS)
+        return await self._remote_commands.take(code, self._link["device_id"], "computer", COMMAND_WAIT_SECONDS)
 
     async def _finish_remote(self, command_id: str, outcome: dict[str, Any]) -> None:
-        link = self._link
-        if link is not None:
-            await self._remote_commands.finish(link["account"], link["device_id"], command_id, outcome)
+        code = self._code()
+        if code is not None and self._link is not None:
+            await self._remote_commands.finish(code, self._link["device_id"], command_id, outcome)
 
     async def _serve_commands(self, take: Any, finish: Any, where: str) -> None:
         """Runs, one by one, what the user's phone asks of this PC ("компьютерийн дууг багасга")."""

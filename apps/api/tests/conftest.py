@@ -5,6 +5,9 @@ from typing import Any
 
 # Tests never touch this PC: no desktop scheduler, real toasts or notes file.
 os.environ["DESKTOP_ACTIONS"] = "false"
+# Nor the real database or cloud API: set empty, apps/api/.env's values are not loaded.
+for _name in ("SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "SYNC_API_URL", "WEB_DIR"):
+    os.environ[_name] = ""
 
 import httpx
 import pytest

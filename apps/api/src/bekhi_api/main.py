@@ -429,7 +429,7 @@ def create_app() -> FastAPI:
             raise ApiException(401, "unauthorized", MN_SYNC_CODE_INVALID)
         # A PC agent pulls from the cloud, which takes the code itself (it stays on this PC).
         remote = isinstance(request.app.state.sync, sync.RemoteSyncStore)
-        device_id = scheduler.link(body.code if remote else account)
+        device_id = scheduler.link(body.code if remote else account, code=body.code)
         try:
             await scheduler.sync_now()
         except Exception:
