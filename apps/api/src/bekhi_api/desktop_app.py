@@ -19,15 +19,10 @@ import webbrowser
 from pathlib import Path
 
 from . import config
+from .desktop import EDGE_PATHS
 
 PORT = 8000  # the web app finds the API on the port it was served from
 URL = f"http://127.0.0.1:{PORT}/"
-EDGE_PATHS = [
-    Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Microsoft/Edge/Application/msedge.exe",
-    Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Microsoft/Edge/Application/msedge.exe",
-    Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Google/Chrome/Application/chrome.exe",
-    Path(os.environ.get("LOCALAPPDATA", "")) / "Google/Chrome/Application/chrome.exe",
-]
 
 
 def _data_dir() -> Path:

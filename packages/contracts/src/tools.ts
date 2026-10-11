@@ -27,6 +27,7 @@ export const TOOL_NAMES = [
   "remember",
   "forget",
   "type_text",
+  "play_video",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -189,6 +190,20 @@ export const OpenAppArgs = z.object({
   device: TargetDevice.optional(),
 });
 
+export const PlayVideoArgs = z.object({
+  query: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .describe("What to play, as the user said it: 'Хүрдийн Бусгүй', 'Монгол дуу', 'lofi'"),
+  device: TargetDevice.optional(),
+  /** Set by the backend: the first YouTube video for the query (else the search page). */
+  url: z.url({ protocol: /^https$/ }).max(500).optional(),
+  /** Set by the backend: that video's title, for the reply. */
+  title: z.string().max(200).optional(),
+});
+
 export const TypeTextArgs = z.object({
   text: z
     .string()
@@ -280,7 +295,19 @@ export const ComputerFolder = z.enum(["downloads", "documents", "desktop", "pict
 export type ComputerFolder = z.infer<typeof ComputerFolder>;
 
 export const ComputerControlArgs = z.object({
-  action: z.enum(["volume_up", "volume_down", "set_volume", "mute", "unmute", "lock_screen", "open_folder"]),
+  action: z.enum([
+    "volume_up",
+    "volume_down",
+    "set_volume",
+    "mute",
+    "unmute",
+    "lock_screen",
+    "open_folder",
+    // What is playing (YouTube, Spotify): the keyboard's media keys.
+    "media_play_pause",
+    "media_next",
+    "media_previous",
+  ]),
   /** set_volume: 0-100. */
   level: z.number().int().min(0).max(100).optional(),
   /** open_folder. */
@@ -313,6 +340,7 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   remember: RememberArgs,
   forget: ForgetArgs,
   type_text: TypeTextArgs,
+  play_video: PlayVideoArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -598,6 +626,17 @@ export const TOOL_MANIFEST = {
     notes:
       "Types the text where the cursor is on the user's computer (Word, a chat, a browser field): dictation in " +
       "Mongolian. Said to the phone, it is sent to the linked computer (sync commands).",
+  },
+  play_video: {
+    executor: "device",
+    strategy: ["url_scheme", "react_native"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Plays the first YouTube video for the query (the backend finds it and sets url and title): the YouTube " +
+      "app on a phone, BEKHI's own browser window on the computer, where it starts with sound.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

@@ -22,6 +22,13 @@ export class DesktopActionService extends LinkingIOSActionService {
   computerControl = (args: ToolArguments<"computer_control">) => this.onPc("computer_control", args);
   typeText = (args: ToolArguments<"type_text">) => this.onPc("type_text", args);
 
+  /** The PC's player window, where it starts with sound; without the PC, a browser tab. */
+  playVideo = async (args: ToolArguments<"play_video">): Promise<ActionOutcome> => {
+    const onPc = await this.onPc("play_video", args);
+    if (onPc.status === "succeeded" || !args.url) return onPc;
+    return this.openUrl({ url: args.url });
+  };
+
   openMaps = (args: ToolArguments<"open_maps">) => this.openUrl({ url: googleMapsUrl(args) });
 
   /** The PC's own app; a search, or a known app this PC lacks (or no PC), goes to its website. */

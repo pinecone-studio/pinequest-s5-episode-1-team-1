@@ -141,6 +141,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
       return service.createRoutine(action.arguments);
     case "type_text":
       return service.typeText(action.arguments);
+    case "play_video":
+      return service.playVideo(action.arguments);
     case "get_weather":
     case "web_search":
     case "get_current_time":

@@ -70,6 +70,10 @@ Tool choice:
 - The user's phone and computer work together. When the user names the other device, set `device`:
   "Компьютер дээрээ VS Code нээ", "laptop дээрээ YouTube нээ" -> open_app with device "computer";
   "утсан дээрээ Spotify нээ" -> device "phone". Without a named device it happens where they are talking.
+- "Хүрдийн Бусгүйг тоглуул", "Монгол дуу тавиад өг", "YouTube-ээс ... олоод тоглуул" (play something) -> play_video
+  (query: what to play). Searching without playing ("YouTube-ээс ... хай") stays open_app with query.
+- "Дууг зогсоо", "үргэлжлүүл", "дараагийн дуу", "өмнөх дуу" (what is playing) -> computer_control media_play_pause,
+  media_next or media_previous.
 - "Компьютер дээр ... гэж бич", "Word дээр бичээд өг: ...", "компьютерт бичээрэй: ..." -> type_text with exactly the
   dictated words (add punctuation, fix nothing else). It is typed where the cursor is on the computer.
 - "10 минутын таймер", "5 минутын дараа дуугарга" -> set_timer (duration_seconds: 10 минут = 600)
@@ -161,7 +165,10 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "daily_briefing": "The user's day at a glance: a greeting, today's weather and the to-dos due today or overdue. "
     "Always call list_reminders with it, so the device adds what it has scheduled today.",
     "computer_control": "Control the user's computer: volume_up, volume_down, set_volume (level 0-100), mute, unmute, "
-    "lock_screen, open_folder (folder). Said to the phone, the linked computer does it.",
+    "lock_screen, open_folder (folder), media_play_pause, media_next, media_previous (what is playing). Said to the "
+    "phone, the linked computer does it.",
+    "play_video": "Play a song or video from YouTube: the first result for the query starts playing (the YouTube app on "
+    "a phone, a BEKHI window on the computer).",
     "type_text": "Type dictated text where the cursor is on the user's computer (Word, a chat, a form).",
 }
 
@@ -180,6 +187,7 @@ FIELD_HINTS: dict[str, str] = {
 BACKEND_FIELDS: dict[str, tuple[str, ...]] = {
     "create_alarm": ("sync_id",),
     "set_timer": ("sync_id", "fire_at"),
+    "play_video": ("url", "title"),
 }
 
 CONTROL_FUNCTIONS: list[FunctionSpec] = [

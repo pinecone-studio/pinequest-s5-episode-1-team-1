@@ -35,6 +35,7 @@ ToolName = Literal[
     "remember",
     "forget",
     "type_text",
+    "play_video",
 ]
 ExecutionTarget = Literal["backend", "react_native", "native_swift", "app_intent", "shortcut", "url_scheme"]
 ActionStatus = Literal[
