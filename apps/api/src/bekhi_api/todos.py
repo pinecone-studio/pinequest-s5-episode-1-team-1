@@ -19,6 +19,7 @@ from uuid import uuid4
 import httpx
 
 from .compose import format_when_mn
+from .sync import supabase_headers
 from .config import API_ROOT
 from .models import ActionResult
 
@@ -95,7 +96,7 @@ class SupabaseTodoStore:
 
     def __init__(self, url: str, service_key: str, http: httpx.AsyncClient, legacy: FileTodoStore) -> None:
         self._rest = url.rstrip("/") + "/rest/v1/todos"
-        self._headers = {"apikey": service_key, "Authorization": f"Bearer {service_key}"}
+        self._headers = supabase_headers(service_key)
         self._http = http
         self._legacy = legacy
 
