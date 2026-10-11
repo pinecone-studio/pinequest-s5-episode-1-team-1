@@ -49,8 +49,12 @@ async function call(path: string, init: { method?: string; body?: unknown } = {}
   }
 }
 
-/** Phone: "this device is linked". Web: link the PC's API or agent itself, which rings the alarms. */
-async function linkDevice(): Promise<void> {
+/**
+ * Phone: "this device is linked". Web: link the PC's API or agent itself, which rings the alarms.
+ * A computer already linked keeps its code and this browser joins it, unless the user typed this
+ * code to join it (`replace`).
+ */
+async function linkDevice(replace = false): Promise<void> {
   const id = ensureIdentity();
   if (Platform.OS !== "web") {
     await call("/api/v1/sync/devices", { method: "POST", body: { platform } });
@@ -59,14 +63,14 @@ async function linkDevice(): Promise<void> {
   const res = await fetch(`${desktopBaseUrl()}/api/v1/desktop/sync`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ code: id.code }),
+    body: JSON.stringify({ code: id.code, replace }),
   });
   if (!res.ok) return; // not the browser on the PC that runs the API: nothing rings here
-  const body = (await res.json().catch(() => null)) as { device_id?: unknown } | null;
+  const body = (await res.json().catch(() => null)) as { device_id?: unknown; code?: unknown } | null;
+  const code = (typeof body?.code === "string" && normalizeSyncCode(body.code)) || id.code;
   // Publish as the PC, so the other devices' replies say "компьютер" once, not twice.
-  if (typeof body?.device_id === "string" && body.device_id !== id.deviceId) {
-    setIdentity({ ...id, deviceId: body.device_id });
-  }
+  const deviceId = typeof body?.device_id === "string" ? body.device_id : id.deviceId;
+  if (code !== id.code || deviceId !== id.deviceId) setIdentity({ code, deviceId });
 }
 
 /** Phone: schedule what the other devices set, drop what any device cancelled. */
@@ -114,7 +118,7 @@ export async function linkWithCode(input: string): Promise<boolean> {
   if (!code) return false;
   setIdentity({ ...ensureIdentity(), code });
   scheduled.clear();
-  await linkDevice();
+  await linkDevice(true);
   if (Platform.OS !== "web") await refreshAlarms();
   return true;
 }

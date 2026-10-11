@@ -61,7 +61,7 @@ interface AssistantState {
   speechError: string | null;
   /** A reply is being read aloud. */
   speaking: boolean;
-  /** Hands-free: the user talked, so listen again after each spoken reply. */
+  /** Hands-free: the user talked, so a spoken reply that asks something is answered by voice. */
   conversing: boolean;
   /** Increments when the screen should start the microphone (next turn of the conversation). */
   listenRequest: number;
@@ -93,6 +93,8 @@ interface AssistantState {
 const OK = new Set<ActionResult["status"]>(["succeeded", "handed_off"]);
 /** Phases after which the conversation may continue by voice (not while confirming or busy). */
 const LISTEN_AFTER = new Set<Phase>(["idle", "success", "unavailable"]);
+/** A reply that asks the user something ("Хэдэн цагт вэ?"): only then does the microphone open again by itself. */
+const asks = (text: string) => /\?\s*$/.test(text);
 let seq = 0;
 let speechSeq = 0;
 /** The connection being made (or made); a routine waits for it, the API may still be waking up. */
@@ -196,7 +198,7 @@ export const useAssistant = create<AssistantState>((set, get) => {
     const allOk = results.every((r) => OK.has(r.status));
     const phase: Phase = results.every((r) => r.status === "cancelled") ? "idle" : allOk ? "success" : "unavailable";
     set({ phase });
-    reply(final.response, allOk || phase === "idle" ? "normal" : "warning", true);
+    reply(final.response, allOk || phase === "idle" ? "normal" : "warning", asks(final.response));
   }
 
   async function handleTurn(turn: AssistantTurn) {
@@ -206,7 +208,7 @@ export const useAssistant = create<AssistantState>((set, get) => {
         const failed = turn.actions.some((a) => a.result && !OK.has(a.result.status));
         const limited = turn.limitations.length > 0 || failed;
         set({ phase: limited ? "unavailable" : turn.actions.length > 0 ? "success" : "idle" });
-        reply(turn.response, limited ? "warning" : "normal", true);
+        reply(turn.response, limited ? "warning" : "normal", asks(turn.response));
         break;
       }
       case "awaiting_confirmation": {

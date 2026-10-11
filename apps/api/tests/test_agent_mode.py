@@ -75,6 +75,23 @@ def test_the_agent_links_the_pc_with_the_code_itself(client, tmp_path, monkeypat
     assert json.loads((tmp_path / "sync.json").read_text(encoding="utf-8"))["account"] == CODE
 
 
+def test_another_browser_on_the_pc_joins_the_pcs_code_instead_of_taking_it_over(client, tmp_path, monkeypatch):
+    client.app.state.desktop = desktop.DesktopScheduler(tmp_path / "r.json")
+    monkeypatch.setattr(main_mod, "_is_local", lambda request: True)
+    monkeypatch.setattr(client.app.state.desktop, "sync_now", lambda: _noop())
+    first = client.post("/api/v1/desktop/sync", json={"code": CODE}).json()
+    assert "code" not in first  # not linked yet: the PC takes the browser's code
+
+    other = "ZZZZ-ZZZZ-ZZZZ"
+    joined = client.post("/api/v1/desktop/sync", json={"code": other}).json()
+    assert joined == {"device_id": first["device_id"], "code": CODE}
+    assert client.app.state.desktop.linked_code() == CODE
+    # The same code again, or one the user typed to join it, links as before.
+    assert "code" not in client.post("/api/v1/desktop/sync", json={"code": CODE.lower()}).json()
+    assert "code" not in client.post("/api/v1/desktop/sync", json={"code": other, "replace": True}).json()
+    assert client.app.state.desktop.linked_code() == other
+
+
 async def _noop() -> None:
     return None
 

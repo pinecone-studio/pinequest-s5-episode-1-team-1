@@ -119,6 +119,9 @@ class DesktopActionRequest(BaseModel):
 
 class DesktopSyncRequest(BaseModel):
     code: str = Field(max_length=32)
+    # The user typed this code to join it. Otherwise a browser opening BEKHI on a computer that is
+    # already linked joins the computer's code, rather than taking the computer over.
+    replace: bool = False
 
 
 class SendCommandRequest(BaseModel):
@@ -472,6 +475,9 @@ def create_app() -> FastAPI:
         account = sync.account_key(body.code)
         if account is None:
             raise ApiException(401, "unauthorized", MN_SYNC_CODE_INVALID)
+        current = scheduler.linked_code()
+        if current and not body.replace and sync.account_key(current) != account:
+            return {"device_id": scheduler.device_id, "code": current}
         # A PC agent pulls from the cloud, which takes the code itself (it stays on this PC).
         remote = isinstance(request.app.state.sync, sync.RemoteSyncStore)
         device_id = scheduler.link(body.code if remote else account, code=body.code)

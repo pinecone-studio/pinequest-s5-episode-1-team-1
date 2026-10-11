@@ -240,6 +240,14 @@ class DesktopScheduler:
         if account is not None:
             self._commands.finish(account, command_id, outcome)
 
+    @property
+    def device_id(self) -> str | None:
+        return (self._link or {}).get("device_id")
+
+    def linked_code(self) -> str | None:
+        """The sync code this computer is linked with, when it knows it."""
+        return self._code()
+
     def _code(self) -> str | None:
         """The sync code itself, which the cloud API asks for (it hashes it)."""
         link = self._link or {}
