@@ -215,7 +215,26 @@ npx expo start --go --tunnel
 
 Built in the cloud with EAS. See [apps/mobile/README.md](apps/mobile/README.md#install-on-android-as-an-app-apk).
 
-#### D. The cloud web app on your PC, with the PC agent
+#### D. BEKHI as an app on your Windows PC (one click)
+
+```powershell
+cd apps/api
+.\install-desktop.cmd      # once, and again after pulling new code
+```
+
+It installs the Python packages, builds BEKHI's window into `apps/api/web` and puts a **BEKHI** icon on the
+desktop. Click it: BEKHI starts in its own window (Edge in app mode, no browser bar), using the keys in
+`apps/api/.env`. Press the orb or the **space bar** and talk. Closing the window stops BEKHI. On this PC it
+opens apps and folders, sets the volume, locks the screen, keeps reminders and alarms as Windows toasts,
+writes notes, and types dictated text where the cursor is.
+
+**Phone and computer together.** Link them once with the same sync code (the link button in the app).
+Then, said to the phone, "Компьютерийн дууг багасга", "Компьютер дээрээ VS Code нээ" or "Компьютер дээр
+'маргааш уулзъя' гэж бич" happen on the computer; said to the computer, "Ээж рүү залга" rings from the
+phone (BEKHI open on it). The phone uses this PC's API when they are on the same Wi-Fi (Expo Go finds it
+by itself); through the cloud API once it runs this code.
+
+#### E. The cloud web app on your PC, with the PC agent
 
 https://bekhi.pages.dev talks to the cloud API (https://bekhi-api.onrender.com), so it needs nothing
 running on your PC to chat. To let it do things **on this PC** (reminders and alarms as Windows toasts,
@@ -274,6 +293,7 @@ Some things to say:
 | "Маргааш 8 цагт сэрээгээрэй" / "10 минутын таймер" | An alarm or timer on every linked device |
 | "Тайлан бичихийг жагсаалтад нэм" / "Хийх зүйлс юу байна?" | Your to-do list, shared by the devices linked with your sync code |
 | "Ээж рүү залга" | Finds the contact (any script) and asks before calling |
+| "Компьютерийн дууг багасга" / "Компьютер дээр ... гэж бич" (to the phone) | The linked computer does it: volume, apps, typing |
 
 ---
 

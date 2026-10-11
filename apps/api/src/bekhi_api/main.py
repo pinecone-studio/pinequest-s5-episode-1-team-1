@@ -27,15 +27,18 @@ from array import array
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Literal
 
 import httpx
 from fastapi import FastAPI, File, Form, Header, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, Field, ValidationError
 
-from . import desktop, directions, memory, sync, todos
+from . import commands, desktop, directions, memory, sync, todos
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -110,6 +113,19 @@ class DesktopSyncRequest(BaseModel):
     code: str = Field(max_length=32)
 
 
+class SendCommandRequest(BaseModel):
+    target: Literal["computer", "phone"]
+    tool: str = Field(max_length=64)
+    arguments: dict
+
+
+class CommandOutcome(BaseModel):
+    status: str = Field(max_length=32)
+    executed_via: str | None = Field(default=None, max_length=32)
+    error_code: str | None = Field(default=None, max_length=64)
+    data: dict | None = None
+
+
 def _is_local(request: Request) -> bool:
     """Desktop actions run on this PC, so only this PC may ask for them (not the phone or the LAN)."""
     return bool(request.client) and request.client.host in LOCAL_HOSTS
@@ -154,6 +170,18 @@ def _error(status: int, code: str, message: str, request: Request) -> JSONRespon
     return JSONResponse(status_code=status, content=body.model_dump())
 
 
+class _AppFiles(StaticFiles):
+    """The web app: any path that is not a file is one of its screens, so it gets index.html."""
+
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as e:
+            if e.status_code != 404 or path.startswith("api"):
+                raise
+            return await super().get_response("index.html", scope)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with httpx.AsyncClient(timeout=10) as http:
@@ -163,9 +191,14 @@ async def lifespan(app: FastAPI):
         app.state.sync = sync.make_store(settings.supabase_url, settings.supabase_service_role_key, http, settings.sync_api_url)
         app.state.todos = todos.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
         app.state.memory = memory.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
+        app.state.commands = commands.CommandStore()
+        # On the user's PC (agent.py): commands for a device not listening here go on to the cloud.
+        app.state.remote_commands = commands.RemoteCommands(settings.sync_api_url, http) if settings.sync_api_url else None
         app.state.desktop = None
         if settings.desktop_actions and desktop.available():
-            app.state.desktop = desktop.DesktopScheduler(sync=app.state.sync)
+            app.state.desktop = desktop.DesktopScheduler(
+                sync=app.state.sync, commands=app.state.commands, remote_commands=app.state.remote_commands
+            )
             app.state.desktop.start()
         try:
             yield
@@ -194,7 +227,9 @@ def create_app() -> FastAPI:
     @app.middleware("http")
     async def request_context(request: Request, call_next):
         request.state.request_id = uuid.uuid4().hex[:12]
-        if request.url.path.startswith(RATE_LIMITED_PATHS):
+        # Waiting for commands is long polling: only sending them counts.
+        polling = request.method == "GET" and request.url.path.startswith("/api/v1/sync/commands")
+        if request.url.path.startswith(RATE_LIMITED_PATHS) and not polling:
             key = request.client.host if request.client else "unknown"
             now = time.monotonic()
             window = hits[key]
@@ -447,6 +482,65 @@ def create_app() -> FastAPI:
         await sync_call(request, lambda store, now: store.cancel(account, ids, now))
         return {"ok": True}
 
+    @app.post("/api/v1/sync/commands")
+    async def send_command(body: SendCommandRequest, request: Request,
+                           x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """Asks the user's other device (computer or phone) to do something; `id` null: none is listening."""
+        account, device = sync_identity(x_bekhi_sync, x_bekhi_device)
+        if body.tool not in commands.RELAYED_TOOLS[body.target]:
+            raise ApiException(422, "invalid_request", MN_INVALID)
+        args = apply_defaults(body.tool, body.arguments)
+        if validate_tool_args(body.tool, args):
+            raise ApiException(422, "invalid_request", MN_INVALID)
+        cmd = request.app.state.commands.send(account, device, body.target, body.tool, args)
+        if cmd is not None:
+            return {"id": cmd.id}
+        remote = request.app.state.remote_commands
+        if remote is None:
+            return {"id": None}
+        try:
+            remote_id = await remote.send(x_bekhi_sync or "", device, body.target, body.tool, args)
+        except httpx.HTTPError as e:
+            log.warning("command relay failed: %s rid=%s", type(e).__name__, request.state.request_id)
+            return {"id": None}
+        if remote_id:
+            forwarded[remote_id] = account
+        return {"id": remote_id}
+
+    # Commands this API passed on to the cloud: their outcome is asked there.
+    forwarded: dict[str, str] = {}
+
+    @app.get("/api/v1/sync/commands/{command_id}")
+    async def command_state(command_id: str, request: Request, wait: float = 0,
+                            x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, device = sync_identity(x_bekhi_sync, x_bekhi_device)
+        if forwarded.get(command_id) == account and request.app.state.remote_commands is not None:
+            try:
+                return await request.app.state.remote_commands.state(x_bekhi_sync or "", device, command_id, wait)
+            except httpx.HTTPError as e:
+                raise ApiException(502, "internal", MN_SYNC_FAILED) from e
+        cmd = await request.app.state.commands.state(account, command_id, wait)
+        if cmd is None:
+            raise ApiException(404, "invalid_request", MN_INVALID)
+        return {"state": cmd.state, "outcome": cmd.outcome}
+
+    @app.get("/api/v1/sync/commands")
+    async def take_commands(request: Request, target: Literal["computer", "phone"], wait: float = 0,
+                            x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """A device waits here for what the user's other devices ask of it."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        taken = await request.app.state.commands.take(account, target, wait)
+        return {"commands": [c.wire() for c in taken]}
+
+    @app.post("/api/v1/sync/commands/{command_id}/result")
+    async def command_result(command_id: str, body: CommandOutcome, request: Request,
+                             x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        log.info("command %s %s rid=%s", body.status, body.error_code or "-", request.state.request_id)
+        if not request.app.state.commands.finish(account, command_id, body.model_dump()):
+            raise ApiException(404, "invalid_request", MN_INVALID)
+        return {"ok": True}
+
     @app.post("/api/v1/assistant/actions/results", response_model=ActionResultsResponse)
     async def action_results(body: ActionResultsRequest, request: Request):
         # Outcome codes only (never names, numbers or text): what happened on the device.
@@ -477,6 +571,8 @@ def create_app() -> FastAPI:
             status, message = MN_DIRECTIONS["MAPS_FAILED"]
             raise ApiException(status, "maps_failed", message) from e
 
+    if settings.web_dir and (settings.web_dir / "index.html").is_file():
+        app.mount("/", _AppFiles(directory=settings.web_dir, html=True), name="web")
     return app
 
 

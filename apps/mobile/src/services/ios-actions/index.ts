@@ -1,7 +1,9 @@
 import { isRunningInExpoGo } from "expo";
 import { Platform } from "react-native";
-import type { ActionRequest, ActionResult } from "@bekhi/contracts";
+import { RELAYED_TOOLS, type ActionRequest, type ActionResult, type DeviceKind, type ToolArguments } from "@bekhi/contracts";
 import { cancelAlarms, publishAlarm, refreshAlarms } from "@/services/sync/alarm-sync";
+import { sendToDevice } from "@/services/sync/commands";
+import { appWebsite, findCatalogApp } from "./app-catalog";
 import { NATIVE_UNAVAILABLE } from "./codes";
 import { DesktopActionService } from "./DesktopActionService";
 import { ExpoAndroidActionService } from "./ExpoAndroidActionService";
@@ -34,8 +36,41 @@ export async function executeDeviceAction(
     // Alarms set on the user's other devices are listed and cancelled here too.
     await refreshAlarms().catch((e: unknown) => console.warn("alarm sync failed", e));
   }
-  const outcome = await withSync(action, await dispatch(service, action, chosen));
+  const target = otherDevice(action);
+  const outcome = target ? await relay(target, action) : await withSync(action, await dispatch(service, action, chosen));
   return { action_id: action.id, tool: action.tool, ...outcome };
+}
+
+const HERE: DeviceKind = Platform.OS === "web" ? "computer" : "phone";
+
+/**
+ * The user's other device, when it is the one to do this: a computer's controls or typing said to
+ * the phone, a call or message said to the computer, or anything where they named the other device.
+ */
+function otherDevice(action: ActionRequest): DeviceKind | null {
+  const named = (action.arguments as { device?: DeviceKind }).device;
+  if (named && named !== HERE && RELAYED_TOOLS[named].includes(action.tool)) return named;
+  if (HERE === "phone" && (action.tool === "computer_control" || action.tool === "type_text")) return "computer";
+  if (HERE === "computer" && (action.tool === "call_contact" || action.tool === "send_message")) return "phone";
+  return null;
+}
+
+function relay(target: DeviceKind, action: ActionRequest) {
+  if (action.tool === "open_app" && target === "computer") return openAppOnComputer(action.arguments);
+  return sendToDevice(target, action.tool, action.arguments);
+}
+
+/** The computer's own app; a search, or a known app it lacks, opens the website there (as in its browser). */
+async function openAppOnComputer(args: ToolArguments<"open_app">) {
+  const app = findCatalogApp(args.app_name);
+  const site = app && appWebsite(app, args.query);
+  if (!app || !site) return sendToDevice("computer", "open_app", args);
+  if (!site.searched) {
+    const outcome = await sendToDevice("computer", "open_app", args);
+    if (outcome.status === "succeeded" || outcome.error_code !== "APP_NOT_FOUND") return outcome;
+  }
+  const opened = await sendToDevice("computer", "open_url", { url: site.url, title: app.name });
+  return opened.status === "handed_off" ? { ...opened, data: { ...opened.data, app: app.name, searched: site.searched } } : opened;
 }
 
 /**
@@ -104,6 +139,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
       return service.computerControl(action.arguments);
     case "create_routine":
       return service.createRoutine(action.arguments);
+    case "type_text":
+      return service.typeText(action.arguments);
     case "get_weather":
     case "web_search":
     case "get_current_time":

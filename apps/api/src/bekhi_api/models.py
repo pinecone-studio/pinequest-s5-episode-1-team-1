@@ -34,6 +34,7 @@ ToolName = Literal[
     "create_routine",
     "remember",
     "forget",
+    "type_text",
 ]
 ExecutionTarget = Literal["backend", "react_native", "native_swift", "app_intent", "shortcut", "url_scheme"]
 ActionStatus = Literal[
