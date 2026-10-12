@@ -68,6 +68,19 @@ describe("AssistantTurn invariants", () => {
   });
 });
 
+describe("open_app arguments", () => {
+  const args = TOOL_ARGUMENT_SCHEMAS.open_app;
+
+  it("opens an app, or searches inside it", () => {
+    expect(args.parse({ app_name: "YouTube" })).toEqual({ app_name: "YouTube" });
+    expect(args.parse({ app_name: "YouTube", query: " Монгол дуу " })).toEqual({ app_name: "YouTube", query: "Монгол дуу" });
+  });
+
+  it("rejects an empty search", () => {
+    expect(args.safeParse({ app_name: "Spotify", query: "  " }).success).toBe(false);
+  });
+});
+
 describe("tool manifest", () => {
   it("covers every tool", () => {
     expect(Object.keys(TOOL_MANIFEST).sort()).toEqual([...TOOL_NAMES].sort());

@@ -42,19 +42,24 @@ channel that sounds on the alarm stream.
 
 ## Install on Android as an app (APK)
 
-Built in the cloud with EAS (`eas.json`, profile `preview`: an installable APK, arm64 only). The repo has
-no commits yet, so EAS runs without Git and uploads the monorepo minus `.easignore`:
+Built in the cloud with EAS (`eas.json`, profile `preview`: an installable APK, arm64 only, linked to the
+`@nandinerdene.j/bekhi` EAS project). EAS uploads the monorepo minus `.easignore` (no API, no `.env`):
 
 ```bash
 cd apps/mobile
-EAS_NO_VCS=1 EAS_PROJECT_ROOT=<repo root, absolute> npx eas-cli build -p android --profile preview
+npx eas-cli build -p android --profile preview
 ```
 
-Copy the APK to the phone (USB file transfer into Download is enough) and open it there to install.
-The installed app has no dev server to learn the PC's address from, so `connect.ts` tries the address
-that answered last time and otherwise looks for the API on every address of the phone's Wi-Fi network
-(`/api/v1/health`); it looks again when the app comes back to the foreground. The API is plain HTTP on
-the LAN, hence `usesCleartextTraffic` (expo-build-properties). Exact-alarm permissions keep timers on time.
+Open the link EAS prints on the phone (or copy the APK over USB) and install it. The APK talks to the
+cloud API (`EXPO_PUBLIC_API_URL` in `eas.json`); a free Render server sleeps when idle, so the first
+connection can take up to a minute ("Холбогдож байна…"). Without that variable, `connect.ts` tries the
+address that answered last time and otherwise looks for the API on every address of the phone's Wi-Fi
+network (`/api/v1/health`), hence `usesCleartextTraffic` (expo-build-properties). Exact-alarm permissions
+keep timers on time.
+
+The APK also has BEKHI's own native module, `modules/bekhi-launcher` (Android only): it lists the apps on
+the home screen and opens one, so "Хаан банкны аппаа нээ" opens any installed app by its name. Expo Go
+does not have it and opens only the apps in `app-catalog.ts`.
 
 ### What works in Expo Go and what doesn't
 
@@ -65,7 +70,8 @@ the LAN, hence `usesCleartextTraffic` (expo-build-properties). Exact-alarm permi
 | Call / message a contact | ✅ expo-contacts + `tel:` / message sheet | ✅ expo-contacts + dialer / SMS app | ✅ | ❌ |
 | Reminder / alarm / event / timer | ⚠️ local notification at that time | ⚠️ local notification at that time | ✅ EventKit / AlarmKit | ⚠️ Windows toast while the API runs |
 | Note | ❌ | ❌ | ✅ | ✅ appended to Documents\BEKHI тэмдэглэл.txt |
-| Open another app, volume, lock screen | ❌ iOS does not allow it | ❌ needs a native build | | ✅ |
+| Open an app (`open_app`), search in it | ⚠️ the known apps in `app-catalog.ts`, through their links | ⚠️ the known apps, links and system screens | ✅ Android: any installed app by name | ✅ Start menu app, else its website |
+| Volume, lock screen | ❌ iOS does not allow it | ❌ needs a native module | | ✅ |
 
 Expo Go never fakes success, and the reply says when something is only a notification. `expo-calendar`
 is not in Expo Go (SDK 57), so real EventKit work needs a development build

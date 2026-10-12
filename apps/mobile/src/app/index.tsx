@@ -59,6 +59,7 @@ export default function Chat() {
     phase,
     messages,
     client,
+    connecting,
     voiceReplies,
     speechError,
     speaking,
@@ -73,6 +74,8 @@ export default function Chat() {
     stopConversation,
     stopReply,
     answerConfirmation,
+    contactChoice,
+    chooseContact,
     toggleVoiceReplies,
     fail,
   } = useAssistant();
@@ -159,7 +162,7 @@ export default function Chat() {
               <Text style={styles.wordmark}>BEKHI</Text>
               <View style={styles.connection}>
                 <View style={[styles.dot, { backgroundColor: live ? colors.success : colors.warning }]} />
-                <Text style={styles.connectionText}>{live ? "Холбогдсон" : "Туршилтын горим"}</Text>
+                <Text style={styles.connectionText}>{live ? "Холбогдсон" : connecting ? "Холбогдож байна…" : "Туршилтын горим"}</Text>
               </View>
             </View>
             <View style={styles.headerActions}>
@@ -217,7 +220,13 @@ export default function Chat() {
           </ScrollView>
 
           <View style={styles.bottom}>
-            {confirming && <ConfirmBar onAnswer={answerConfirmation} />}
+            {confirming && (
+              <ConfirmBar
+                onAnswer={answerConfirmation}
+                choices={contactChoice && !contactChoice.sure ? contactChoice.names : undefined}
+                onChoose={chooseContact}
+              />
+            )}
             {typing ? (
               <TypeBar disabled={busy || confirming} onSend={submitText} onVoice={() => void onOrb()} />
             ) : (

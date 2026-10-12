@@ -8,6 +8,8 @@ import { loadServerAddress, saveServerAddress } from "./server-address";
 
 const API_PORT = 8000;
 const PROBE_TIMEOUT_MS = 3000;
+/** A cloud server on a free plan sleeps when idle and takes up to a minute to wake. */
+const WAKE_TIMEOUT_MS = 75_000;
 const SCAN_TIMEOUT_MS = 800;
 const SCAN_BATCH = 32;
 
@@ -25,7 +27,8 @@ export function apiBaseUrl(): string {
  */
 function configuredBaseUrl(): string | null {
   const fromEnv = process.env.EXPO_PUBLIC_API_URL;
-  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  // A bare host ("bekhi-api.onrender.com") is an https address.
+  if (fromEnv) return (fromEnv.includes("://") ? fromEnv : `https://${fromEnv}`).replace(/\/$/, "");
   if (Platform.OS === "web" && typeof window !== "undefined") {
     return `${window.location.protocol}//${window.location.hostname}:${API_PORT}`;
   }
@@ -55,7 +58,7 @@ export function connectAssistant(): Promise<AssistantClient> {
 async function findApi(): Promise<string | null> {
   const known = [configuredBaseUrl(), loadServerAddress()].filter((b): b is string => b !== null);
   for (const base of new Set(known)) {
-    if (await isBekhiApi(base, PROBE_TIMEOUT_MS)) return base;
+    if (await isBekhiApi(base, base.startsWith("https://") ? WAKE_TIMEOUT_MS : PROBE_TIMEOUT_MS)) return base;
   }
   return Platform.OS === "web" ? null : scanWifi();
 }

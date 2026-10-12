@@ -68,7 +68,10 @@
       "typedRoutes": true
     },
     "extra": {
-      "router": {}
+      "router": {},
+      "eas": {
+        "projectId": "8e11dcab-57cf-4498-a4b1-d268fd5d460c"
+      }
     },
     "owner": "nandinerdene.j"
   }

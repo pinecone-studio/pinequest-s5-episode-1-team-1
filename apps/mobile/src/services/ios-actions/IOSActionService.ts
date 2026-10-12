@@ -7,6 +7,9 @@ export type ActionOutcome = Pick<ActionResult, "status" | "executed_via" | "erro
   data?: ActionResult["data"];
 };
 
+/** The contact the user picked on screen for a call or message; null when the phone found nobody. */
+export type ChosenContact = { name: string; number: string } | null;
+
 export interface NotificationRequest {
   title: string;
   body: string;
@@ -20,8 +23,9 @@ export interface NotificationRequest {
  * - Native (Phase 9): Swift module over EventKit / Contacts / AlarmKit / MessageUI
  */
 export interface IOSActionService {
-  callContact(args: ToolArguments<"call_contact">): Promise<ActionOutcome>;
-  sendMessage(args: ToolArguments<"send_message">): Promise<ActionOutcome>;
+  /** `chosen`: who the user picked on screen; without it the name is looked up again. */
+  callContact(args: ToolArguments<"call_contact">, chosen?: ChosenContact): Promise<ActionOutcome>;
+  sendMessage(args: ToolArguments<"send_message">, chosen?: ChosenContact): Promise<ActionOutcome>;
   createReminder(args: ToolArguments<"create_reminder">): Promise<ActionOutcome>;
   createCalendarEvent(args: ToolArguments<"create_calendar_event">): Promise<ActionOutcome>;
   createAlarm(args: ToolArguments<"create_alarm">): Promise<ActionOutcome>;
