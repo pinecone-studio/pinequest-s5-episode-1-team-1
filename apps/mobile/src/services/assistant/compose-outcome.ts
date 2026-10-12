@@ -27,6 +27,20 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   delete_todo: { verb: "устгах", dative: "устгахад" },
   daily_briefing: { verb: "өдрийн тойм гаргах", dative: "өдрийн тойм гаргахад" },
   create_routine: { verb: "өдөр бүрийн тойм тохируулах", dative: "өдөр бүрийн тойм тохируулахад" },
+  remember: { verb: "санах", dative: "санахад" },
+  forget: { verb: "мартах", dative: "мартахад" },
+  set_profile: { verb: "хадгалах", dative: "хадгалахад" },
+  look_at_screen: { verb: "дэлгэц харах", dative: "дэлгэц харахад" },
+  draft_email: { verb: "имэйл бичих", dative: "имэйл бичихэд" },
+  send_email: { verb: "имэйл илгээх", dative: "имэйл илгээхэд" },
+  type_text: { verb: "компьютер дээр бичих", dative: "компьютер дээр бичихэд" },
+  play_video: { verb: "тоглуулах", dative: "тоглуулахад" },
+  find_files: { verb: "файл хайх", dative: "файл хайхад" },
+  open_file: { verb: "файл нээх", dative: "файл нээхэд" },
+  read_file: { verb: "файл унших", dative: "файл уншихад" },
+  read_webpage: { verb: "хуудас унших", dative: "хуудас уншихад" },
+  check_email: { verb: "имэйл шалгах", dative: "имэйл шалгахад" },
+  read_email: { verb: "имэйл унших", dative: "имэйл уншихад" },
 };
 
 /**

@@ -61,6 +61,25 @@ The APK also has BEKHI's own native module, `modules/bekhi-launcher` (Android on
 the home screen and opens one, so "Хаан банкны аппаа нээ" opens any installed app by its name. Expo Go
 does not have it and opens only the apps in `app-catalog.ts`.
 
+## Install on iPhone with TestFlight
+
+Expo Go can only preview BEKHI on an iPhone. Real installs go through TestFlight, which needs a paid
+Apple Developer Program membership ($99 a year) for the Apple ID that will own the app. The project is
+ready for it: bundle id `mn.bekhi.app`, `production` build profile (talks to the cloud API, build number
+increased on every build), `ITSAppUsesNonExemptEncryption` = NO (HTTPS only, so no export questions).
+
+```bash
+cd apps/mobile
+npx eas-cli build -p ios --profile production   # asks for the Apple ID; EAS makes the certificate and profile
+npx eas-cli submit -p ios --latest              # uploads the build to App Store Connect
+```
+
+The first submit asks which App Store Connect app to use; create it there first ("My Apps" → "+" → New
+App, bundle id `mn.bekhi.app`) and put its id in `eas.json` as `submit.production.ios.ascAppId` so later
+submits need no questions. When the build has been processed (about 10-30 minutes), add testers in App
+Store Connect → TestFlight: up to 100 people of your team at once, or external testers after Apple's
+beta review. Testers install the TestFlight app and open the invitation.
+
 ### What works in Expo Go and what doesn't
 
 | | Expo Go (iPhone) | Expo Go (Android) | Development build (Phase 9+) | Browser on the PC that runs the API |

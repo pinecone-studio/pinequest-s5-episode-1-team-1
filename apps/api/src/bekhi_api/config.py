@@ -72,11 +72,17 @@ class Settings:
     max_audio_bytes: int
     rate_limit_per_minute: int
     desktop_actions: bool
+    desktop_hotkey: bool
     web_search_provider: str | None
     tavily_api_key: str | None
     google_maps_api_key: str | None
     supabase_url: str | None
     supabase_service_role_key: str | None
+    sync_api_url: str | None
+    web_dir: Path | None
+    google_client_id: str | None
+    google_client_secret: str | None
+    google_token_key: str | None
     log_level: str
     cors_origins: list[str] = field(default_factory=list)
 
@@ -121,6 +127,8 @@ def get_settings() -> Settings:
         rate_limit_per_minute=int(os.getenv("RATE_LIMIT_PER_MINUTE") or 30),
         # Windows: the web app on this PC can set reminders/alarms/notes here (desktop.py). Local requests only.
         desktop_actions=(os.getenv("DESKTOP_ACTIONS") or "true").lower() in ("1", "true", "yes"),
+        # With desktop actions on Windows: Ctrl+Space anywhere calls BEKHI's window (hotkey.py).
+        desktop_hotkey=(os.getenv("DESKTOP_HOTKEY") or "true").lower() in ("1", "true", "yes"),
         # tavily: 1,000 free searches a month (TAVILY_API_KEY). gemini: Google Search grounding, which
         # needs billing on the Gemini key (the free tier answers 429).
         web_search_provider=os.getenv("WEB_SEARCH_PROVIDER", "tavily") or None,
@@ -130,6 +138,14 @@ def get_settings() -> Settings:
         # Alarm/timer sync between devices (sync.py). Unset: kept in this process instead.
         supabase_url=os.getenv("SUPABASE_URL") or None,
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,
+        # A PC agent (agent.py): pull the synced alarms from this API (the cloud) instead of keeping them.
+        sync_api_url=os.getenv("SYNC_API_URL") or None,
+        # BEKHI on the computer (desktop_app.py): the web app built for this API, served at /.
+        web_dir=Path(os.environ["WEB_DIR"]) if os.getenv("WEB_DIR") else None,
+        # Gmail (google_link.py): the Google Cloud OAuth client, and the key that encrypts stored tokens.
+        google_client_id=os.getenv("GOOGLE_CLIENT_ID") or None,
+        google_client_secret=os.getenv("GOOGLE_CLIENT_SECRET") or None,
+        google_token_key=os.getenv("GOOGLE_TOKEN_KEY") or None,
         log_level=os.getenv("LOG_LEVEL") or "INFO",
         cors_origins=_csv(os.getenv("CORS_ORIGINS")) or ["http://localhost:8081"],
     )

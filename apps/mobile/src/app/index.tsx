@@ -7,12 +7,12 @@ import { Backdrop } from "@/components/Backdrop";
 import { ConfirmBar } from "@/components/ConfirmBar";
 import { EdgeGlow } from "@/components/EdgeGlow";
 import { MessageLine } from "@/components/MessageLine";
+import { Settings } from "@/components/Settings";
 import { type OrbState, SiriOrb } from "@/components/SiriOrb";
-import { SyncLink } from "@/components/SyncLink";
 import { TypeBar } from "@/components/TypeBar";
-import { VoicePicker } from "@/components/VoicePicker";
 import { notify, tap } from "@/lib/haptics";
 import { SAMPLE_PHRASES } from "@/services/assistant/PreviewAssistantClient";
+import { onWakeKey } from "@/services/assistant/wake";
 import { useVoiceInput } from "@/services/audio/useVoiceInput";
 import { onRoutineOpened } from "@/services/ios-actions/notifications";
 import { type Phase, useAssistant } from "@/store/assistant";
@@ -48,7 +48,7 @@ function statusLabel(phase: Phase, speaking: boolean): string {
     case "confirming":
       return "Тийм эсвэл Үгүй гэж хариулаарай";
     default:
-      return speaking ? "Ярьж байна · товшвол таслана" : "Товшоод яриарай";
+      return speaking ? "Ярьж байна · товшвол таслана" : NATIVE ? "Товшоод яриарай" : "Товшоод эсвэл Space дараад яриарай";
   }
 }
 
@@ -147,6 +147,27 @@ export default function Chat() {
     await listen();
   }
 
+  // On the computer the space bar is the talk button too (except while typing in a field).
+  const orbRef = useRef(onOrb);
+  orbRef.current = onOrb;
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof window === "undefined") return;
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (e.code !== "Space" || e.repeat || target?.closest("input, textarea, [contenteditable='true']")) return;
+      e.preventDefault();
+      void orbRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Ctrl+Space from any program on the computer (apps/api hotkey.py): the window is in front now, so listen
+  // (or, while listening, send what was said), unless BEKHI is busy with the last request.
+  const idleRef = useRef(true);
+  idleRef.current = !busy && !confirming;
+  useEffect(() => onWakeKey(() => idleRef.current && void orbRef.current()), []);
+
   async function cancelListening() {
     tap();
     await voice.stop();
@@ -164,22 +185,23 @@ export default function Chat() {
           <View style={styles.header}>
             <View style={styles.brand}>
               <Text style={styles.wordmark}>BEKHI</Text>
-              <View style={styles.connection}>
-                <View style={[styles.dot, { backgroundColor: live ? colors.success : colors.warning }]} />
-                <Text style={styles.connectionText}>{live ? "Холбогдсон" : connecting ? "Холбогдож байна…" : "Туршилтын горим"}</Text>
-              </View>
+              {/* Said only when something is off: a connected BEKHI just works. */}
+              {!live && (
+                <View style={styles.connection}>
+                  <View style={[styles.dot, { backgroundColor: colors.warning }]} />
+                  <Text style={styles.connectionText}>{connecting ? "Холбогдож байна…" : "Туршилтын горим"}</Text>
+                </View>
+              )}
             </View>
-            <View style={styles.headerActions}>
-              <RoundButton icon="map-outline" label="Газрын зураг, зам" onPress={() => router.push("/map")} small />
-              <VoicePicker voices={voices} voiceId={voiceId} onChoose={chooseVoice} />
-              <SyncLink live={live} />
-              <RoundButton
-                icon={!voiceReplies ? "volume-mute" : speaking ? "volume-high" : "volume-medium"}
-                label={voiceReplies ? "Дуугаар хариулахыг унтраах" : "Дуугаар хариулахыг асаах"}
-                onPress={toggleVoiceReplies}
-                small
-              />
-            </View>
+            <Settings
+              live={live}
+              voices={voices}
+              voiceId={voiceId}
+              onChooseVoice={chooseVoice}
+              voiceReplies={voiceReplies}
+              onToggleVoiceReplies={toggleVoiceReplies}
+              onOpenMap={() => router.push("/map")}
+            />
           </View>
 
           {speechError && voiceReplies && (
@@ -271,15 +293,13 @@ function RoundButton({
   icon,
   label,
   onPress,
-  small,
 }: {
   /** An Ionicons name, or a ready icon element. */
   icon: keyof typeof Ionicons.glyphMap | React.ReactElement;
   label: string;
   onPress(): void;
-  small?: boolean;
 }) {
-  const size = small ? 36 : 48;
+  const size = 48;
   return (
     <Pressable
       accessibilityRole="button"
@@ -288,7 +308,7 @@ function RoundButton({
       hitSlop={8}
       style={({ pressed }) => [styles.round, { width: size, height: size, borderRadius: size / 2 }, pressed && styles.roundPressed]}
     >
-      {typeof icon === "string" ? <Ionicons name={icon} size={small ? 18 : 22} color={colors.label} /> : icon}
+      {typeof icon === "string" ? <Ionicons name={icon} size={22} color={colors.label} /> : icon}
     </Pressable>
   );
 }
@@ -312,7 +332,6 @@ const styles = StyleSheet.create({
   connection: { flexDirection: "row", alignItems: "center", gap: 6 },
   dot: { width: 7, height: 7, borderRadius: 4 },
   connectionText: { fontSize: 12, color: colors.secondaryLabel },
-  headerActions: { flexDirection: "row", alignItems: "center", gap: 10 },
   noticeWrap: { width: "100%", maxWidth: MAX_CONTENT_WIDTH, alignSelf: "center", paddingHorizontal: 20 },
   notice: {
     flexDirection: "row",

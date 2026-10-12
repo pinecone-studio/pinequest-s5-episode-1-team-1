@@ -19,6 +19,7 @@ from uuid import uuid4
 import httpx
 
 from .compose import format_when_mn
+from .sync import supabase_headers
 from .config import API_ROOT
 from .models import ActionResult
 
@@ -95,7 +96,7 @@ class SupabaseTodoStore:
 
     def __init__(self, url: str, service_key: str, http: httpx.AsyncClient, legacy: FileTodoStore) -> None:
         self._rest = url.rstrip("/") + "/rest/v1/todos"
-        self._headers = {"apikey": service_key, "Authorization": f"Bearer {service_key}"}
+        self._headers = supabase_headers(service_key)
         self._http = http
         self._legacy = legacy
 
@@ -134,6 +135,69 @@ class SupabaseTodoStore:
         if ids is not None:
             params["id"] = f"in.({','.join(ids)})"
         await self._call("DELETE", params)
+
+
+DUE_NOTE = "БЭХИ: "  # Google Tasks keeps only a due date: the time goes in the task's notes
+
+
+class GoogleTasksTodoStore:
+    """The list is the account's Google Tasks list once they link Google with Tasks allowed, so it is
+    the same list on every device and in Google's own apps. Otherwise, or while the Tasks API is not
+    enabled for the project (403), the list stays in `base`."""
+
+    def __init__(self, google: Any, base: TodoStore) -> None:
+        self._google = google
+        self._base = base
+
+    async def _on_google(self, account: str | None) -> bool:
+        return account is not None and await self._google.has_tasks(account)
+
+    async def items(self, account: str | None) -> list[dict[str, Any]]:
+        if not await self._on_google(account):
+            return await self._base.items(account)
+        try:
+            body = await self._google.tasks_call(account, "GET", params={"showCompleted": "true", "showHidden": "true",
+                                                                          "maxResults": "100"})
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code != 403:
+                raise
+            return await self._base.items(account)
+        return [_from_task(t) for t in (body or {}).get("items", []) if t.get("title")]
+
+    async def add(self, account: str | None, item: dict[str, Any]) -> None:
+        if not await self._on_google(account):
+            return await self._base.add(account, item)
+        task: dict[str, Any] = {"title": item["title"]}
+        if item.get("due_at"):
+            task["notes"] = DUE_NOTE + item["due_at"]
+            task["due"] = item["due_at"][:10] + "T00:00:00.000Z"
+        try:
+            await self._google.tasks_call(account, "POST", json=task)
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code != 403:
+                raise
+            await self._base.add(account, item)
+
+    async def mark_done(self, account: str | None, ids: list[str]) -> None:
+        if not await self._on_google(account):
+            return await self._base.mark_done(account, ids)
+        for task_id in ids:
+            await self._google.tasks_call(account, "PATCH", f"/{task_id}", json={"status": "completed"})
+
+    async def delete(self, account: str | None, ids: list[str] | None) -> None:
+        if not await self._on_google(account):
+            return await self._base.delete(account, ids)
+        for task_id in ids if ids is not None else [i["id"] for i in await self.items(account)]:
+            await self._google.tasks_call(account, "DELETE", f"/{task_id}")
+
+
+def _from_task(task: dict[str, Any]) -> dict[str, Any]:
+    notes = task.get("notes") or ""
+    due = notes[len(DUE_NOTE):].split()[0] if notes.startswith(DUE_NOTE) else None
+    if due is None and task.get("due"):
+        due = task["due"][:10] + "T23:59:00+08:00"  # a date set in Google's apps: due by the end of that day
+    return {"id": task["id"], "title": task["title"], "due_at": due, "done": task.get("status") == "completed",
+            "created_at": task.get("updated", "")}
 
 
 def make_store(supabase_url: str | None, service_key: str | None, http: httpx.AsyncClient) -> TodoStore:

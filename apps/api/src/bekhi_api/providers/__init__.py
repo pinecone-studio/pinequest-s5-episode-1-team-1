@@ -11,11 +11,11 @@ from typing import TypeVar
 import httpx
 
 from ..config import get_settings
-from .base import LLMPlanner, ProviderUserError, SpeechToText, TextToSpeech, VoiceNeedsPaidPlan, WebSearch
+from .base import LLMPlanner, ProviderUserError, Reader, SpeechToText, TextToSpeech, VoiceNeedsPaidPlan, WebSearch
 
 log = logging.getLogger(__name__)
 
-__all__ = ["ProviderNotConfigured", "ProviderUserError", "get_llm", "get_search", "get_stt", "get_tts"]
+__all__ = ["ProviderNotConfigured", "ProviderUserError", "get_llm", "get_reader", "get_search", "get_stt", "get_tts"]
 
 T = TypeVar("T")
 
@@ -127,6 +127,16 @@ def get_llm() -> LLMPlanner:
 
         return GeminiPlanner(_gemini_client(), [s.gemini_model, *s.gemini_fallback_models])
     raise ProviderNotConfigured(f"LLM provider '{s.llm_provider}' is not available")
+
+
+def get_reader() -> Reader | None:
+    """Reads the user's screen and PDFs (look_at_screen, read_file), or None without a Gemini key."""
+    s = get_settings()
+    if not s.gemini_api_key:
+        return None
+    from .gemini import GeminiReader
+
+    return GeminiReader(_gemini_client(), [s.gemini_model, *s.gemini_fallback_models])
 
 
 def get_search(http: httpx.AsyncClient) -> WebSearch | None:

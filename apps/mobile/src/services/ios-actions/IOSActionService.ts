@@ -39,6 +39,10 @@ export interface IOSActionService {
   cancelReminder(args: ToolArguments<"cancel_reminder">): Promise<ActionOutcome>;
   computerControl(args: ToolArguments<"computer_control">): Promise<ActionOutcome>;
   createRoutine(args: ToolArguments<"create_routine">): Promise<ActionOutcome>;
+  /** Types dictated text where the cursor is: the computer only (a phone sends it there). */
+  typeText(args: ToolArguments<"type_text">): Promise<ActionOutcome>;
+  /** The video the backend found (args.url): the YouTube app on a phone, a player window on the computer. */
+  playVideo(args: ToolArguments<"play_video">): Promise<ActionOutcome>;
   executeShortcut(name: string, input?: string): Promise<ActionOutcome>;
 }
 
