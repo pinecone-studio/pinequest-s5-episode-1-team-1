@@ -84,6 +84,14 @@ def open_meteo(request: httpx.Request) -> httpx.Response:
     return httpx.Response(200, json={"results": [{"name": "Дархан", "latitude": 49.48, "longitude": 105.96}]})
 
 
+@pytest.fixture(autouse=True)
+def fresh_weather():
+    """Each test asks the (fake) weather services itself."""
+    from bekhi_api import backend_tools
+
+    backend_tools.clear_cache()
+
+
 @pytest.fixture
 def planner(monkeypatch) -> FakePlanner:
     fake = FakePlanner()
