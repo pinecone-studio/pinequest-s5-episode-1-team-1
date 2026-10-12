@@ -12,15 +12,45 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { TravelMode, type DirectionsResponse, type LatLng } from "@bekhi/contracts";
+import {
+  TravelMode,
+  type DirectionsResponse,
+  type LatLng,
+  type NearbyStop,
+  type TransitDetails,
+} from "@bekhi/contracts";
 import { RouteMap } from "@/components/RouteMap";
 import { tap } from "@/lib/haptics";
 import { googleMapsUrl } from "@/services/ios-actions/maps";
-import { fetchDirections } from "@/services/maps/directions";
-import { distanceM, formatDistance, formatDuration, pathLengthM, progressAlong } from "@/services/maps/geo";
+import {
+  fetchDirections,
+  fetchNearbyStops,
+  NEARBY_RADIUS_M,
+} from "@/services/maps/directions";
+import {
+  distanceM,
+  formatDistance,
+  formatDuration,
+  pathLengthM,
+  progressAlong,
+} from "@/services/maps/geo";
+import {
+  catchFirstBus,
+  clock,
+  lineColors,
+  NEARBY_STOP_COLOR,
+  rides,
+  uniqueByName,
+  VEHICLE_ICONS,
+  walkSeconds,
+  type BusCatch,
+} from "@/services/maps/transit";
 import { useLiveLocation } from "@/services/maps/useLiveLocation";
 import { colors, MAX_CONTENT_WIDTH, radius } from "@/theme";
 
@@ -29,8 +59,17 @@ const OFF_ROUTE_M = 60;
 /** Each lookup is a billed Routes API request. */
 const REROUTE_EVERY_MS = 20_000;
 const ARRIVED_M = 30;
+/** Stops are looked up again after moving this far (a billed Places API request). */
+const STOPS_AGAIN_M = 300;
+const STOPS_LISTED = 5;
+/** How often the bus countdown is refreshed. */
+const TICK_MS = 10_000;
 
-const MODES: { mode: TravelMode; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
+const MODES: {
+  mode: TravelMode;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}[] = [
   { mode: "driving", label: "Машин", icon: "car" },
   { mode: "walking", label: "Явган", icon: "walk" },
   { mode: "transit", label: "Нийтийн тээвэр", icon: "bus" },
@@ -39,61 +78,129 @@ const MODES: { mode: TravelMode; label: string; icon: keyof typeof Ionicons.glyp
 type Target = { destination: string; mode: TravelMode };
 
 export default function MapScreen() {
-  const params = useLocalSearchParams<{ destination?: string; mode?: string }>();
+  const params = useLocalSearchParams<{
+    destination?: string;
+    mode?: string;
+  }>();
   const paramMode = TravelMode.safeParse(params.mode);
   const { location, status } = useLiveLocation();
   const safe = useSafeAreaInsets();
 
   const [query, setQuery] = useState(params.destination ?? "");
-  const [mode, setMode] = useState<TravelMode>(paramMode.success ? paramMode.data : "driving");
+  const [mode, setMode] = useState<TravelMode>(
+    paramMode.success ? paramMode.data : "driving",
+  );
   const [target, setTarget] = useState<Target | null>(
-    params.destination ? { destination: params.destination, mode: paramMode.success ? paramMode.data : "driving" } : null,
+    params.destination
+      ? {
+          destination: params.destination,
+          mode: paramMode.success ? paramMode.data : "driving",
+        }
+      : null,
   );
   const [route, setRoute] = useState<DirectionsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [overlays, setOverlays] = useState({ top: 0, bottom: 0 });
+  const [stops, setStops] = useState<NearbyStop[]>([]);
+  const [stopsError, setStopsError] = useState<string | null>(null);
+  const [focus, setFocus] = useState<LatLng | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
+  const stopsFrom = useRef<LatLng | null>(null);
   const request = useRef(0);
   const lastLookup = useRef(0);
   const locationRef = useRef(location);
-  locationRef.current = location;
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
 
-  const lookUp = useCallback(async (to: Target, from: LatLng, reroute: boolean) => {
-    const id = ++request.current;
-    lastLookup.current = Date.now();
-    if (!reroute) {
-      setLoading(true);
-      setError(null);
-      setRoute(null);
-    }
-    try {
-      const found = await fetchDirections({ origin: from, destination: to.destination, mode: to.mode });
-      if (id === request.current) {
-        setRoute(found);
+  const lookUp = useCallback(
+    async (to: Target, from: LatLng, reroute: boolean) => {
+      const id = ++request.current;
+      lastLookup.current = Date.now();
+      if (!reroute) {
+        setLoading(true);
         setError(null);
+        setRoute(null);
       }
-    } catch (e) {
-      // A failed re-route keeps the route on screen.
-      if (id === request.current && !reroute) setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      if (id === request.current) setLoading(false);
-    }
-  }, []);
+      try {
+        const found = await fetchDirections({
+          origin: from,
+          destination: to.destination,
+          mode: to.mode,
+        });
+        if (id === request.current) {
+          setRoute(found);
+          setNow(Date.now());
+          setError(null);
+        }
+      } catch (e) {
+        // A failed re-route keeps the route on screen.
+        if (id === request.current && !reroute)
+          setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (id === request.current) setLoading(false);
+      }
+    },
+    [],
+  );
 
   // A new destination or mode: look it up as soon as the position is known.
   const hasFix = location !== null;
   useEffect(() => {
-    if (target && locationRef.current) void lookUp(target, locationRef.current, false);
+    if (target && locationRef.current)
+      void lookUp(target, locationRef.current, false);
   }, [target, hasFix, lookUp]);
 
+  // Bus stops around the user while no destination is chosen.
+  useEffect(() => {
+    if (target || !location) return;
+    if (stopsFrom.current && distanceM(stopsFrom.current, location) < STOPS_AGAIN_M)
+      return;
+    stopsFrom.current = location;
+    fetchNearbyStops({ origin: location, radius_m: NEARBY_RADIUS_M })
+      .then((found) => {
+        setStops(found.stops);
+        setStopsError(null);
+      })
+      .catch((e: unknown) => {
+        stopsFrom.current = null;
+        setStopsError(e instanceof Error ? e.message : String(e));
+      });
+  }, [target, location]);
+
   const totalM = useMemo(() => (route ? pathLengthM(route.path) : 0), [route]);
-  const progress = useMemo(() => (route && location ? progressAlong(route.path, location) : null), [route, location]);
-  const arrived = route !== null && location !== null && distanceM(location, route.destination) < ARRIVED_M;
+  const lines = useMemo(() => (route ? rides(route) : []), [route]);
+  const listedStops = useMemo(
+    () => uniqueByName(stops).slice(0, STOPS_LISTED),
+    [stops],
+  );
+
+  useEffect(() => {
+    if (lines.length === 0) return;
+    const timer = setInterval(() => setNow(Date.now()), TICK_MS);
+    return () => clearInterval(timer);
+  }, [lines]);
+  const busCatch = useMemo(
+    () => (route ? catchFirstBus(route, location, now) : null),
+    [route, location, now],
+  );
+  const progress = useMemo(
+    () => (route && location ? progressAlong(route.path, location) : null),
+    [route, location],
+  );
+  const arrived =
+    route !== null &&
+    location !== null &&
+    distanceM(location, route.destination) < ARRIVED_M;
 
   useEffect(() => {
     if (!target || !location || !progress || loading || arrived) return;
-    if (progress.offRouteM > OFF_ROUTE_M && Date.now() - lastLookup.current > REROUTE_EVERY_MS) {
+    if (
+      progress.offRouteM > OFF_ROUTE_M &&
+      Date.now() - lastLookup.current > REROUTE_EVERY_MS
+    ) {
       void lookUp(target, location, true);
     }
   }, [progress, target, location, loading, arrived, lookUp]);
@@ -129,8 +236,24 @@ export default function MapScreen() {
     void Linking.openURL(googleMapsUrl(target, { navigate: true }));
   }
 
+  function nextBus() {
+    if (!target || !location) return;
+    tap();
+    void lookUp(target, location, false);
+  }
+
+  function showStop(stop: NearbyStop) {
+    tap();
+    // A new object, so picking the same stop again moves the map back to it.
+    setFocus({ ...stop.location });
+  }
+
   // Share of the route still ahead, for the time and distance left.
-  const left = route ? (progress && totalM > 0 ? Math.min(1, progress.remainingM / totalM) : 1) : 0;
+  const left = route
+    ? progress && totalM > 0
+      ? Math.min(1, progress.remainingM / totalM)
+      : 1
+    : 0;
   const secondsLeft = route ? Math.round(route.duration_s * left) : 0;
 
   return (
@@ -138,13 +261,24 @@ export default function MapScreen() {
       <RouteMap
         location={location}
         route={route}
-        inset={{ top: safe.top + overlays.top, bottom: safe.bottom + overlays.bottom }}
+        stops={target ? [] : stops}
+        focus={focus}
+        inset={{
+          top: safe.top + overlays.top,
+          bottom: safe.bottom + overlays.bottom,
+        }}
       />
 
       <SafeAreaView style={styles.overlay} edges={["top", "bottom"]}>
         <View style={styles.column} onLayout={(e) => measured("top", e)}>
           <View style={styles.searchRow}>
-            <Pressable accessibilityRole="button" accessibilityLabel="Буцах" onPress={back} hitSlop={8} style={styles.iconButton}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Буцах"
+              onPress={back}
+              hitSlop={8}
+              style={styles.iconButton}
+            >
               <Ionicons name="chevron-back" size={22} color={colors.label} />
             </Pressable>
             <View style={styles.search}>
@@ -160,8 +294,17 @@ export default function MapScreen() {
                 style={styles.input}
               />
               {query.length > 0 && (
-                <Pressable accessibilityRole="button" accessibilityLabel="Зам хайх" onPress={search} hitSlop={8}>
-                  <Ionicons name="arrow-forward-circle" size={26} color={colors.accent} />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Зам хайх"
+                  onPress={search}
+                  hitSlop={8}
+                >
+                  <Ionicons
+                    name="arrow-forward-circle"
+                    size={26}
+                    color={colors.accent}
+                  />
                 </Pressable>
               )}
             </View>
@@ -175,8 +318,19 @@ export default function MapScreen() {
                 onPress={() => chooseMode(m.mode)}
                 style={[styles.mode, mode === m.mode && styles.modeSelected]}
               >
-                <Ionicons name={m.icon} size={16} color={mode === m.mode ? colors.background : colors.label} />
-                <Text style={[styles.modeText, mode === m.mode && styles.modeTextSelected]}>{m.label}</Text>
+                <Ionicons
+                  name={m.icon}
+                  size={16}
+                  color={mode === m.mode ? colors.background : colors.label}
+                />
+                <Text
+                  style={[
+                    styles.modeText,
+                    mode === m.mode && styles.modeTextSelected,
+                  ]}
+                >
+                  {m.label}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -187,20 +341,30 @@ export default function MapScreen() {
             {status === "denied" ? (
               <View style={styles.message}>
                 <Text style={styles.messageText}>
-                  Зам заахын тулд байршлын зөвшөөрөл хэрэгтэй. Утасны тохиргооноос BEKHI-д байршил зөвшөөрнө үү.
+                  Зам заахын тулд байршлын зөвшөөрөл хэрэгтэй. Утасны
+                  тохиргооноос BEKHI-д байршил зөвшөөрнө үү.
                 </Text>
                 {Platform.OS !== "web" && (
-                  <Pressable onPress={() => void Linking.openSettings()} style={styles.secondaryButton}>
-                    <Text style={styles.secondaryButtonText}>Тохиргоо нээх</Text>
+                  <Pressable
+                    onPress={() => void Linking.openSettings()}
+                    style={styles.secondaryButton}
+                  >
+                    <Text style={styles.secondaryButtonText}>
+                      Тохиргоо нээх
+                    </Text>
                   </Pressable>
                 )}
               </View>
             ) : status === "unavailable" ? (
-              <Text style={styles.messageText}>Байршлыг тодорхойлж чадсангүй. GPS асаалттай эсэхийг шалгана уу.</Text>
+              <Text style={styles.messageText}>
+                Байршлыг тодорхойлж чадсангүй. GPS асаалттай эсэхийг шалгана уу.
+              </Text>
             ) : !location ? (
               <View style={styles.row}>
                 <ActivityIndicator color={colors.secondaryLabel} />
-                <Text style={styles.messageText}>Байршлыг тодорхойлж байна…</Text>
+                <Text style={styles.messageText}>
+                  Байршлыг тодорхойлж байна…
+                </Text>
               </View>
             ) : loading ? (
               <View style={styles.row}>
@@ -211,36 +375,130 @@ export default function MapScreen() {
               <Text style={styles.errorText}>{error}</Text>
             ) : route && target ? (
               <>
+                {busCatch && !arrived && (
+                  <CatchBanner busCatch={busCatch} onNextBus={nextBus} />
+                )}
                 {arrived ? (
                   <Text style={styles.eta}>Хүрлээ 🎉</Text>
                 ) : (
                   <View style={styles.summary}>
-                    <Text style={styles.eta}>{formatDuration(secondsLeft)}</Text>
+                    <Text style={styles.eta}>
+                      {formatDuration(secondsLeft)}
+                    </Text>
                     <Text style={styles.summaryText}>
-                      {formatDistance(route.distance_m * left)} · {arrivalTime(secondsLeft)}-д хүрнэ
+                      {formatDistance(route.distance_m * left)} ·{" "}
+                      {arrivalTime(secondsLeft)}-д хүрнэ
                     </Text>
                   </View>
                 )}
                 <Text style={styles.destination} numberOfLines={1}>
                   {target.destination}
                 </Text>
-                {route.steps.length > 0 && !arrived && (
-                  <ScrollView style={styles.steps} showsVerticalScrollIndicator={false}>
-                    {route.steps.map((s, i) => (
-                      <View key={i} style={styles.step}>
-                        <Text style={styles.stepText}>{s.instruction}</Text>
-                        {s.distance_m > 0 && <Text style={styles.stepDistance}>{formatDistance(s.distance_m)}</Text>}
+                {lines.length > 0 && !arrived && (
+                  <View style={styles.lines}>
+                    {lines.map((t, i) => (
+                      <View key={i} style={styles.lineChain}>
+                        {i > 0 && (
+                          <Ionicons
+                            name="chevron-forward"
+                            size={14}
+                            color={colors.tertiaryLabel}
+                          />
+                        )}
+                        <LineBadge transit={t} />
                       </View>
                     ))}
+                  </View>
+                )}
+                {target.mode === "transit" &&
+                  lines.length === 0 &&
+                  !arrived && (
+                    <Text style={styles.messageText}>
+                      Энэ замд автобус хэрэггүй: алхаад очих нь хамгийн
+                      ойрхон байна.
+                    </Text>
+                  )}
+                {route.steps.length > 0 && !arrived && (
+                  <ScrollView
+                    style={styles.steps}
+                    showsVerticalScrollIndicator={false}
+                  >
+                    {route.steps.map((s, i) =>
+                      s.transit ? (
+                        <TransitStep key={i} transit={s.transit} />
+                      ) : (
+                        <View key={i} style={styles.step}>
+                          <Text style={styles.stepText}>{s.instruction}</Text>
+                          {s.distance_m > 0 && (
+                            <Text style={styles.stepDistance}>
+                              {formatDistance(s.distance_m)}
+                            </Text>
+                          )}
+                        </View>
+                      ),
+                    )}
                   </ScrollView>
                 )}
-                <Pressable onPress={startNavigation} style={({ pressed }) => [styles.primaryButton, pressed && styles.pressed]}>
-                  <Ionicons name="navigate" size={18} color={colors.background} />
-                  <Text style={styles.primaryButtonText}>Google Maps-ээр хөтлүүлэх</Text>
+                <Pressable
+                  onPress={startNavigation}
+                  style={({ pressed }) => [
+                    styles.primaryButton,
+                    pressed && styles.pressed,
+                  ]}
+                >
+                  <Ionicons
+                    name="navigate"
+                    size={18}
+                    color={colors.background}
+                  />
+                  <Text style={styles.primaryButtonText}>
+                    Google Maps-ээр хөтлүүлэх
+                  </Text>
                 </Pressable>
               </>
             ) : (
-              <Text style={styles.messageText}>Очих газраа бичээд хайна уу. Жишээ нь: Сансар, Зайсан, Улсын их дэлгүүр.</Text>
+              <>
+                {listedStops.length > 0 && (
+                  <View style={styles.nearby}>
+                    <Text style={styles.sectionTitle}>
+                      Ойрын автобусны буудал
+                    </Text>
+                    {listedStops.map((s) => (
+                      <Pressable
+                        key={s.id}
+                        accessibilityRole="button"
+                        onPress={() => showStop(s)}
+                        style={({ pressed }) => [
+                          styles.stopRow,
+                          pressed && styles.pressed,
+                        ]}
+                      >
+                        <View style={styles.stopIcon}>
+                          <Ionicons
+                            name="bus"
+                            size={14}
+                            color={colors.background}
+                          />
+                        </View>
+                        <Text style={styles.stepText} numberOfLines={1}>
+                          {s.name}
+                        </Text>
+                        <Text style={styles.stepDistance}>
+                          {formatDistance(s.distance_m)} · 🚶{" "}
+                          {formatDuration(walkSeconds(s.distance_m))}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+                {stopsError && listedStops.length === 0 && (
+                  <Text style={styles.errorText}>{stopsError}</Text>
+                )}
+                <Text style={styles.messageText}>
+                  Очих газраа бичээд хайна уу. Автобусаар явах бол
+                  &quot;Нийтийн тээвэр&quot;-ийг сонгоорой.
+                </Text>
+              </>
             )}
           </View>
         </View>
@@ -250,8 +508,96 @@ export default function MapScreen() {
 }
 
 function arrivalTime(secondsFromNow: number): string {
-  const at = new Date(Date.now() + secondsFromNow * 1000);
-  return `${String(at.getHours()).padStart(2, "0")}:${String(at.getMinutes()).padStart(2, "0")}`;
+  return clock(new Date(Date.now() + secondsFromNow * 1000));
+}
+
+const CATCH = {
+  relaxed: { icon: "checkmark-circle", color: colors.success, title: "Амжина" },
+  hurry: { icon: "flash", color: colors.warning, title: "Яараарай!" },
+  at_stop: { icon: "time", color: colors.success, title: "Буудал дээрээ байна" },
+  missed: { icon: "close-circle", color: colors.danger, title: "Энэ автобусанд амжихгүй" },
+} as const;
+
+/** Whether the first bus of the route can still be caught, by its timetabled departure. */
+function CatchBanner({
+  busCatch,
+  onNextBus,
+}: {
+  busCatch: BusCatch;
+  onNextBus: () => void;
+}) {
+  const { kind, transit, departs, seconds } = busCatch;
+  const look = CATCH[kind];
+  const detail = {
+    relaxed: `Гарах хүртэл ${formatDuration(seconds)}`,
+    hurry: "Одоо гарвал амжина",
+    at_stop: `Ирэх хүртэл ${formatDuration(seconds)}`,
+    missed: "алхаад амжихааргүй",
+  }[kind];
+  return (
+    <View style={[styles.catch, { borderColor: look.color }]}>
+      <Ionicons name={look.icon} size={22} color={look.color} />
+      <View style={styles.catchBody}>
+        <Text style={[styles.catchTitle, { color: look.color }]}>
+          {look.title}
+        </Text>
+        <Text style={styles.catchText}>
+          {transit.line} · {clock(departs)}-д · {detail}
+        </Text>
+        <Text style={styles.catchNote}>Цагийн хуваариар</Text>
+      </View>
+      {kind === "missed" && (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onNextBus}
+          style={styles.secondaryButton}
+        >
+          <Text style={styles.secondaryButtonText}>Дараагийн автобус</Text>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
+function LineBadge({ transit }: { transit: TransitDetails }) {
+  const { background, text } = lineColors(transit);
+  return (
+    <View style={[styles.badge, { backgroundColor: background }]}>
+      <Ionicons name={VEHICLE_ICONS[transit.vehicle]} size={13} color={text} />
+      <Text style={[styles.badgeText, { color: text }]}>{transit.line}</Text>
+    </View>
+  );
+}
+
+function TransitStep({ transit }: { transit: TransitDetails }) {
+  const leaves = transit.departure_time
+    ? clock(new Date(transit.departure_time))
+    : null;
+  return (
+    <View style={[styles.step, styles.transitStep]}>
+      <View style={styles.transitHeader}>
+        <LineBadge transit={transit} />
+        {transit.headsign && (
+          <Text style={styles.headsign} numberOfLines={1}>
+            → {transit.headsign}
+          </Text>
+        )}
+      </View>
+      <Text style={styles.stepText}>
+        Суух: {transit.departure_stop.name}
+        {leaves && <Text style={styles.stepDistance}> · {leaves}</Text>}
+      </Text>
+      <Text style={styles.stepText}>
+        Буух: {transit.arrival_stop.name}
+        {transit.stop_count > 0 && (
+          <Text style={styles.stepDistance}>
+            {" "}
+            · {transit.stop_count} буудал
+          </Text>
+        )}
+      </Text>
+    </View>
+  );
 }
 
 const glass = {
@@ -262,33 +608,160 @@ const glass = {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
-  overlay: { ...StyleSheet.absoluteFill, justifyContent: "space-between", pointerEvents: "box-none" },
-  column: { width: "100%", maxWidth: MAX_CONTENT_WIDTH, alignSelf: "center", paddingHorizontal: 14, paddingVertical: 8, gap: 8, pointerEvents: "box-none" },
+  overlay: {
+    ...StyleSheet.absoluteFill,
+    justifyContent: "space-between",
+    pointerEvents: "box-none",
+  },
+  column: {
+    width: "100%",
+    maxWidth: MAX_CONTENT_WIDTH,
+    alignSelf: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    gap: 8,
+    pointerEvents: "box-none",
+  },
   searchRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  iconButton: { ...glass, width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center" },
-  search: { ...glass, flex: 1, height: 44, borderRadius: 22, flexDirection: "row", alignItems: "center", gap: 8, paddingLeft: 14, paddingRight: 8 },
+  iconButton: {
+    ...glass,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  search: {
+    ...glass,
+    flex: 1,
+    height: 44,
+    borderRadius: 22,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingLeft: 14,
+    paddingRight: 8,
+  },
   input: { flex: 1, height: 44, fontSize: 16, color: colors.label },
   modes: { flexDirection: "row", gap: 8, pointerEvents: "box-none" },
-  mode: { ...glass, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: radius.chip },
+  mode: {
+    ...glass,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: radius.chip,
+  },
   modeSelected: { backgroundColor: colors.label, borderColor: colors.label },
   modeText: { fontSize: 13, fontWeight: "600", color: colors.label },
   modeTextSelected: { color: colors.background },
   card: { ...glass, borderRadius: radius.sheet, padding: 18, gap: 10 },
   row: { flexDirection: "row", alignItems: "center", gap: 10 },
   message: { gap: 12 },
-  messageText: { flexShrink: 1, fontSize: 15, lineHeight: 21, color: colors.secondaryLabel },
+  messageText: {
+    flexShrink: 1,
+    fontSize: 15,
+    lineHeight: 21,
+    color: colors.secondaryLabel,
+  },
   errorText: { fontSize: 15, lineHeight: 21, color: colors.warning },
   summary: { gap: 2 },
-  eta: { fontSize: 30, fontWeight: "800", color: colors.success, letterSpacing: -0.5 },
+  eta: {
+    fontSize: 30,
+    fontWeight: "800",
+    color: colors.success,
+    letterSpacing: -0.5,
+  },
   summaryText: { fontSize: 15, color: colors.secondaryLabel },
   destination: { fontSize: 17, fontWeight: "600", color: colors.label },
-  steps: { maxHeight: 150 },
-  step: { flexDirection: "row", justifyContent: "space-between", gap: 12, paddingVertical: 7, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border },
+  steps: { maxHeight: 180 },
+  lines: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 4,
+  },
+  lineChain: { flexDirection: "row", alignItems: "center", gap: 4 },
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  badgeText: { fontSize: 13, fontWeight: "800" },
+  transitStep: { flexDirection: "column", justifyContent: "flex-start", gap: 4 },
+  transitHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
+  headsign: { flex: 1, fontSize: 13, color: colors.secondaryLabel },
+  catch: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    backgroundColor: colors.surface,
+  },
+  catchBody: { flex: 1, gap: 2 },
+  catchTitle: { fontSize: 16, fontWeight: "800" },
+  catchText: { fontSize: 14, color: colors.label },
+  catchNote: { fontSize: 11, color: colors.tertiaryLabel },
+  nearby: { gap: 2 },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.secondaryLabel,
+    marginBottom: 4,
+  },
+  stopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 7,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
+  stopIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: NEARBY_STOP_COLOR,
+  },
+  step: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+    paddingVertical: 7,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
   stepText: { flex: 1, fontSize: 14, lineHeight: 19, color: colors.label },
   stepDistance: { fontSize: 13, color: colors.tertiaryLabel },
-  primaryButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, height: 48, borderRadius: 24, backgroundColor: colors.accent },
-  primaryButtonText: { fontSize: 16, fontWeight: "700", color: colors.background },
+  primaryButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: colors.accent,
+  },
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: colors.background,
+  },
   pressed: { opacity: 0.8 },
-  secondaryButton: { alignSelf: "flex-start", paddingHorizontal: 14, paddingVertical: 8, borderRadius: radius.chip, backgroundColor: colors.surface },
+  secondaryButton: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: radius.chip,
+    backgroundColor: colors.surface,
+  },
   secondaryButtonText: { fontSize: 14, fontWeight: "600", color: colors.label },
 });

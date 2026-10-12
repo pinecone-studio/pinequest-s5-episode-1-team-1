@@ -6,7 +6,7 @@ import { openAppOnPhone } from "./apps";
 import { lookupPhone, type ContactLookup } from "./contacts";
 import { type ActionOutcome, type ChosenContact, type NotificationRequest, unsupported } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
-import { openInAppMap } from "./maps";
+import { findStopsOnMap, openInAppMap } from "./maps";
 import { cancelScheduled, listScheduled, scheduleNotification, scheduleRoutine } from "./notifications";
 import { pickScheduled } from "./scheduled";
 
@@ -18,6 +18,7 @@ import { pickScheduled } from "./scheduled";
  */
 export class ExpoIOSActionService extends LinkingIOSActionService {
   openMaps = (args: ToolArguments<"open_maps">) => openInAppMap(args);
+  findBusStops = () => findStopsOnMap();
 
   callContact = async (args: ToolArguments<"call_contact">, chosen?: ChosenContact): Promise<ActionOutcome> => {
     const contact = await resolveContact(args, chosen);

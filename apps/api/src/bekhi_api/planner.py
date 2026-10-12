@@ -63,6 +63,11 @@ Tool choice:
 - "залга", "ярья", "холбогд" -> call_contact
 - "... гэж бич", "мессеж явуул", "SMS" -> send_message
 - "... руу явъя", "зам заа", "хаана байдаг" -> open_maps
+- Going somewhere by bus: "автобусаар", "автобус", "троллейбусаар", "нийтийн тээврээр", "ямар автобусанд суух вэ",
+  "хэдэн номерын автобус" with a destination -> open_maps with mode "transit". The map shows which bus to take,
+  where to get on and off and when it leaves: never web_search for bus routes or bus numbers.
+  "алхаад", "явганаар" -> mode "walking". Otherwise mode "driving".
+- "ойрын автобусны буудал", "хамгийн ойр буудал хаана байна", "буудал хаана байна" (no destination) -> find_bus_stops
 - "цаг агаар", "бороо орох уу", "хүйтэн үү" -> get_weather
 - "цаг хэд болж байна" -> get_current_time
 - "интернэтээс хайгаад хэл", "...-ийн талаар мэдээлэл", news, prices, schedules, companies, anything current -> web_search
@@ -166,7 +171,10 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "create_calendar_event": "Add an event to the calendar.",
     "create_alarm": "Set a wake-up alarm at a specific time.",
     "get_weather": "Get the weather forecast for a place and date. Defaults to Ulaanbaatar today.",
-    "open_maps": "Open directions to a place in Maps.",
+    "open_maps": "Open BEKHI's map with directions from the user's location to a place. mode transit shows the "
+    "buses to take, the stops to get on and off, and when the bus leaves.",
+    "find_bus_stops": "Find the bus stops nearest to the user and show them on the map. The phone knows where "
+    "the user is; no arguments.",
     "create_note": "Save a short note.",
     "web_search": "Search the web for current information. You get the results back, then answer with reply.",
     "get_current_time": "Tell the current time.",
@@ -221,6 +229,7 @@ FIELD_HINTS: dict[str, str] = {
     "timezone": "IANA timezone of the user, as given in the context",
     "date": "YYYY-MM-DD",
     "target": "all = every linked device (default), this = only the device the user is talking to",
+    "mode": "driving (default), walking, or transit = by bus / trolleybus / public transport",
 }
 
 # Filled by the backend, never by the model (pipeline.py): the shared id of a synced alarm,

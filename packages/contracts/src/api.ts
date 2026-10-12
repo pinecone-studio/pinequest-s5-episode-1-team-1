@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { ActionRequest, ActionResult } from "./actions";
-import { DEFAULT_TIMEZONE, IanaTimezone, IsoDateTime, SpokenText, TtsVoice, Uuid } from "./common";
+import {
+  DEFAULT_TIMEZONE,
+  IanaTimezone,
+  IsoDateTime,
+  SpokenText,
+  TtsVoice,
+  Uuid,
+} from "./common";
 import { isDeviceTool, TravelMode } from "./tools";
 
 // ---------------------------------------------------------------------------
@@ -140,33 +147,61 @@ const AssistantTurnBase = z.object({
 });
 
 export const AssistantTurn = AssistantTurnBase.superRefine((turn, ctx) => {
-  const pendingDevice = turn.actions.some((a) => isDeviceTool(a.tool) && a.result === null);
+  const pendingDevice = turn.actions.some(
+    (a) => isDeviceTool(a.tool) && a.result === null,
+  );
   const needsConfirm = turn.actions.some((a) => a.confirmation.required);
 
   if (turn.requires_confirmation !== needsConfirm) {
-    ctx.addIssue({ code: "custom", message: "requires_confirmation must match actions[].confirmation.required" });
+    ctx.addIssue({
+      code: "custom",
+      message:
+        "requires_confirmation must match actions[].confirmation.required",
+    });
   }
   if (turn.requires_clarification !== (turn.clarification !== null)) {
-    ctx.addIssue({ code: "custom", message: "requires_clarification must match clarification presence" });
+    ctx.addIssue({
+      code: "custom",
+      message: "requires_clarification must match clarification presence",
+    });
   }
   if (turn.stage === "final" && pendingDevice) {
-    ctx.addIssue({ code: "custom", message: "a final turn cannot contain unexecuted device actions" });
+    ctx.addIssue({
+      code: "custom",
+      message: "a final turn cannot contain unexecuted device actions",
+    });
   }
   if (turn.stage === "awaiting_confirmation" && !needsConfirm) {
-    ctx.addIssue({ code: "custom", message: "awaiting_confirmation requires an action needing confirmation" });
+    ctx.addIssue({
+      code: "custom",
+      message: "awaiting_confirmation requires an action needing confirmation",
+    });
   }
   if (turn.stage === "awaiting_device" && (!pendingDevice || needsConfirm)) {
-    ctx.addIssue({ code: "custom", message: "awaiting_device requires pending device actions and no confirmation" });
+    ctx.addIssue({
+      code: "custom",
+      message:
+        "awaiting_device requires pending device actions and no confirmation",
+    });
   }
   if (turn.stage === "awaiting_clarification" && turn.clarification === null) {
-    ctx.addIssue({ code: "custom", message: "awaiting_clarification requires a clarification" });
+    ctx.addIssue({
+      code: "custom",
+      message: "awaiting_clarification requires a clarification",
+    });
   }
   for (const a of turn.actions) {
     if (!isDeviceTool(a.tool) && a.result === null) {
-      ctx.addIssue({ code: "custom", message: `backend tool ${a.tool} must include its result` });
+      ctx.addIssue({
+        code: "custom",
+        message: `backend tool ${a.tool} must include its result`,
+      });
     }
     if (a.confirmation.required && !a.confirmation.prompt) {
-      ctx.addIssue({ code: "custom", message: `action ${a.id} requires a confirmation prompt` });
+      ctx.addIssue({
+        code: "custom",
+        message: `action ${a.id} requires a confirmation prompt`,
+      });
     }
   }
 });
@@ -210,23 +245,88 @@ export const DirectionsRequest = z.object({
 });
 export type DirectionsRequest = z.infer<typeof DirectionsRequest>;
 
+export const TransitVehicle = z.enum([
+  "bus",
+  "trolleybus",
+  "tram",
+  "train",
+  "other",
+]);
+export type TransitVehicle = z.infer<typeof TransitVehicle>;
+
+const HexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+
+export const TransitStop = z.object({
+  name: z.string().max(200),
+  location: LatLng.nullable(),
+});
+export type TransitStop = z.infer<typeof TransitStop>;
+
+/** The ride part of a transit step: which line to take, where to get on and off. */
+export const TransitDetails = z.object({
+  vehicle: TransitVehicle,
+  /** As riders know the line: "М 3", "Ч:52". The full line name when there is no short one. */
+  line: z.string().min(1).max(100),
+  /** Operator's line colors, "#RRGGBB". */
+  color: HexColor.nullable(),
+  text_color: HexColor.nullable(),
+  /** Where the line is heading, as shown on the vehicle. */
+  headsign: z.string().max(200).nullable(),
+  departure_stop: TransitStop,
+  arrival_stop: TransitStop,
+  /** Stops ridden, the one where the rider gets off included. */
+  stop_count: z.number().int().min(0),
+  /** Scheduled departure from `departure_stop` (Google's timetable, not live tracking). */
+  departure_time: IsoDateTime.nullable(),
+});
+export type TransitDetails = z.infer<typeof TransitDetails>;
+
+export const DirectionsStep = z.object({
+  /** Turn instruction from Google, in Mongolian where Google has it. */
+  instruction: z.string().max(500),
+  distance_m: z.number().int().min(0),
+  /** Time this step takes without traffic; for a ride, the time on board. */
+  duration_s: z.number().int().min(0).default(0),
+  /** Set on the steps ridden on public transport (mode "transit"). */
+  transit: TransitDetails.nullable().optional(),
+});
+export type DirectionsStep = z.infer<typeof DirectionsStep>;
+
 export const DirectionsResponse = z.object({
   distance_m: z.number().int().min(0),
   duration_s: z.number().int().min(0),
   destination: LatLng,
   /** The route to draw, origin first. */
   path: z.array(LatLng).max(5000),
-  steps: z
-    .array(
-      z.object({
-        /** Turn instruction from Google, in Mongolian where Google has it. */
-        instruction: z.string().max(500),
-        distance_m: z.number().int().min(0),
-      }),
-    )
-    .max(200),
+  steps: z.array(DirectionsStep).max(200),
 });
 export type DirectionsResponse = z.infer<typeof DirectionsResponse>;
+
+// ---------------------------------------------------------------------------
+// POST /api/v1/maps/stops/nearby — bus stops around the phone (Google Places API)
+// ---------------------------------------------------------------------------
+
+export const NearbyStopsRequest = z.object({
+  origin: LatLng,
+  radius_m: z.number().int().min(100).max(2000).default(600),
+});
+export type NearbyStopsRequest = z.infer<typeof NearbyStopsRequest>;
+
+export const NearbyStop = z.object({
+  /** Google place id. */
+  id: z.string().min(1).max(300),
+  name: z.string().max(200),
+  location: LatLng,
+  /** Straight-line distance from `origin`. */
+  distance_m: z.number().int().min(0),
+});
+export type NearbyStop = z.infer<typeof NearbyStop>;
+
+export const NearbyStopsResponse = z.object({
+  /** Nearest first. Both sides of a street are separate stops with the same name. */
+  stops: z.array(NearbyStop).max(20),
+});
+export type NearbyStopsResponse = z.infer<typeof NearbyStopsResponse>;
 
 // ---------------------------------------------------------------------------
 // Errors

@@ -82,6 +82,24 @@
       }
     },
     {
+      "id": "06b_maps_bus_zaisan",
+      "utterance": "Зайсан руу автобусаар яаж очих вэ?",
+      "expected": {
+        "tools": ["open_maps"],
+        "arguments": [{ "mode": "transit" }],
+        "argument_contains": [{ "destination": "зайсан" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "06c_nearby_bus_stops",
+      "utterance": "Хамгийн ойрхон автобусны буудал хаана байна?",
+      "expected": {
+        "tools": ["find_bus_stops"],
+        "requires_confirmation": false
+      }
+    },
+    {
       "id": "07_calendar_work_10",
       "utterance": "Маргааш 10 цагт ажилтай гэж calendar дээр нэм.",
       "expected": {

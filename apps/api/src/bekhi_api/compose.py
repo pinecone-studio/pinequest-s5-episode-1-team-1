@@ -29,6 +29,7 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "create_alarm": ("сэрүүлэг тавих", "сэрүүлэг тавихад"),
     "create_note": ("тэмдэглэл хадгалах", "тэмдэглэл хадгалахад"),
     "open_maps": ("газрын зураг нээх", "газрын зураг нээхэд"),
+    "find_bus_stops": ("автобусны буудал хайх", "автобусны буудал хайхад"),
     "get_weather": ("цаг агаар харах", "цаг агаар харахад"),
     "web_search": ("хайлт хийх", "хайлт хийхэд"),
     "get_current_time": ("цаг харах", "цаг харахад"),
@@ -68,6 +69,7 @@ FOLDER_NAMES = {
     "music": "Music",
     "videos": "Videos",
 }
+TRAVEL_MN = {"transit": "автобусаар очих ", "walking": "алхаж очих "}
 KIND_MN = {"reminder": "сануулга", "alarm": "сэрүүлэг", "timer": "таймер", "event": "уулзалт", "routine": "өдрийн тойм"}
 DEVICE_MN = {"ios": "iPhone", "android": "Android утас", "web": "компьютер"}
 MN_SYNC_FAILED = "Бусад төхөөрөмж рүү илгээж чадсангүй, зөвхөн энд тавигдлаа."
@@ -96,6 +98,7 @@ UNSUPPORTED_BY_CODE = {
 PERMISSION_BY_CODE = {
     "CONTACTS_DENIED": "Контакт харах зөвшөөрөл хэрэгтэй байна. Утасныхаа Settings-ээс Expo Go-д Contacts зөвшөөрөл өгнө үү.",
     "NOTIFICATIONS_DENIED": "Мэдэгдэл илгээх зөвшөөрөл хэрэгтэй байна. Утасныхаа Settings-ээс Expo Go-д Notifications зөвшөөрөл өгнө үү.",
+    "LOCATION_DENIED": "Ойрын буудлыг олохын тулд байршлын зөвшөөрөл хэрэгтэй байна. Утасныхаа Settings-ээс Expo Go-д Location зөвшөөрөл өгнө үү.",
 }
 
 FAILED_BY_CODE = {
@@ -109,6 +112,8 @@ FAILED_BY_CODE = {
     "APP_OPEN_FAILED": "'{app}' аппыг нээж чадсангүй.",
     "URL_NOT_HTTP": "Энэ хаягийг нээж чадсангүй.",
     "LOCATION_NOT_FOUND": "Тэр газрыг олсонгүй. Өөрөөр хэлээд өгөөч.",
+    "LOCATION_UNAVAILABLE": "Байршлыг тодорхойлж чадсангүй. GPS асаалттай эсэхийг шалгана уу.",
+    "STOPS_FAILED": "Ойрын буудлуудыг олж чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.",
     "CONTACT_NOT_FOUND": "{name} гэсэн контакт олдсонгүй.",
     "CONTACT_NO_PHONE": "{name} гэсэн контактад утасны дугаар алга.",
     "TIME_IN_PAST": "Тэр цаг аль хэдийн өнгөрсөн байна. Өөр цаг хэлээд өгөөч.",
@@ -201,6 +206,26 @@ def _scheduled_list(items: list[dict], now_iso: str) -> str:
     lines = [f"{format_when_mn(i['fire_at'], now_iso)} {i.get('title') or KIND_MN.get(i.get('kind', ''), 'сануулга')}" for i in items[:5]]
     more = f", бас {len(items) - 5} нь" if len(items) > 5 else ""
     return f"Танд {len(items)} зүйл товлогдсон байна: " + ", ".join(lines) + more + "."
+
+
+def _stops_sentence(stops: list) -> str:
+    """Nearest stops as the phone found them: [{"name": ..., "distance_m": ...}], nearest first."""
+    named = [s for s in stops if isinstance(s, dict) and s.get("name")]
+    if not named:
+        return "Ойролцоо автобусны буудал олдсонгүй."
+    first, *rest = named
+    sentence = f"Хамгийн ойрын буудал {first['name']}, {_metres(first)} метрийн зайтай."
+    if rest:
+        sentence += " Дараа нь " + ", ".join(f"{s['name']} {_metres(s)} метр" for s in rest[:2]) + "."
+    return sentence + " Газрын зураг дээр харууллаа."
+
+
+def _metres(stop: dict) -> int:
+    """Rounded to 10 m: a GPS fix is no more precise than that."""
+    try:
+        return max(10, int(float(stop.get("distance_m") or 0) / 10 + 0.5) * 10)
+    except (TypeError, ValueError):
+        return 10
 
 
 def _computer_sentence(a: dict, data: dict) -> str:
@@ -302,6 +327,8 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return f"За, {duration_mn(int(a['duration_seconds']))} таймер тавилаа." + where
             case "list_reminders":
                 return _scheduled_list(list(data.get("items") or []), now_iso)
+            case "find_bus_stops":
+                return _stops_sentence(list(data.get("stops") or []))
             case "cancel_reminder":
                 cancelled = [str(t) for t in (data.get("cancelled") or [])]
                 return f"За, {', '.join(cancelled)} цуцаллаа." if cancelled else "За, цуцаллаа."
@@ -356,7 +383,8 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
             case "call_contact":
                 return f"За, {toward(a['contact_name'])} тань залгаж байна."
             case "open_maps":
-                return f"За, {toward(a['destination'])} замыг газрын зураг дээр нээлээ."
+                how = TRAVEL_MN.get(a.get("mode", ""), "")
+                return f"За, {toward(a['destination'])} {how}замыг газрын зураг дээр нээлээ."
             case "send_message":
                 return f"За, {toward(a['contact_name'])} бичих мессежийг бэлдлээ. Илгээх товчийг дараарай."
             case "open_url":
