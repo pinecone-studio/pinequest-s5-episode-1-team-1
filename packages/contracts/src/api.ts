@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { ActionRequest, ActionResult } from "./actions";
-import { DEFAULT_TIMEZONE, IanaTimezone, IsoDateTime, SpokenText, TtsVoice, Uuid } from "./common";
+import {
+  DEFAULT_TIMEZONE,
+  IanaTimezone,
+  IsoDateTime,
+  SpokenText,
+  TtsVoice,
+  Uuid,
+} from "./common";
 import { isDeviceTool, TravelMode } from "./tools";
 
 // ---------------------------------------------------------------------------
@@ -140,33 +147,61 @@ const AssistantTurnBase = z.object({
 });
 
 export const AssistantTurn = AssistantTurnBase.superRefine((turn, ctx) => {
-  const pendingDevice = turn.actions.some((a) => isDeviceTool(a.tool) && a.result === null);
+  const pendingDevice = turn.actions.some(
+    (a) => isDeviceTool(a.tool) && a.result === null,
+  );
   const needsConfirm = turn.actions.some((a) => a.confirmation.required);
 
   if (turn.requires_confirmation !== needsConfirm) {
-    ctx.addIssue({ code: "custom", message: "requires_confirmation must match actions[].confirmation.required" });
+    ctx.addIssue({
+      code: "custom",
+      message:
+        "requires_confirmation must match actions[].confirmation.required",
+    });
   }
   if (turn.requires_clarification !== (turn.clarification !== null)) {
-    ctx.addIssue({ code: "custom", message: "requires_clarification must match clarification presence" });
+    ctx.addIssue({
+      code: "custom",
+      message: "requires_clarification must match clarification presence",
+    });
   }
   if (turn.stage === "final" && pendingDevice) {
-    ctx.addIssue({ code: "custom", message: "a final turn cannot contain unexecuted device actions" });
+    ctx.addIssue({
+      code: "custom",
+      message: "a final turn cannot contain unexecuted device actions",
+    });
   }
   if (turn.stage === "awaiting_confirmation" && !needsConfirm) {
-    ctx.addIssue({ code: "custom", message: "awaiting_confirmation requires an action needing confirmation" });
+    ctx.addIssue({
+      code: "custom",
+      message: "awaiting_confirmation requires an action needing confirmation",
+    });
   }
   if (turn.stage === "awaiting_device" && (!pendingDevice || needsConfirm)) {
-    ctx.addIssue({ code: "custom", message: "awaiting_device requires pending device actions and no confirmation" });
+    ctx.addIssue({
+      code: "custom",
+      message:
+        "awaiting_device requires pending device actions and no confirmation",
+    });
   }
   if (turn.stage === "awaiting_clarification" && turn.clarification === null) {
-    ctx.addIssue({ code: "custom", message: "awaiting_clarification requires a clarification" });
+    ctx.addIssue({
+      code: "custom",
+      message: "awaiting_clarification requires a clarification",
+    });
   }
   for (const a of turn.actions) {
     if (!isDeviceTool(a.tool) && a.result === null) {
-      ctx.addIssue({ code: "custom", message: `backend tool ${a.tool} must include its result` });
+      ctx.addIssue({
+        code: "custom",
+        message: `backend tool ${a.tool} must include its result`,
+      });
     }
     if (a.confirmation.required && !a.confirmation.prompt) {
-      ctx.addIssue({ code: "custom", message: `action ${a.id} requires a confirmation prompt` });
+      ctx.addIssue({
+        code: "custom",
+        message: `action ${a.id} requires a confirmation prompt`,
+      });
     }
   }
 });
