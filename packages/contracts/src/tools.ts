@@ -26,6 +26,7 @@ export const TOOL_NAMES = [
   "create_routine",
   "remember",
   "forget",
+  "type_text",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -160,8 +161,14 @@ export const GetCurrentTimeArgs = z.object({
   timezone: IanaTimezone.optional(),
 });
 
+/** Which of the user's devices does it, when they name the other one ("компьютер дээрээ ..."). */
+export const TargetDevice = z
+  .enum(["computer", "phone"])
+  .describe("Only when the user names the other device: 'компьютер дээрээ нээ' -> computer, 'утсан дээрээ' -> phone");
+
 export const OpenUrlArgs = z.object({
   url: z.url({ protocol: /^https?$/ }).max(2000),
+  device: TargetDevice.optional(),
   /** What the page is, for the spoken reply ("YouTube", "Pinecone Academy-ийн сайт"). */
   title: z.string().max(100).optional(),
 });
@@ -179,6 +186,16 @@ export const OpenAppArgs = z.object({
     .max(300)
     .optional()
     .describe("Only when the user wants something found or played in the app: what to search for there ('Монгол дуу')"),
+  device: TargetDevice.optional(),
+});
+
+export const TypeTextArgs = z.object({
+  text: z
+    .string()
+    .trim()
+    .min(1)
+    .max(2000)
+    .describe("Exactly the words to type, as the user dictated them, with punctuation"),
 });
 
 export const SetTimerArgs = z.object({
@@ -295,6 +312,7 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   create_routine: CreateRoutineArgs,
   remember: RememberArgs,
   forget: ForgetArgs,
+  type_text: TypeTextArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -569,6 +587,17 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes: "Forgets the remembered facts containing the query words, or all of them.",
+  },
+  type_text: {
+    executor: "device",
+    strategy: ["react_native"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Types the text where the cursor is on the user's computer (Word, a chat, a browser field): dictation in " +
+      "Mongolian. Said to the phone, it is sent to the linked computer (sync commands).",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

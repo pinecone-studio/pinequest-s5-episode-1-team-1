@@ -20,6 +20,7 @@ web-build/
 apps/mobile/ios/
 apps/mobile/android/
 apps/mobile/modules/*/android/build/
+apps/api/web/
 
 # Signing material and secrets
 *.jks

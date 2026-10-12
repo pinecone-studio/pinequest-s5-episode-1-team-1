@@ -1,6 +1,13 @@
 import { Platform } from "react-native";
 import { create } from "zustand";
-import { MN, type ActionRequest, type ActionResult, type AssistantTurn, type RoutineKind } from "@bekhi/contracts";
+import {
+  MN,
+  type ActionRequest,
+  type ActionResult,
+  type AssistantTurn,
+  type DeviceCommand,
+  type RoutineKind,
+} from "@bekhi/contracts";
 import { toward } from "@/lib/mongolian";
 import { AssistantError, type AssistantClient } from "@/services/assistant/AssistantClient";
 import { PreviewAssistantClient } from "@/services/assistant/PreviewAssistantClient";
@@ -10,6 +17,7 @@ import { executeDeviceAction, iosActions, type ChosenContact } from "@/services/
 import { findContacts, type ContactCandidate } from "@/services/ios-actions/contacts";
 import { speak, stopSpeaking } from "@/services/speech/speak";
 import { startAlarmSync } from "@/services/sync/alarm-sync";
+import { listenForCommands } from "@/services/sync/commands";
 import { fetchVoices, loadSavedVoice, saveVoice, type Voice } from "@/services/speech/voices";
 
 export type Phase =
@@ -89,6 +97,21 @@ let seq = 0;
 let speechSeq = 0;
 /** The connection being made (or made); a routine waits for it, the API may still be waking up. */
 let connection: Promise<void> | null = null;
+
+/** What the user's computer asked of this phone, shown as it happens. */
+function fromComputer(command: DeviceCommand): string {
+  const args = command.arguments as { contact_name?: string; app_name?: string };
+  switch (command.tool) {
+    case "call_contact":
+      return `💻 Компьютерээс: ${toward(args.contact_name ?? "")} залгаж байна.`;
+    case "send_message":
+      return `💻 Компьютерээс: ${toward(args.contact_name ?? "")} мессеж бичиж байна.`;
+    case "open_app":
+      return `💻 Компьютерээс: ${args.app_name ?? "апп"} нээж байна.`;
+    default:
+      return "💻 Компьютерээс ирсэн хүсэлтийг хийж байна.";
+  }
+}
 
 /** What a routine asks, as if the user said it. */
 const ROUTINE_REQUESTS: Record<RoutineKind, string> = {
@@ -276,6 +299,13 @@ export const useAssistant = create<AssistantState>((set, get) => {
         if (client.mode !== "live") return;
         // Alarms and timers set on the user's other devices ring here too.
         startAlarmSync();
+        // Calls and messages the user asks of their computer happen on this phone.
+        listenForCommands(async (command) => {
+          push(msg("bekhi", fromComputer(command)));
+          const request = { ...command, confirmation: { required: false, prompt: null }, result: null };
+          const r = await executeDeviceAction(iosActions, request as unknown as ActionRequest);
+          return { status: r.status, executed_via: r.executed_via, error_code: r.error_code, data: r.data ?? null };
+        });
         const list = await fetchVoices(apiBaseUrl());
         if (!list) return;
         const saved = loadSavedVoice();

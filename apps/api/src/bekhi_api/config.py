@@ -78,6 +78,7 @@ class Settings:
     supabase_url: str | None
     supabase_service_role_key: str | None
     sync_api_url: str | None
+    web_dir: Path | None
     log_level: str
     cors_origins: list[str] = field(default_factory=list)
 
@@ -133,6 +134,8 @@ def get_settings() -> Settings:
         supabase_service_role_key=os.getenv("SUPABASE_SERVICE_ROLE_KEY") or None,
         # A PC agent (agent.py): pull the synced alarms from this API (the cloud) instead of keeping them.
         sync_api_url=os.getenv("SYNC_API_URL") or None,
+        # BEKHI on the computer (desktop_app.py): the web app built for this API, served at /.
+        web_dir=Path(os.environ["WEB_DIR"]) if os.getenv("WEB_DIR") else None,
         log_level=os.getenv("LOG_LEVEL") or "INFO",
         cors_origins=_csv(os.getenv("CORS_ORIGINS")) or ["http://localhost:8081"],
     )

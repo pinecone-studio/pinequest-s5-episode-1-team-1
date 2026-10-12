@@ -16,6 +16,7 @@ import base64
 import json
 import logging
 import os
+import re
 import sys
 import uuid
 from dataclasses import asdict, dataclass
@@ -36,6 +37,9 @@ OLD_NOTES_FILE_NAME = "Duud тэмдэглэл.txt"
 OLD_DATA_DIR_NAME = "Duud"
 CREATE_NO_WINDOW = 0x08000000
 SYNC_EVERY_SECONDS = 30
+COMMAND_WAIT_SECONDS = 20  # one long poll for commands from the user's other devices
+COMMAND_RETRY_SECONDS = 5
+COMMAND_MISSING_RETRY_SECONDS = 300
 # A synced alarm about to ring (or ringing) is not scheduled again: clocks differ by a few seconds.
 SYNC_MIN_LEAD = timedelta(seconds=5)
 
@@ -109,12 +113,17 @@ async def show_toast(title: str, body: str, alarm: bool = False) -> None:
 
 
 class DesktopScheduler:
-    def __init__(self, store: Path | None = None, sync: Any = None) -> None:
+    def __init__(self, store: Path | None = None, sync: Any = None, commands: Any = None,
+                 remote_commands: Any = None) -> None:
         self._store = store or _data_dir() / "reminders.json"
         self._link_file = self._store.with_name("sync.json")
         self._pending: list[Toast] = self._load()
         self._task: asyncio.Task | None = None
+        self._tasks: list[asyncio.Task] = []
         self._sync = sync  # sync.SyncStore
+        # What the user's other devices ask of this PC: commands.CommandStore here, RemoteCommands on the cloud.
+        self._commands = commands
+        self._remote_commands = remote_commands
         self._link: dict[str, str] | None = self._load_link()
         self._synced: set[str] = {t.sync_id for t in self._pending if t.sync_id}
 
@@ -194,10 +203,72 @@ class DesktopScheduler:
             self._pending = [t for t in self._pending if t not in stale]
             self._save()
         self._task = asyncio.create_task(self._run())
+        if self._commands is not None:
+            self._tasks.append(asyncio.create_task(self._serve_commands(self._take_here, self._finish_here, "local")))
+        if self._remote_commands is not None:
+            self._tasks.append(asyncio.create_task(self._serve_commands(self._take_remote, self._finish_remote, "cloud")))
 
     async def stop(self) -> None:
-        if self._task:
-            self._task.cancel()
+        for task in [self._task, *self._tasks]:
+            if task:
+                task.cancel()
+
+    def _account_hash(self) -> str | None:
+        """The linked account as stored by the sync stores (a PC agent keeps the code itself)."""
+        if self._link is None:
+            return None
+        key = self._link["account"]
+        if re.fullmatch(r"[0-9a-f]{64}", key):
+            return key
+        from . import sync
+
+        return sync.account_key(key)
+
+    async def _take_here(self) -> list[dict[str, Any]]:
+        account = self._account_hash()
+        if account is None:
+            await asyncio.sleep(COMMAND_RETRY_SECONDS)
+            return []
+        return [c.wire() for c in await self._commands.take(account, "computer", COMMAND_WAIT_SECONDS)]
+
+    async def _finish_here(self, command_id: str, outcome: dict[str, Any]) -> None:
+        account = self._account_hash()
+        if account is not None:
+            self._commands.finish(account, command_id, outcome)
+
+    async def _take_remote(self) -> list[dict[str, Any]]:
+        link = self._link
+        if link is None or re.fullmatch(r"[0-9a-f]{64}", link["account"]):
+            await asyncio.sleep(COMMAND_RETRY_SECONDS)  # not linked with a code the cloud understands
+            return []
+        return await self._remote_commands.take(link["account"], link["device_id"], "computer", COMMAND_WAIT_SECONDS)
+
+    async def _finish_remote(self, command_id: str, outcome: dict[str, Any]) -> None:
+        link = self._link
+        if link is not None:
+            await self._remote_commands.finish(link["account"], link["device_id"], command_id, outcome)
+
+    async def _serve_commands(self, take: Any, finish: Any, where: str) -> None:
+        """Runs, one by one, what the user's phone asks of this PC ("компьютерийн дууг багасга")."""
+        while True:
+            try:
+                taken = await take()
+            except Exception as e:  # offline, or the cloud is waking up
+                log.warning("%s commands failed: %s", where, type(e).__name__)
+                # A cloud API without commands yet (404) is asked again only now and then.
+                missing = getattr(getattr(e, "response", None), "status_code", None) == 404
+                await asyncio.sleep(COMMAND_MISSING_RETRY_SECONDS if missing else COMMAND_RETRY_SECONDS)
+                continue
+            for cmd in taken:
+                try:
+                    outcome = run(cmd["tool"], cmd["arguments"], self)
+                except Exception:
+                    log.exception("command %s failed", cmd["tool"])
+                    outcome = _result("failed", "DESKTOP_FAILED")
+                try:
+                    await finish(cmd["id"], outcome)
+                except Exception as e:
+                    log.warning("%s command result failed: %s", where, type(e).__name__)
 
     async def _run(self) -> None:
         last_sync = 0.0
@@ -382,6 +453,13 @@ def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[st
         })
     if tool == "computer_control":
         return computer_control(args)
+    if tool == "type_text":
+        from . import windows_controls as win
+
+        return _result("succeeded") if win.type_text(args["text"]) else _result("failed", "TYPING_FAILED")
+    if tool == "open_url":
+        os.startfile(args["url"])  # the default browser; the contract allows only http(s)
+        return _result("handed_off")
     fields = {
         "create_reminder": ("due_at", "reminder", lambda: (args["title"], args.get("notes") or "БЭХИ сануулга", False)),
         "create_alarm": ("fire_at", "alarm", lambda: (args.get("label") or "Сэрэх цаг боллоо", "БЭХИ сэрүүлэг", True)),
