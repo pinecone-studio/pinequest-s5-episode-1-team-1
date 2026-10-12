@@ -10,9 +10,10 @@ import time
 import wave
 from typing import Any
 
+import httpx
 from google.genai import errors, types
 
-from .base import FunctionCall, FunctionSpec, HistoryMessage, SearchError
+from .base import FunctionCall, FunctionSpec, HistoryMessage, ReaderError, SearchError
 
 # Measured on Mongolian test clips: a strict verbatim instruction halved the character error rate.
 # The old prompt listed assistant topics, and the model "heard" commands that were never spoken
@@ -33,6 +34,9 @@ RETRYABLE = {429, 500, 503, 504}
 # does not pay for a round trip that is certain to fail.
 QUOTA_COOLDOWN_SECONDS = 120
 _quota_exhausted_until: dict[str, float] = {}
+
+# Every model out of quota at once (the free tier's requests per minute): wait this long, once.
+QUOTA_RETRY_SECONDS = 6
 
 LIVE_TIMEOUT_SECONDS = 10
 LIVE_CHUNK_BYTES = 32_000  # 1 s of 16 kHz 16-bit mono
@@ -61,22 +65,30 @@ async def _generate(
 ) -> tuple[Any, str]:
     """The response and the model that produced it."""
     last: Exception | None = None
-    for model in _by_availability(models):
-        try:
-            resp = await client.aio.models.generate_content(
-                model=model,
-                contents=contents,
-                config=config.model_copy(update={"thinking_config": thinking_for(model)}) if thinking else config,
-            )
-            return resp, model
-        except (errors.ServerError, errors.ClientError) as e:
-            code = getattr(e, "code", None)
-            if code not in RETRYABLE:
-                raise
-            if code == 429:
-                _quota_exhausted_until[model] = time.monotonic() + QUOTA_COOLDOWN_SECONDS
-            log.warning("gemini model %s unavailable (%s), trying next", model, code)
-            last = e
+    for attempt in range(2):
+        codes: set[int | None] = set()
+        for model in _by_availability(models):
+            try:
+                resp = await client.aio.models.generate_content(
+                    model=model,
+                    contents=contents,
+                    config=config.model_copy(update={"thinking_config": thinking_for(model)}) if thinking else config,
+                )
+                return resp, model
+            except (errors.ServerError, errors.ClientError) as e:
+                code = getattr(e, "code", None)
+                if code not in RETRYABLE:
+                    raise
+                if code == 429:
+                    _quota_exhausted_until[model] = time.monotonic() + QUOTA_COOLDOWN_SECONDS
+                log.warning("gemini model %s unavailable (%s), trying next", model, code)
+                codes.add(code)
+                last = e
+        # A per-minute quota frees up within seconds; anything else will not get better by waiting.
+        if attempt == 0 and codes == {429}:
+            await asyncio.sleep(QUOTA_RETRY_SECONDS)
+            continue
+        break
     assert last is not None
     raise last
 
@@ -221,6 +233,35 @@ class GeminiWebSearch:
         chunks = (meta.grounding_chunks or []) if meta else []
         sources = [{"title": c.web.title, "url": c.web.uri} for c in chunks if c.web][:5]
         return {"answer": (resp.text or "").strip(), "sources": sources}
+
+
+READER_PROMPT = (
+    "You look at what the user of a Mongolian voice assistant shows you: their computer screen, or a document. "
+    "Answer their question in Mongolian (Cyrillic), as it will be read aloud: plain short sentences, no markdown, "
+    "no lists of symbols. Translate English or any other language into Mongolian. For an error message, say what "
+    "it means and what to do about it. Keep to about 100 words unless they ask for all of it. If the picture or "
+    "document does not show what they ask about, say so."
+)
+
+
+class GeminiReader:
+    """Reads a screenshot or a PDF with the planner's models (they all take pictures and PDFs)."""
+
+    def __init__(self, client: Any, models: list[str]) -> None:
+        self._client = client
+        self._models = models
+
+    async def read(self, data: bytes, mime_type: str, instruction: str) -> str:
+        try:
+            resp = await generate_with_fallback(
+                self._client,
+                self._models,
+                contents=[types.Part.from_bytes(data=data, mime_type=mime_type), instruction],
+                config=types.GenerateContentConfig(system_instruction=READER_PROMPT, max_output_tokens=1500),
+            )
+        except (errors.APIError, httpx.HTTPError) as e:
+            raise ReaderError(type(e).__name__) from e
+        return (resp.text or "").strip()
 
 
 class GeminiPlanner:

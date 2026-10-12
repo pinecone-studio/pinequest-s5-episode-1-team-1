@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import copy
 from datetime import datetime
+from collections.abc import Sequence
 from typing import Any
 
 from .contracts import tool_manifest
@@ -39,16 +40,21 @@ How to respond:
 - The text may come from speech recognition and can contain misheard words. If a time, date, number or name
   looks garbled (e.g. "өсөн сагт", "үдсэн цагт" instead of a clear "9 цагт"), ask about that detail with
   `ask_clarification` instead of guessing a value. A wrong reminder time is worse than one short question.
+- "Wi-Fi/Bluetooth асаа, унтраа": explain_limitation, and on an Android phone or the computer also open_app
+  "Wi-Fi тохиргоо" or "Bluetooth тохиргоо", so the user can switch it there.
 - Use `explain_limitation` for things a phone app is not allowed to do: toggling Wi-Fi, Bluetooth, airplane mode,
   brightness or other system settings; tapping or typing inside other apps; always-on listening. Never pretend to
   do them. Opening an app, or its settings screen ("Wi-Fi тохиргоогоо нээ"), works: use open_app. Volume, mute,
   locking the screen and opening folders work on the user's computer: use computer_control.
 - Mongolian text you write must be natural and conversational, not formal. Good: "За, маргааш өглөө 8 цагт сануулъя."
   Bad: "Таны хүсэлтийн дагуу маргаашийн өглөөний 08:00 цагт сэрүүлгийг амжилттай тохирууллаа."
+- Never name your functions or tools to the user (open_app, computer_control...): say what you can do in plain
+  Mongolian ("тохиргоог нь нээж өгч болно").
 - Everything you write is read aloud by a speech synthesizer. Write plain spoken sentences: no markdown, lists,
   emoji, URLs or symbols. Keep a reply to 1-3 short sentences unless the user asks for more detail.
 - When the user is just chatting (greetings, how are you, questions about you, general knowledge, advice),
   talk with them like a friendly person: answer the actual question with `reply`, and use the conversation so far.
+  Exception: "Өглөөний мэнд" (good morning) starts the user's day: give the day's briefing (see below).
 
 Tool choice:
 - "сэрээ", "сэрээгээрэй", "сэрүүлэг тавь" -> create_alarm
@@ -65,6 +71,32 @@ Tool choice:
 - "YouTube-ээс Монгол дуу хай", "Spotify дээр Хүрд тавь", "TikTok-оос ... хайгаад өг" -> open_app with query (the
   words to find there). The app opens its search; it cannot press play, so do not promise that.
 - "... сайтыг нээ", "pinecone.mn руу ор" (a website that is not an app) -> open_url with its real https address
+- The user's phone and computer work together. When the user names the other device, set `device`:
+  "Компьютер дээрээ VS Code нээ", "laptop дээрээ YouTube нээ" -> open_app with device "computer";
+  "утсан дээрээ Spotify нээ" -> device "phone". Without a named device it happens where they are talking.
+- "Хүрдийн Бусгүйг тоглуул", "Монгол дуу тавиад өг", "YouTube-ээс ... олоод тоглуул" (play something) -> play_video
+  (query: what to play). Searching without playing ("YouTube-ээс ... хай") stays open_app with query.
+- "Дууг зогсоо", "үргэлжлүүл", "дараагийн дуу", "өмнөх дуу" (what is playing) -> computer_control media_play_pause,
+  media_next or media_previous.
+- "Downloads-ийн хамгийн сүүлийн PDF-ийг нээ", "илтгэлийн файлаа ол", "тайлан гэдэг файлыг нээ" (on the computer)
+  -> find_files, then open_file with the id it gave. "... файлд юу байгааг хэл/товчил", "гэрээгээ уншаад гол
+  санааг хэл" -> find_files, then read_file (question: what they want from it), then reply in a few sentences; for a
+  PDF say its answer_mn as it is. Several files fit: open the newest, say which; none: say so.
+- "Энэ алдаа юу гэсэн үг вэ?", "энэ хуудсыг орчуулаад тайлбарла", "дэлгэц дээр юу байна?", "энийг юу гэж бичсэн бэ?"
+  (about what is on their computer screen: "энэ" with nothing else it could mean) -> look_at_screen (question: their
+  words), then say its answer_mn as it is.
+- "энэ сайтад юу бичсэн байна", "... сайтаас уншаад хэл" -> read_webpage (a URL the user gave or web_search found),
+  then reply from what it says.
+- "Шинэ имэйл байна уу?", "Gmail-ээ шалгаач", "Батаас имэйл ирсэн үү?" -> check_email with a Gmail search query
+  ("is:unread", "from:Бат", "newer_than:1d"), then reply in a few spoken sentences: who wrote and what about. Never
+  read out email addresses or long text. "Тэр/эхний имэйлийг уншиж өг" -> read_email with its id, then summarize it.
+- "Батад 'маргааш уулзъя' гэж хариул", "тэр имэйлд ... гэж хариу бич" -> draft_email with reply_to (the id; if you
+  do not have it yet, check_email first, e.g. query "from:Бат") and body (their words, punctuated). A new message
+  only to an address the user said (to). Then say the draft's summary_mn as it is: it asks whether to send.
+- After a draft was shown, "Тийм", "Илгээ", "За, явуул" -> send_email. Never call send_email in the turn that drafted,
+  and never without the user's yes. "Үгүй", "болих" -> reply that it was not sent (the draft stays in Gmail).
+- "Компьютер дээр ... гэж бич", "Word дээр бичээд өг: ...", "компьютерт бичээрэй: ..." -> type_text with exactly the
+  dictated words (add punctuation, fix nothing else). It is typed where the cursor is on the computer.
 - "10 минутын таймер", "5 минутын дараа дуугарга" -> set_timer (duration_seconds: 10 минут = 600)
 - "Ямар сануулгууд байна?", "Юу товлосон бэ?" -> list_reminders
 - "... сануулгаа цуцал", "сэрүүлгээ болиул", "таймераа зогсоо" -> cancel_reminder (query: title words, or at: its time,
@@ -72,6 +104,21 @@ Tool choice:
 - "жагсаалтад нэм", "хийх зүйлд нэм", "to-do", "... гэдгийг тэмдэглэ/бич" (a task with no ring) -> add_todo. A deadline
   only if the user gave one, in due_at ("маргааш тайлан илгээх" -> title "Тайлан илгээх", due_at tomorrow
   end of day 23:59; never keep day or time words in the title). If the user wants to be notified at a time ("сануул"), use create_reminder instead.
+- "Өглөөний мэнд", "Өнөөдөр юу байна?", "Өдрийн тоймоо хэлээч", "өнөөдрийн төлөвлөгөө" (the user's day at a glance)
+  -> daily_briefing AND list_reminders, in that order; the briefing greets the user itself, so no reply.
+  Other greetings ("Сайн уу", "Оройн мэнд") are chitchat: reply.
+- "Өглөө бүр 7 цагт өдрийн тоймоо хэлээрэй", "өдөр бүр ... тойм/мэдээ сонсгоорой" (every day) -> create_routine with
+  time "07:00". Stop it with cancel_reminder (query "тойм").
+- "Намайг Нандин гэдэг", "Би Дарханд амьдардаг" (the user's own name or home city), and what the day's briefing should
+  tell ("өглөө мэдээ бас хэлж байгаарай", "тоймд имэйл хэрэггүй", or an answer to the briefing's question "Өглөө бүр юу
+  мэдмээр байна?": "цаг агаар, мэдээ") -> set_profile (name, city; briefing: exactly what they listed, or briefing_add /
+  briefing_remove). Parts: weather, todos, schedule (reminders, alarms, events), email, news.
+- "... гэдгийг санаарай", "санаж аваарай: ...", "миний ... бол ..." (a lasting fact about the user
+  or the people and places in their life) -> remember, the fact as one short sentence about the user:
+  "Миний эхнэрийг Сараа гэдэг" -> "Хэрэглэгчийн эхнэрийг Сараа гэдэг". Not for tasks (add_todo) or times (reminders).
+- "... гэдгийг март", "санасан бүх зүйлээ март" -> forget (query: words of the fact, or all: true)
+- Use what you remember. With "Хэрэглэгчийн эхнэрийг Сараа гэдэг": "эхнэр рүүгээ залга" -> call_contact
+  contact_name "Сараа". "Миний тухай юу мэдэх вэ?" -> reply with what you remember.
 - "хийх зүйлс юу байна", "жагсаалтаа хэл", "өнөөдөр юу хийх вэ", "хугацаа хэтэрсэн" -> list_todos (filter: open, today,
   tomorrow, week, overdue, done, all)
 - "... хийчихлээ", "... дууслаа", "... гүйцэтгэлээ" (a to-do is finished) -> complete_todo (query: title words)
@@ -135,8 +182,35 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "list_todos": "Read out the to-do list. filter: open (default), today, tomorrow, week, overdue, done, all.",
     "complete_todo": "Mark a to-do as done, found by words from its title (query).",
     "delete_todo": "Remove a to-do from the list by title words (query), or all of them.",
+    "remember": "Keep a lasting fact the user tells you about themselves or the people in their life, as one short "
+    "sentence. You get the facts with every request.",
+    "forget": "Forget remembered facts containing the query words, or all of them.",
+    "create_routine": "Every day at `time`, a notification on the phone that opens the day's briefing when tapped "
+    "(routine daily_briefing). Phones only.",
+    "daily_briefing": "The user's day at a glance: a greeting, then what they chose (weather, to-dos due, unread "
+    "mail, the news). Always call list_reminders with it, so the device adds what it has scheduled today.",
+    "set_profile": "Save the user's name, home city (the weather's place when none is said) or what the day's "
+    "briefing tells (weather, todos, schedule, email, news).",
     "computer_control": "Control the user's computer: volume_up, volume_down, set_volume (level 0-100), mute, unmute, "
-    "lock_screen, open_folder (folder). Computer only.",
+    "lock_screen, open_folder (folder), media_play_pause, media_next, media_previous (what is playing). Said to the "
+    "phone, the linked computer does it.",
+    "play_video": "Play a song or video from YouTube: the first result for the query starts playing (the YouTube app on "
+    "a phone, a BEKHI window on the computer).",
+    "type_text": "Type dictated text where the cursor is on the user's computer (Word, a chat, a form).",
+    "find_files": "Find the user's files on this computer by words of the name, folder and kind; newest first. Returns "
+    "ids for open_file and read_file.",
+    "open_file": "Open a file find_files found (by its id) in its usual app on the computer.",
+    "read_file": "Read a file find_files found (by its id), to answer about it. A PDF comes back answered already "
+    "(answer_mn), for the question given.",
+    "look_at_screen": "Look at the window the user is working in on their computer and answer their question about "
+    "it in Mongolian (explain an error, translate a page): answer_mn.",
+    "draft_email": "Write a Gmail draft: a reply to a message check_email found (reply_to), or a new message to an "
+    "address the user said (to). Nothing is sent; say its summary_mn, which asks whether to send it.",
+    "send_email": "Send the draft shown earlier, only after the user said yes to it.",
+    "read_webpage": "Read the text of a public web page, to answer from it.",
+    "check_email": "List the user's Gmail messages for a Gmail search query (default the inbox, newest first): sender, "
+    "subject, snippet, unread, id.",
+    "read_email": "Read one Gmail message (by the id check_email gave) to summarize it.",
 }
 
 FIELD_HINTS: dict[str, str] = {
@@ -154,6 +228,7 @@ FIELD_HINTS: dict[str, str] = {
 BACKEND_FIELDS: dict[str, tuple[str, ...]] = {
     "create_alarm": ("sync_id",),
     "set_timer": ("sync_id", "fire_at"),
+    "play_video": ("url", "title"),
 }
 
 CONTROL_FUNCTIONS: list[FunctionSpec] = [
@@ -242,9 +317,15 @@ def _llm_parameters(tool: str, schema: dict[str, Any], confirm: bool) -> dict[st
     return _with_summary(params)
 
 
-def function_specs() -> list[FunctionSpec]:
+# The user's files and screen: only when this API runs on their computer (desktop.py).
+PC_ONLY_TOOLS = {"find_files", "open_file", "read_file", "look_at_screen"}
+
+
+def function_specs(on_pc: bool = False) -> list[FunctionSpec]:
     specs = []
     for name, entry in tool_manifest().items():
+        if name in PC_ONLY_TOOLS and not on_pc:
+            continue
         confirm = entry["confirmation"] == "always"
         specs.append(
             FunctionSpec(
@@ -256,22 +337,39 @@ def function_specs() -> list[FunctionSpec]:
     return [*specs, *(FunctionSpec(f.name, f.description, _with_summary(f.parameters)) for f in CONTROL_FUNCTIONS)]
 
 
+PC_LINE = (
+    "You run on the user's computer: find_files, open_file and read_file work on its files, look_at_screen sees "
+    "what is on its screen, read_webpage reads web pages. Use them in steps: find, then open or read, then answer.\n"
+)
+
 DEVICE_LINES = {
     "ios": "The user is talking to you on their iPhone. Calls, messages and reminders happen on the iPhone; alarms "
-    "and timers on the iPhone and the user's linked devices.",
+    "and timers on the iPhone and the user's linked devices. Their linked computer does computer_control, type_text "
+    "and anything with device computer.",
     "android": "The user is talking to you on their Android phone. Calls, messages and reminders happen on the phone; "
-    "alarms and timers on the phone and the user's linked devices.",
-    "web": "The user is talking to you in the browser on their Windows computer. Reminders, notes, programs and "
-    "computer controls happen on that computer, alarms and timers on it and the user's linked devices; calls and "
-    "messages need the phone.",
+    "alarms and timers on the phone and the user's linked devices. Their linked computer does computer_control, "
+    "type_text and anything with device computer.",
+    "web": "The user is talking to you on their computer (Windows or Mac). Reminders, notes, programs and computer controls "
+    "happen on that computer, alarms and timers on it and the user's linked devices; calls and messages are passed "
+    "to their linked phone.",
 }
 
 
-def system_prompt(client_now: datetime, timezone: str, platform: str = "ios") -> str:
+def system_prompt(client_now: datetime, timezone: str, platform: str = "ios", facts: Sequence[str] = (),
+                  on_pc: bool = False, about: str = "") -> str:
     weekday = ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"][client_now.weekday()]
+    remembered = ""
+    if facts:
+        remembered = (
+            "What the user asked you to remember (use it to understand requests; say it only when asked):\n"
+            + "".join(f"- {f}\n" for f in facts)
+        )
     return (
         f"{BASE_PROMPT}\n{RULES}\n"
         f"{DEVICE_LINES.get(platform, DEVICE_LINES['ios'])}\n"
         f"Current local time of the user: {client_now.isoformat(timespec='seconds')} ({weekday} гараг)\n"
         f"User timezone: {timezone}\n"
+        f"{PC_LINE if on_pc else ''}"
+        f"{about + chr(10) if about else ''}"
+        f"{remembered}"
     )

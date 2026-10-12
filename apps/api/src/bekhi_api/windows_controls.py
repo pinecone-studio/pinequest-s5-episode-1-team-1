@@ -1,4 +1,4 @@
-"""Windows controls for desktop actions: volume (Core Audio), lock screen, standard folders.
+"""Windows controls for desktop actions: volume (Core Audio), lock screen, standard folders, typing.
 
 Raw COM through ctypes, so the API needs no extra packages. Windows only; import it lazily.
 """
@@ -6,11 +6,12 @@ Raw COM through ctypes, so the API needs no extra packages. Windows only; import
 from __future__ import annotations
 
 import ctypes
+import time
 import uuid
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from ctypes import POINTER, byref, c_float, c_int, c_uint, c_ulong, c_void_p
-from ctypes.wintypes import BOOL
+from ctypes.wintypes import BOOL, DWORD, LONG, WORD
 from typing import TypeVar
 
 T = TypeVar("T")
@@ -121,6 +122,77 @@ def change_volume(*, delta: int | None = None, level: int | None = None, mute: b
         return round(target * 100)
 
     return _with_speaker_volume(work)
+
+
+INPUT_KEYBOARD = 1
+KEYEVENTF_KEYUP = 0x0002
+KEYEVENTF_UNICODE = 0x0004
+VK_RETURN = 0x0D
+VK_TAB = 0x09
+VK_MENU = 0x12  # Alt
+MEDIA_KEYS = {"media_play_pause": 0xB3, "media_next": 0xB0, "media_previous": 0xB1}
+KEYEVENTF_EXTENDEDKEY = 0x0001
+BEKHI_WINDOW_TITLE = "BEKHI"  # the app window (desktop_app.py): the page title
+
+
+class _KeyboardInput(ctypes.Structure):
+    _fields_ = [("wVk", WORD), ("wScan", WORD), ("dwFlags", DWORD), ("time", DWORD), ("dwExtraInfo", ctypes.c_size_t)]
+
+
+class _MouseInput(ctypes.Structure):
+    _fields_ = [("dx", LONG), ("dy", LONG), ("mouseData", DWORD), ("dwFlags", DWORD), ("time", DWORD),
+                ("dwExtraInfo", ctypes.c_size_t)]
+
+
+class _InputUnion(ctypes.Union):
+    _fields_ = [("ki", _KeyboardInput), ("mi", _MouseInput)]  # the mouse member sets INPUT's size
+
+
+class _Input(ctypes.Structure):
+    _fields_ = [("type", DWORD), ("u", _InputUnion)]
+
+
+def _key(vk: int, scan: int, flags: int) -> _Input:
+    return _Input(INPUT_KEYBOARD, _InputUnion(ki=_KeyboardInput(vk, scan, flags, 0, 0)))
+
+
+def type_text(text: str) -> bool:
+    """Types `text` where the cursor is, in whatever app has the focus, as if from the keyboard.
+    Unicode key events, so Cyrillic needs no Mongolian keyboard layout."""
+    events: list[_Input] = []
+    for ch in text.replace("\r\n", "\n"):
+        if ch == "\n":
+            events += [_key(VK_RETURN, 0, 0), _key(VK_RETURN, 0, KEYEVENTF_KEYUP)]
+            continue
+        units = ch.encode("utf-16-le")
+        for i in range(0, len(units), 2):
+            unit = int.from_bytes(units[i : i + 2], "little")
+            events += [_key(0, unit, KEYEVENTF_UNICODE), _key(0, unit, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP)]
+    if not events:
+        return True
+    if _foreground_title() == BEKHI_WINDOW_TITLE:
+        # Said to BEKHI's own window: type into the window the user was in before (Alt+Tab).
+        _send([_key(VK_MENU, 0, 0), _key(VK_TAB, 0, 0), _key(VK_TAB, 0, KEYEVENTF_KEYUP), _key(VK_MENU, 0, KEYEVENTF_KEYUP)])
+        time.sleep(0.4)
+    return _send(events)
+
+
+def press_media_key(action: str) -> bool:
+    """Play/pause, next or previous for whatever is playing (YouTube in a browser, Spotify)."""
+    vk = MEDIA_KEYS[action]
+    return _send([_key(vk, 0, KEYEVENTF_EXTENDEDKEY), _key(vk, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP)])
+
+
+def _send(events: list[_Input]) -> bool:
+    sent = ctypes.windll.user32.SendInput(len(events), (_Input * len(events))(*events), ctypes.sizeof(_Input))
+    return sent == len(events)
+
+
+def _foreground_title() -> str:
+    hwnd = ctypes.windll.user32.GetForegroundWindow()
+    title = ctypes.create_unicode_buffer(256)
+    ctypes.windll.user32.GetWindowTextW(hwnd, title, 256)
+    return title.value.strip()
 
 
 def lock_screen() -> bool:

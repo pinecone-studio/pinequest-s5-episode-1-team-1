@@ -34,10 +34,15 @@ def _ctx(conversation_id: str | None = None) -> dict[str, Any]:
 
 
 @pytest.fixture(scope="module")
-def live_client():
-    with TestClient(main_mod.app) as c:
-        main_mod.app.state.http = httpx.AsyncClient(transport=httpx.MockTransport(open_meteo))
-        yield c
+def live_client(tmp_path_factory):
+    # To-dos and remembered facts go to a scratch folder, not the API's own data.
+    data = tmp_path_factory.mktemp("live-data")
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setenv("TODO_FILE", str(data / "todos.json"))
+        mp.setenv("MEMORY_FILE", str(data / "memory.json"))
+        with TestClient(main_mod.app) as c:
+            main_mod.app.state.http = httpx.AsyncClient(transport=httpx.MockTransport(open_meteo))
+            yield c
 
 
 def _check(turn: dict[str, Any], expected: dict[str, Any], utterance: str) -> None:

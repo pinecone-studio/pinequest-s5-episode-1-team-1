@@ -20,3 +20,9 @@ works only while every linked device talks to the same API.
 written only by the backend with the service role key. Without Supabase the API keeps a JSON file per
 account next to `TODO_FILE`; a request without a sync code (an app from before accounts) uses the one list
 in `TODO_FILE` itself.
+
+## Remembered facts (in use)
+
+`migrations/20261010000000_memories.sql`: `memories`, the short facts each account asked BEKHI to remember
+("Хэрэглэгчийн эхнэрийг Сараа гэдэг"), at most 50, read and written only by the backend. Without Supabase
+they are a JSON file per account next to `MEMORY_FILE`.

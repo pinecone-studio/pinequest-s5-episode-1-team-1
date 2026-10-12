@@ -71,3 +71,12 @@ export function syncHeaders(): Record<string, string> {
   const { code, deviceId } = ensureIdentity();
   return { [SYNC_CODE_HEADER]: code, [SYNC_DEVICE_HEADER]: deviceId };
 }
+
+/** What the computer's QR code holds: opens BEKHI on the phone and joins the computer's account. */
+export const linkUrl = (code: string) => `bekhi://link?code=${code}`;
+
+/** The code in a scanned QR code ("bekhi://link?code=...") or in what the user typed. */
+export function codeFromLink(text: string): string | null {
+  const match = /[?&]code=([^&#\s]+)/.exec(text);
+  return normalizeSyncCode(match?.[1] ? decodeURIComponent(match[1]) : text);
+}
