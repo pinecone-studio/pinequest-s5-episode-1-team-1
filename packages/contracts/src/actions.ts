@@ -72,6 +72,7 @@ export const ActionRequest = z.discriminatedUnion("tool", [
   actionRequest("create_alarm"),
   actionRequest("get_weather"),
   actionRequest("open_maps"),
+  actionRequest("find_bus_stops"),
   actionRequest("create_note"),
   actionRequest("send_message"),
   actionRequest("web_search"),

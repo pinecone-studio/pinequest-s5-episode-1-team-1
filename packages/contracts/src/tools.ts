@@ -8,6 +8,7 @@ export const TOOL_NAMES = [
   "create_alarm",
   "get_weather",
   "open_maps",
+  "find_bus_stops",
   "create_note",
   "send_message",
   "web_search",
@@ -158,6 +159,9 @@ export const OpenMapsArgs = z.object({
   destination: z.string().min(1).max(200),
   mode: TravelMode.default("driving"),
 });
+
+/** Bus stops around the phone's own position: nothing to say but "where". */
+export const FindBusStopsArgs = z.object({});
 
 export const CreateNoteArgs = z.object({
   title: z.string().max(200).optional(),
@@ -438,6 +442,7 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   create_alarm: CreateAlarmArgs,
   get_weather: GetWeatherArgs,
   open_maps: OpenMapsArgs,
+  find_bus_stops: FindBusStopsArgs,
   create_note: CreateNoteArgs,
   send_message: SendMessageArgs,
   web_search: WebSearchArgs,
@@ -557,6 +562,17 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: "BekhiOpenMapsIntent",
     notes: "Apple Maps directions URL (maps.apple.com); Google Maps URL scheme if installed and preferred.",
+  },
+  find_bus_stops: {
+    executor: "device",
+    strategy: ["react_native"],
+    confirmation: "never",
+    permissions: ["location"],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The phone reads its own position, asks the backend for nearby stops (Google Places API) and opens " +
+      "BEKHI's map with them. Only stop names and distances go back in the result, never the position.",
   },
   create_note: {
     executor: "device",

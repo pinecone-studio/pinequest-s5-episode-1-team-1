@@ -125,6 +125,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
       return service.createNote(action.arguments);
     case "open_maps":
       return service.openMaps(action.arguments);
+    case "find_bus_stops":
+      return service.findBusStops(action.arguments);
     case "open_url":
       return service.openUrl(action.arguments);
     case "open_app":

@@ -62,7 +62,8 @@ uv run pytest -m live -v
 | GET | `/api/v1/assistant/voices` | ElevenLabs voices the app can pick (`config.ELEVENLABS_VOICES`) and the default |
 | POST | `/api/v1/assistant/tts` | `{text, voice?}` → MP3 (ElevenLabs) or WAV (Gemini fallback). A voice that needs a paid plan is read in the default voice, with `X-Bekhi-Voice-Fallback: paid_plan_required` |
 | POST | `/api/v1/assistant/actions/results` | device outcomes → final Mongolian answer |
-| POST | `/api/v1/maps/directions` | `{origin: {latitude, longitude}, destination, mode}` → route to draw (Google Routes API, `GOOGLE_MAPS_API_KEY`): `distance_m`, `duration_s`, `path`, `steps` |
+| POST | `/api/v1/maps/directions` | `{origin: {latitude, longitude}, destination, mode}` → route to draw (Google Routes API, `GOOGLE_MAPS_API_KEY`): `distance_m`, `duration_s`, `path`, `steps`. With `mode: "transit"`, ride steps carry `transit`: line number, color, stops to get on and off, stop count, timetabled departure |
+| POST | `/api/v1/maps/stops/nearby` | `{origin, radius_m?}` → bus stops nearest first (Google Places API (New), same key; enable "Places API (New)" for it) |
 | POST | `/api/v1/desktop/actions` | `{tool, arguments}` → ActionResult, run on this Windows PC. Requests from localhost only; `DESKTOP_ACTIONS=false` turns it off |
 
 Agent loop (`pipeline.py`): when Gemini calls a backend tool (`web_search`, `get_weather`,

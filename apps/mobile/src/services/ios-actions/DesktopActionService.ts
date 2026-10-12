@@ -3,7 +3,7 @@ import { desktopBaseUrl, PC_AGENT_URL } from "@/services/assistant/connect";
 import { appWebsite, findCatalogApp } from "./app-catalog";
 import type { ActionOutcome } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
-import { googleMapsUrl } from "./maps";
+import { findStopsOnMap, googleMapsUrl } from "./maps";
 
 /**
  * The web app on a Windows PC: reminders, alarms, event reminders, notes, apps and the volume
@@ -30,6 +30,8 @@ export class DesktopActionService extends LinkingIOSActionService {
   };
 
   openMaps = (args: ToolArguments<"open_maps">) => this.openUrl({ url: googleMapsUrl(args) });
+  /** The browser's own position, on BEKHI's map page. */
+  findBusStops = () => findStopsOnMap();
 
   /** The PC's own app; a search, or a known app this PC lacks (or no PC), goes to its website. */
   openApp = async (args: ToolArguments<"open_app">): Promise<ActionOutcome> => {

@@ -7,6 +7,8 @@ and gets back the route to draw. Logs never contain either place.
 from __future__ import annotations
 
 import logging
+import re
+from datetime import datetime
 from typing import Any
 
 import httpx
@@ -22,11 +24,38 @@ FIELD_MASK = ",".join([
     "routes.polyline.geoJsonLinestring",
     "routes.legs.endLocation",
     "routes.legs.steps.distanceMeters",
+    "routes.legs.steps.staticDuration",
     "routes.legs.steps.navigationInstruction.instructions",
+    "routes.legs.steps.transitDetails.headsign",
+    "routes.legs.steps.transitDetails.stopCount",
+    "routes.legs.steps.transitDetails.stopDetails",
+    "routes.legs.steps.transitDetails.transitLine.name",
+    "routes.legs.steps.transitDetails.transitLine.nameShort",
+    "routes.legs.steps.transitDetails.transitLine.color",
+    "routes.legs.steps.transitDetails.transitLine.textColor",
+    "routes.legs.steps.transitDetails.transitLine.vehicle.type",
 ])
 MAX_PATH_POINTS = 5000
 MAX_STEPS = 200
 MAX_INSTRUCTION_CHARS = 500
+MAX_NAME_CHARS = 200
+MAX_LINE_CHARS = 100
+HEX_COLOR = re.compile(r"#[0-9a-fA-F]{6}")
+# Google vehicle type -> what the app draws.
+VEHICLES = {
+    "BUS": "bus",
+    "INTERCITY_BUS": "bus",
+    "TROLLEYBUS": "trolleybus",
+    "TRAM": "tram",
+    "LIGHT_RAIL": "tram",
+    "RAIL": "train",
+    "HEAVY_RAIL": "train",
+    "COMMUTER_TRAIN": "train",
+    "HIGH_SPEED_TRAIN": "train",
+    "LONG_DISTANCE_TRAIN": "train",
+    "METRO_RAIL": "train",
+    "SUBWAY": "train",
+}
 
 # HTTP status -> error code. A destination Google cannot place is a 400 or a response without routes.
 ERRORS = {400: "ROUTE_NOT_FOUND", 404: "ROUTE_NOT_FOUND", 401: "MAPS_KEY_INVALID", 403: "MAPS_KEY_INVALID"}
@@ -105,18 +134,70 @@ def _route(route: dict[str, Any]) -> dict[str, Any]:
         {
             "instruction": (s.get("navigationInstruction") or {}).get("instructions", "")[:MAX_INSTRUCTION_CHARS],
             "distance_m": int(s.get("distanceMeters") or 0),
+            "duration_s": _seconds(s.get("staticDuration")),
+            "transit": _transit(s.get("transitDetails")),
         }
         for leg in legs
         for s in leg.get("steps") or []
     ]
     return {
         "distance_m": int(route.get("distanceMeters") or 0),
-        # Google writes durations as seconds with an "s": "754s".
-        "duration_s": int(float(str(route.get("duration") or "0s").rstrip("s"))),
+        "duration_s": _seconds(route.get("duration")),
         "destination": {"latitude": end["latitude"], "longitude": end["longitude"]},
         "path": path,
-        "steps": [s for s in steps if s["instruction"]][:MAX_STEPS],
+        "steps": [s for s in steps if s["instruction"] or s["transit"]][:MAX_STEPS],
     }
+
+
+def _seconds(value: Any) -> int:
+    """Google writes durations as seconds with an "s": "754s"."""
+    try:
+        return max(0, int(float(str(value or "0s").rstrip("s"))))
+    except ValueError:
+        return 0
+
+
+def _transit(details: dict[str, Any] | None) -> dict[str, Any] | None:
+    if not details:
+        return None
+    line = details.get("transitLine") or {}
+    name = (line.get("nameShort") or line.get("name") or "").strip()[:MAX_LINE_CHARS]
+    if not name:
+        return None
+    stops = details.get("stopDetails") or {}
+    return {
+        "vehicle": VEHICLES.get((line.get("vehicle") or {}).get("type", ""), "other"),
+        "line": name,
+        "color": _color(line.get("color")),
+        "text_color": _color(line.get("textColor")),
+        "headsign": (details.get("headsign") or "")[:MAX_NAME_CHARS] or None,
+        "departure_stop": _stop(stops.get("departureStop")),
+        "arrival_stop": _stop(stops.get("arrivalStop")),
+        "stop_count": int(details.get("stopCount") or 0),
+        "departure_time": _time(stops.get("departureTime")),
+    }
+
+
+def _stop(stop: dict[str, Any] | None) -> dict[str, Any]:
+    stop = stop or {}
+    at = (stop.get("location") or {}).get("latLng") or {}
+    location = (
+        {"latitude": at["latitude"], "longitude": at["longitude"]} if "latitude" in at and "longitude" in at else None
+    )
+    return {"name": (stop.get("name") or "")[:MAX_NAME_CHARS], "location": location}
+
+
+def _color(value: Any) -> str | None:
+    return value.upper() if isinstance(value, str) and HEX_COLOR.fullmatch(value) else None
+
+
+def _time(value: Any) -> str | None:
+    """RFC 3339 from Google ("2026-10-12T02:45:00Z") -> ISO 8601 with an offset, or None."""
+    try:
+        at = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        return None
+    return at.isoformat(timespec="seconds") if at.tzinfo else None
 
 
 def _thin(points: list[Any], limit: int) -> list[Any]:
