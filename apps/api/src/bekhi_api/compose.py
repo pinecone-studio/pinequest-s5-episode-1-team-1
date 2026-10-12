@@ -46,6 +46,7 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "create_routine": ("өдөр бүрийн тойм тохируулах", "өдөр бүрийн тойм тохируулахад"),
     "remember": ("санах", "санахад"),
     "forget": ("мартах", "мартахад"),
+    "type_text": ("компьютер дээр бичих", "компьютер дээр бичихэд"),
 }
 
 FOLDER_NAMES = {
@@ -73,6 +74,9 @@ UNSUPPORTED_BY_CODE = {
     "ANDROID_CANNOT_OPEN_APPS": "Expo Go дээр '{app}' аппыг нээж чадсангүй. БЭХИ-гийн Android апп суулгавал утсан "
     "дээрх ямар ч аппыг нэрээр нь нээнэ.",
     "ANDROID_NO_SYSTEM_CONTROL": "Android утсан дээр БЭХИ одоохондоо дууны түвшин өөрчлөх, утсыг түгжих боломжгүй.",
+    # Commands for the user's other device (commands.py) when no such device is listening.
+    "NO_COMPUTER": "Компьютер холбогдоогүй байна. Компьютер дээрээ БЭХИ-г асаагаад энэ утастай нэг кодоор холбоорой.",
+    "NO_PHONE": "Утас холбогдоогүй байна. Утсан дээрээ БЭХИ-г нээгээд энэ компьютертэй нэг кодоор холбоорой.",
     # The cloud web app on a PC without BEKHI's PC agent running (apps/api agent.py).
     "DESKTOP_AGENT_OFF": "Компьютер дээр {verb} боломжгүй байна: энэ компьютерт БЭХИ агент асаагүй байна.",
 }
@@ -100,6 +104,9 @@ FAILED_BY_CODE = {
     "TODO_AMBIGUOUS": "Жагсаалтад хэд хэдэн ийм зүйл байна. Аль нь болохыг нэрээр нь тодорхой хэлээрэй.",
     "TODO_FULL": "Жагсаалт дүүрсэн байна. Заримыг нь устгана уу.",
     "TODO_UNAVAILABLE": "Жагсаалт руу одоо хандаж чадсангүй. Түр хүлээгээд дахин хэлээрэй.",
+    "COMPUTER_NO_ANSWER": "Компьютер хариу өгсөнгүй. Компьютер дээрээ БЭХИ асаалттай эсэхийг шалгаарай.",
+    "PHONE_NO_ANSWER": "Утас хариу өгсөнгүй. Утсан дээрээ БЭХИ нээлттэй эсэхийг шалгаарай.",
+    "TYPING_FAILED": "Компьютер дээр бичиж чадсангүй. Бичих газраа дараад дахин хэлээрэй.",
     "MEMORY_FULL": "Санах зүйл дүүрсэн байна. Заримыг нь мартуулаарай.",
     "MEMORY_NOT_FOUND": "Тийм зүйл санаагүй байна.",
     "MEMORY_UNAVAILABLE": "Санах ой руу одоо хандаж чадсангүй. Түр хүлээгээд дахин хэлээрэй.",
@@ -212,8 +219,21 @@ def sync_note(data: dict | None) -> str:
     return f"Бусад төхөөрөмж рүү бас илгээлээ: {names}."
 
 
+DEVICE_PLACE = {"computer": "компьютер дээр", "phone": "утсан дээр"}
+
+
+def _on_device(sentence: str, data: dict | None) -> str:
+    """Done by the user's other device (commands.py): "За, компьютер дээр VS Code нээлээ"."""
+    place = DEVICE_PLACE.get(str((data or {}).get("device")))
+    if not place or "компьютер" in sentence or "утас" in sentence:
+        return sentence
+    return sentence.replace("За, ", f"За, {place} ", 1) if sentence.startswith("За, ") else sentence
+
+
 def sentence_for(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
     sentence = _sentence(action, r, now_iso)
+    if r.status in ("succeeded", "handed_off"):
+        sentence = _on_device(sentence, r.data)
     if action.tool in ("create_alarm", "set_timer") and r.status == "succeeded":
         sentence = f"{sentence} {sync_note(r.data)}".strip()
     if action.tool == "cancel_reminder" and ((r.data or {}).get("sync") or {}).get("status") == "failed":
@@ -242,6 +262,8 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return f"За, {', '.join(cancelled)} цуцаллаа." if cancelled else "За, цуцаллаа."
             case "computer_control":
                 return _computer_sentence(a, data)
+            case "type_text":
+                return "За, компьютер дээр бичлээ."
             case "create_routine":
                 return (
                     f"За, өдөр бүр {clock_mn(a['time'])} өдрийн тоймын мэдэгдэл ирнэ. "

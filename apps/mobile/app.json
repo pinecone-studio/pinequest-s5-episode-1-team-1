@@ -11,6 +11,10 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "mn.bekhi.app",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
         "NSMicrophoneUsageDescription": "Таны хэлсэн үгийг сонсож ойлгохын тулд БЭХИ микрофон ашиглана.",
         "NSContactsUsageDescription": "Таны хэлсэн хүн рүү залгах, мессеж бичихийн тулд БЭХИ контактаас утасны дугаарыг хайна. Нэр, дугаар утаснаас гарахгүй."

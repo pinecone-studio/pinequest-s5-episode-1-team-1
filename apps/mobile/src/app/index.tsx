@@ -147,6 +147,21 @@ export default function Chat() {
     await listen();
   }
 
+  // On the computer the space bar is the talk button too (except while typing in a field).
+  const orbRef = useRef(onOrb);
+  orbRef.current = onOrb;
+  useEffect(() => {
+    if (Platform.OS !== "web" || typeof window === "undefined") return;
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (e.code !== "Space" || e.repeat || target?.closest("input, textarea, [contenteditable='true']")) return;
+      e.preventDefault();
+      void orbRef.current();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   async function cancelListening() {
     tap();
     await voice.stop();

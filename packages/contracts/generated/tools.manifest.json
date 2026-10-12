@@ -401,6 +401,14 @@
             "maxLength": 2000,
             "format": "uri"
           },
+          "device": {
+            "type": "string",
+            "enum": [
+              "computer",
+              "phone"
+            ],
+            "description": "Only when the user names the other device: 'компьютер дээрээ нээ' -> computer, 'утсан дээрээ' -> phone"
+          },
           "title": {
             "type": "string",
             "maxLength": 100
@@ -438,6 +446,14 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 300
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "computer",
+              "phone"
+            ],
+            "description": "Only when the user names the other device: 'компьютер дээрээ нээ' -> computer, 'утсан дээрээ' -> phone"
           }
         },
         "required": [
@@ -818,6 +834,33 @@
             "type": "boolean"
           }
         }
+      }
+    },
+    {
+      "name": "type_text",
+      "executor": "device",
+      "strategy": [
+        "react_native"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Types the text where the cursor is on the user's computer (Word, a chat, a browser field): dictation in Mongolian. Said to the phone, it is sent to the linked computer (sync commands).",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "Exactly the words to type, as the user dictated them, with punctuation"
+          }
+        },
+        "required": [
+          "text"
+        ]
       }
     }
   ]

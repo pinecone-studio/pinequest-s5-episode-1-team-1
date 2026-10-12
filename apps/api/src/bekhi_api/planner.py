@@ -67,6 +67,11 @@ Tool choice:
 - "YouTube-ээс Монгол дуу хай", "Spotify дээр Хүрд тавь", "TikTok-оос ... хайгаад өг" -> open_app with query (the
   words to find there). The app opens its search; it cannot press play, so do not promise that.
 - "... сайтыг нээ", "pinecone.mn руу ор" (a website that is not an app) -> open_url with its real https address
+- The user's phone and computer work together. When the user names the other device, set `device`:
+  "Компьютер дээрээ VS Code нээ", "laptop дээрээ YouTube нээ" -> open_app with device "computer";
+  "утсан дээрээ Spotify нээ" -> device "phone". Without a named device it happens where they are talking.
+- "Компьютер дээр ... гэж бич", "Word дээр бичээд өг: ...", "компьютерт бичээрэй: ..." -> type_text with exactly the
+  dictated words (add punctuation, fix nothing else). It is typed where the cursor is on the computer.
 - "10 минутын таймер", "5 минутын дараа дуугарга" -> set_timer (duration_seconds: 10 минут = 600)
 - "Ямар сануулгууд байна?", "Юу товлосон бэ?" -> list_reminders
 - "... сануулгаа цуцал", "сэрүүлгээ болиул", "таймераа зогсоо" -> cancel_reminder (query: title words, or at: its time,
@@ -156,7 +161,8 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "daily_briefing": "The user's day at a glance: a greeting, today's weather and the to-dos due today or overdue. "
     "Always call list_reminders with it, so the device adds what it has scheduled today.",
     "computer_control": "Control the user's computer: volume_up, volume_down, set_volume (level 0-100), mute, unmute, "
-    "lock_screen, open_folder (folder). Computer only.",
+    "lock_screen, open_folder (folder). Said to the phone, the linked computer does it.",
+    "type_text": "Type dictated text where the cursor is on the user's computer (Word, a chat, a form).",
 }
 
 FIELD_HINTS: dict[str, str] = {
@@ -278,12 +284,14 @@ def function_specs() -> list[FunctionSpec]:
 
 DEVICE_LINES = {
     "ios": "The user is talking to you on their iPhone. Calls, messages and reminders happen on the iPhone; alarms "
-    "and timers on the iPhone and the user's linked devices.",
+    "and timers on the iPhone and the user's linked devices. Their linked computer does computer_control, type_text "
+    "and anything with device computer.",
     "android": "The user is talking to you on their Android phone. Calls, messages and reminders happen on the phone; "
-    "alarms and timers on the phone and the user's linked devices.",
-    "web": "The user is talking to you in the browser on their Windows computer. Reminders, notes, programs and "
-    "computer controls happen on that computer, alarms and timers on it and the user's linked devices; calls and "
-    "messages need the phone.",
+    "alarms and timers on the phone and the user's linked devices. Their linked computer does computer_control, "
+    "type_text and anything with device computer.",
+    "web": "The user is talking to you on their Windows computer. Reminders, notes, programs and computer controls "
+    "happen on that computer, alarms and timers on it and the user's linked devices; calls and messages are passed "
+    "to their linked phone.",
 }
 
 

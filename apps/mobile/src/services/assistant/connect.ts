@@ -35,6 +35,11 @@ export function desktopBaseUrl(): string {
   return host === "localhost" || host === "127.0.0.1" || host === here ? base : PC_AGENT_URL;
 }
 
+/** BEKHI's window on the computer is served by the API itself (apps/api desktop_app.py): use it first. */
+function servedBy(): string | null {
+  return Platform.OS === "web" && typeof window !== "undefined" ? window.location.origin : null;
+}
+
 /**
  * EXPO_PUBLIC_API_URL wins. Otherwise the same host that serves the app: the browser's
  * host on web, the dev machine's LAN address in Expo Go. An installed APK has neither.
@@ -70,7 +75,7 @@ export function connectAssistant(): Promise<AssistantClient> {
 }
 
 async function findApi(): Promise<string | null> {
-  const known = [configuredBaseUrl(), loadServerAddress()].filter((b): b is string => b !== null);
+  const known = [servedBy(), configuredBaseUrl(), loadServerAddress()].filter((b): b is string => b !== null);
   for (const base of new Set(known)) {
     if (await isBekhiApi(base, base.startsWith("https://") ? WAKE_TIMEOUT_MS : PROBE_TIMEOUT_MS)) return base;
   }

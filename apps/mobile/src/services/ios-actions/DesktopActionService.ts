@@ -20,6 +20,7 @@ export class DesktopActionService extends LinkingIOSActionService {
   listReminders = (args: ToolArguments<"list_reminders">) => this.onPc("list_reminders", args);
   cancelReminder = (args: ToolArguments<"cancel_reminder">) => this.onPc("cancel_reminder", args);
   computerControl = (args: ToolArguments<"computer_control">) => this.onPc("computer_control", args);
+  typeText = (args: ToolArguments<"type_text">) => this.onPc("type_text", args);
 
   openMaps = (args: ToolArguments<"open_maps">) => this.openUrl({ url: googleMapsUrl(args) });
 
