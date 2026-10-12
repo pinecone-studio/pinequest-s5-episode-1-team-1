@@ -122,7 +122,7 @@ async def _met_norway(http: httpx.AsyncClient, place: dict[str, Any], day: date,
     temps: list[float] = []
     sky: tuple[float, str] | None = None  # (hours from noon, symbol)
     for step in r.json()["properties"]["timeseries"]:
-        local = datetime.fromisoformat(step["time"].replace("Z", "+00:00")).astimezone(tz)
+        local = datetime.fromisoformat(step["time"]).astimezone(tz)
         if local.date() != day:
             continue
         data = step["data"]
