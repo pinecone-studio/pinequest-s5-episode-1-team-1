@@ -587,7 +587,10 @@
               "mute",
               "unmute",
               "lock_screen",
-              "open_folder"
+              "open_folder",
+              "media_play_pause",
+              "media_next",
+              "media_previous"
             ]
           },
           "level": {
@@ -860,6 +863,51 @@
         },
         "required": [
           "text"
+        ]
+      }
+    },
+    {
+      "name": "play_video",
+      "executor": "device",
+      "strategy": [
+        "url_scheme",
+        "react_native"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Plays the first YouTube video for the query (the backend finds it and sets url and title): the YouTube app on a phone, BEKHI's own browser window on the computer, where it starts with sound.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "What to play, as the user said it: 'Хүрдийн Бусгүй', 'Монгол дуу', 'lofi'"
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "computer",
+              "phone"
+            ],
+            "description": "Only when the user names the other device: 'компьютер дээрээ нээ' -> computer, 'утсан дээрээ' -> phone"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "format": "uri"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "query"
         ]
       }
     }

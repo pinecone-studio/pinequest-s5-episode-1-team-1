@@ -17,6 +17,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import sys
 import uuid
 from dataclasses import asdict, dataclass
@@ -394,6 +395,8 @@ def computer_control(args: dict[str, Any]) -> dict[str, Any]:
     if action == "open_folder":
         os.startfile(win.known_folder(args.get("folder") or "downloads"))
         return _result("succeeded")
+    if action in win.MEDIA_KEYS:
+        return _result("succeeded") if win.press_media_key(action) else _result("failed", "MEDIA_KEY_FAILED")
     if action == "set_volume" and args.get("level") is None:
         return _result("failed", "INVALID_ARGUMENTS")
     change = {
@@ -408,6 +411,37 @@ def computer_control(args: dict[str, Any]) -> dict[str, Any]:
     except OSError:
         return _result("failed", "VOLUME_UNAVAILABLE")
     return _result("succeeded", data={"volume": level})
+
+
+EDGE_PATHS = [
+    Path(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)")) / "Microsoft/Edge/Application/msedge.exe",
+    Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Microsoft/Edge/Application/msedge.exe",
+    Path(os.environ.get("ProgramFiles", r"C:\Program Files")) / "Google/Chrome/Application/chrome.exe",
+    Path(os.environ.get("LOCALAPPDATA", "")) / "Google/Chrome/Application/chrome.exe",
+]
+_player: subprocess.Popen | None = None
+
+
+def play_in_window(url: str) -> bool:
+    """Opens the video in BEKHI's own player window (Edge in app mode, its own profile), where it may
+    start with sound. One video at a time: the window of the last one closes first."""
+    global _player
+    browser = next((p for p in EDGE_PATHS if p.is_file()), None)
+    if browser is None:
+        os.startfile(url)
+        return True
+    if _player is not None and _player.poll() is None:
+        _player.terminate()
+        try:
+            _player.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            _player.kill()
+    _player = subprocess.Popen([
+        str(browser), f"--app={url}", f"--user-data-dir={_data_dir() / 'player'}",
+        "--autoplay-policy=no-user-gesture-required", "--window-size=1100,680",
+        "--no-first-run", "--no-default-browser-check", "--hide-crash-restore-bubble",
+    ])
+    return True
 
 
 def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[str, Any]:
@@ -460,6 +494,8 @@ def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[st
     if tool == "open_url":
         os.startfile(args["url"])  # the default browser; the contract allows only http(s)
         return _result("handed_off")
+    if tool == "play_video":
+        return _result("succeeded") if play_in_window(args["url"]) else _result("failed", "BROWSER_NOT_FOUND")
     fields = {
         "create_reminder": ("due_at", "reminder", lambda: (args["title"], args.get("notes") or "БЭХИ сануулга", False)),
         "create_alarm": ("fire_at", "alarm", lambda: (args.get("label") or "Сэрэх цаг боллоо", "БЭХИ сэрүүлэг", True)),

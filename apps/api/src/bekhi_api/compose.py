@@ -47,6 +47,7 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "remember": ("санах", "санахад"),
     "forget": ("мартах", "мартахад"),
     "type_text": ("компьютер дээр бичих", "компьютер дээр бичихэд"),
+    "play_video": ("тоглуулах", "тоглуулахад"),
 }
 
 FOLDER_NAMES = {
@@ -106,6 +107,7 @@ FAILED_BY_CODE = {
     "TODO_UNAVAILABLE": "Жагсаалт руу одоо хандаж чадсангүй. Түр хүлээгээд дахин хэлээрэй.",
     "COMPUTER_NO_ANSWER": "Компьютер хариу өгсөнгүй. Компьютер дээрээ БЭХИ асаалттай эсэхийг шалгаарай.",
     "PHONE_NO_ANSWER": "Утас хариу өгсөнгүй. Утсан дээрээ БЭХИ нээлттэй эсэхийг шалгаарай.",
+    "BROWSER_NOT_FOUND": "Компьютер дээр видео тоглуулах browser олдсонгүй.",
     "TYPING_FAILED": "Компьютер дээр бичиж чадсангүй. Бичих газраа дараад дахин хэлээрэй.",
     "MEMORY_FULL": "Санах зүйл дүүрсэн байна. Заримыг нь мартуулаарай.",
     "MEMORY_NOT_FOUND": "Тийм зүйл санаагүй байна.",
@@ -190,7 +192,21 @@ def _computer_sentence(a: dict, data: dict) -> str:
             return "За, компьютерээ түгжлээ."
         case "open_folder":
             return f"За, {FOLDER_NAMES.get(a.get('folder', ''), 'хавтсыг')} хавтсыг нээлээ."
+        case "media_play_pause":
+            return "За."
+        case "media_next":
+            return "За, дараагийнх руу шилжлээ."
+        case "media_previous":
+            return "За, өмнөх рүү буцлаа."
     return "За, хийчихлээ."
+
+
+def _play_sentence(a: dict, data: dict) -> str:
+    """"За, YouTube дээр 'Hurd - Busgui' тоглуулж байна", or the search page when no video was found."""
+    where = "компьютер дээр" if data.get("device") == "computer" else "YouTube дээр"
+    if a.get("title"):
+        return f"За, {where} '{a['title']}' тоглуулж байна."
+    return f"За, {where} '{a['query']}' гэж хайлаа."
 
 
 def _app_sentence(a: dict, data: dict) -> str:
@@ -264,6 +280,8 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return _computer_sentence(a, data)
             case "type_text":
                 return "За, компьютер дээр бичлээ."
+            case "play_video":
+                return _play_sentence(a, data)
             case "create_routine":
                 return (
                     f"За, өдөр бүр {clock_mn(a['time'])} өдрийн тоймын мэдэгдэл ирнэ. "
@@ -314,6 +332,8 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return f"За, {toward(a['contact_name'])} бичих мессежийг бэлдлээ. Илгээх товчийг дараарай."
             case "open_url":
                 return f"За, {a.get('title') or 'хуудсыг'} нээлээ."
+            case "play_video":
+                return _play_sentence(a, r.data or {})
             case "open_app":
                 return _app_sentence(a, r.data or {})
         return "За, нээчихлээ."

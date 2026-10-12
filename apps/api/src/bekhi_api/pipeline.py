@@ -19,7 +19,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, briefing, memory, todos
+from . import backend_tools, briefing, media, memory, todos
 from .compose import FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
@@ -130,7 +130,7 @@ def _fill_backend_fields(tool: str, args: dict[str, Any], ctx: AssistantContext)
     if tool == "set_timer":
         ends = _server_now() + timedelta(seconds=int(args["duration_seconds"]))
         args["fire_at"] = ends.astimezone(ctx.client_now.tzinfo).isoformat(timespec="seconds")
-    if tool in BACKEND_FIELDS and args.get("target", "all") == "all":
+    if tool in ("create_alarm", "set_timer") and args.get("target", "all") == "all":
         args["sync_id"] = str(uuid4())
 
 
@@ -190,6 +190,8 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                     results.append((call, {"error": "INVALID_ARGUMENTS"}))
                     continue
                 _fill_backend_fields(call.name, args, ctx)
+                if call.name == "play_video":
+                    await media.fill_video(args, deps.http)
                 entry = manifest[call.name]
                 required = entry["confirmation"] == "always"
                 prompt = None

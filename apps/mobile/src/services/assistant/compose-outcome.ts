@@ -30,6 +30,7 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   remember: { verb: "санах", dative: "санахад" },
   forget: { verb: "мартах", dative: "мартахад" },
   type_text: { verb: "компьютер дээр бичих", dative: "компьютер дээр бичихэд" },
+  play_video: { verb: "тоглуулах", dative: "тоглуулахад" },
 };
 
 /**
