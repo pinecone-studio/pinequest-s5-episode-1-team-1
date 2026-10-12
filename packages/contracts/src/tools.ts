@@ -9,6 +9,9 @@ export const TOOL_NAMES = [
   "get_weather",
   "open_maps",
   "find_bus_stops",
+  "suggest_food",
+  "show_recipe",
+  "find_restaurants",
   "create_note",
   "send_message",
   "web_search",
@@ -162,6 +165,54 @@ export const OpenMapsArgs = z.object({
 
 /** Bus stops around the phone's own position: nothing to say but "where". */
 export const FindBusStopsArgs = z.object({});
+
+const DishName = z.string().trim().min(1).max(60).describe("A dish, in Mongolian: 'Цуйван', 'Бууз', 'Гуляш'");
+
+/** Dish ideas the model picks (time of day, weather, what the user feels like); the app shows them as a card. */
+export const SuggestFoodArgs = z.object({
+  ideas: z
+    .array(
+      z.object({
+        dish: DishName,
+        note: z
+          .string()
+          .trim()
+          .max(120)
+          .optional()
+          .describe("Why it fits now, a few words: 'хүйтэн өдөр дулаацуулна', 'хурдан хийгдэнэ'"),
+      }),
+    )
+    .min(1)
+    .max(4),
+});
+
+/** A recipe the model writes, to cook at home; the app shows it as a card. */
+export const ShowRecipeArgs = z.object({
+  dish: DishName,
+  servings: z.number().int().min(1).max(20).describe("How many people it feeds"),
+  minutes: z.number().int().min(1).max(600).describe("Total time, preparation included"),
+  ingredients: z
+    .array(z.string().trim().min(1).max(100))
+    .min(1)
+    .max(25)
+    .describe("Each with its amount: '500 г үхрийн мах', '2 ширхэг сонгино'"),
+  steps: z
+    .array(z.string().trim().min(1).max(300))
+    .min(1)
+    .max(15)
+    .describe("Short steps in order, one or two sentences each"),
+});
+
+/** Places to eat around the phone's own position. */
+export const FindRestaurantsArgs = z.object({
+  query: z
+    .string()
+    .trim()
+    .min(1)
+    .max(60)
+    .optional()
+    .describe("The dish or kind of food the user wants: 'хуушуур', 'пицца', 'солонгос хоол'; omitted: any place to eat"),
+});
 
 export const CreateNoteArgs = z.object({
   title: z.string().max(200).optional(),
@@ -443,6 +494,9 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   get_weather: GetWeatherArgs,
   open_maps: OpenMapsArgs,
   find_bus_stops: FindBusStopsArgs,
+  suggest_food: SuggestFoodArgs,
+  show_recipe: ShowRecipeArgs,
+  find_restaurants: FindRestaurantsArgs,
   create_note: CreateNoteArgs,
   send_message: SendMessageArgs,
   web_search: WebSearchArgs,
@@ -573,6 +627,38 @@ export const TOOL_MANIFEST = {
     notes:
       "The phone reads its own position, asks the backend for nearby stops (Google Places API) and opens " +
       "BEKHI's map with them. Only stop names and distances go back in the result, never the position.",
+  },
+  suggest_food: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The model's dish ideas, returned as they are: the app shows each with 'how to make it' and 'where nearby' " +
+      "buttons, and BEKHI asks whether the user eats in or out.",
+  },
+  show_recipe: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "A recipe the model writes (servings, time, ingredients, steps), shown as a card; BEKHI says the gist.",
+  },
+  find_restaurants: {
+    executor: "device",
+    strategy: ["react_native"],
+    confirmation: "never",
+    permissions: ["location"],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The phone reads its own position and asks the backend for places to eat near it (Google Places Text Search), " +
+      "for the dish if one is given. The result lists names, addresses, distances, ratings and whether they are " +
+      "open, never the position; tapping one opens BEKHI's map with walking directions.",
   },
   create_note: {
     executor: "device",

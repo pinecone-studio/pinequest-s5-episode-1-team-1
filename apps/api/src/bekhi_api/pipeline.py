@@ -21,7 +21,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, briefing, google_link, media, memory, pc_files, screen, todos, webpage
+from . import backend_tools, briefing, food, google_link, media, memory, pc_files, screen, todos, webpage
 from . import profile as profiles
 from .compose import ACTION_MN, FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
@@ -52,6 +52,8 @@ MAX_ACTIONS = 5
 # continues, e.g. search -> search again -> answer. Device actions end the loop: their
 # outcome only exists after the phone runs them.
 MAX_AGENT_STEPS = 4
+# Backend tools that only show what the model wrote: nothing new for it to read, so no further step.
+SHOW_TOOLS = {"suggest_food": food.suggest_food, "show_recipe": food.show_recipe}
 
 
 class ContractViolation(RuntimeError):
@@ -97,6 +99,8 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
+    if tool in SHOW_TOOLS:
+        return SHOW_TOOLS[tool](action_id, args)
     if tool in pc_files.PC_TOOLS or tool == "look_at_screen":
         if not deps.on_pc:
             return ActionResult(action_id=action_id, tool=tool, status="unsupported", executed_via=None,
@@ -258,7 +262,7 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                 )
                 if entry["executor"] == "backend":
                     action.result = await _run_backend_tool(action.id, call.name, args, ctx, deps)
-                    ran_backend_tool = True
+                    ran_backend_tool = ran_backend_tool or call.name not in SHOW_TOOLS
                     results.append((call, _tool_response(action.result)))
                 else:
                     results.append((call, {"status": "sent to the phone"}))

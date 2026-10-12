@@ -13,6 +13,9 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   create_note: { verb: "тэмдэглэл хадгалах", dative: "тэмдэглэл хадгалахад" },
   open_maps: { verb: "газрын зураг нээх", dative: "газрын зураг нээхэд" },
   find_bus_stops: { verb: "автобусны буудал хайх", dative: "автобусны буудал хайхад" },
+  suggest_food: { verb: "хоол санал болгох", dative: "хоол санал болгоход" },
+  show_recipe: { verb: "хоолны жор харуулах", dative: "хоолны жор харуулахад" },
+  find_restaurants: { verb: "хоолны газар хайх", dative: "хоолны газар хайхад" },
   get_weather: { verb: "цаг агаар харах", dative: "цаг агаар харахад" },
   web_search: { verb: "хайлт хийх", dative: "хайлт хийхэд" },
   get_current_time: { verb: "цаг харах", dative: "цаг харахад" },
@@ -61,6 +64,7 @@ function sentenceFor(action: ActionRequest, r: ActionResult, nowIso: string): st
   switch (r.status) {
     case "succeeded":
       if (action.tool === "find_bus_stops") return stopsSentence(r.data?.stops);
+      if (action.tool === "find_restaurants") return restaurantsSentence(action.arguments.query, r.data?.restaurants);
       return successSentence(action, nowIso);
     case "handed_off":
       return handedOffSentence(action);
@@ -121,15 +125,36 @@ const TRAVEL_MN: Partial<Record<string, string>> = {
   walking: "алхаж очих ",
 };
 
+type Named = { name: string; distance_m?: number; rating?: number | null; open_now?: boolean | null };
+
+const named = (items: unknown): Named[] =>
+  (Array.isArray(items) ? items : []).filter(
+    (s): s is Named => typeof s === "object" && s !== null && typeof (s as { name?: unknown }).name === "string",
+  );
+
+const metres = (s: { distance_m?: number }) => Math.max(10, Math.round((s.distance_m ?? 0) / 10) * 10);
+
+/** Same wording as the backend's compose.py. */
+function restaurantsSentence(query: string | undefined, places: unknown): string {
+  const [first, ...rest] = named(places);
+  const what = query ? `${query} идэх газар` : "хоолны газар";
+  if (!first) return `Ойролцоо ${what} олдсонгүй.`;
+  let sentence = `Хамгийн ойрын ${what} ${first.name}, ${metres(first)} метрт.`;
+  if (typeof first.rating === "number" && first.rating > 0) sentence += ` Үнэлгээ нь ${first.rating.toFixed(1)}.`;
+  if (first.open_now === false) sentence += " Гэхдээ одоо хаалттай байна.";
+  if (rest.length > 0) {
+    sentence += ` Бас ${rest
+      .slice(0, 2)
+      .map((p) => `${p.name} ${metres(p)} метр`)
+      .join(", ")}.`;
+  }
+  return `${sentence} Аль нэгийг нь дарвал зам заая.`;
+}
+
 /** Same wording as the backend's compose.py. */
 function stopsSentence(stops: unknown): string {
-  const named = (Array.isArray(stops) ? stops : []).filter(
-    (s): s is { name: string; distance_m?: number } =>
-      typeof s === "object" && s !== null && typeof (s as { name?: unknown }).name === "string",
-  );
-  const [first, ...rest] = named;
+  const [first, ...rest] = named(stops);
   if (!first) return "Ойролцоо автобусны буудал олдсонгүй.";
-  const metres = (s: { distance_m?: number }) => Math.max(10, Math.round((s.distance_m ?? 0) / 10) * 10);
   let sentence = `Хамгийн ойрын буудал ${first.name}, ${metres(first)} метрийн зайтай.`;
   if (rest.length > 0) {
     sentence += ` Дараа нь ${rest

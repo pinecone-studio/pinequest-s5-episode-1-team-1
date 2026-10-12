@@ -17,6 +17,9 @@ ToolName = Literal[
     "get_weather",
     "open_maps",
     "find_bus_stops",
+    "suggest_food",
+    "show_recipe",
+    "find_restaurants",
     "create_note",
     "send_message",
     "web_search",
@@ -243,6 +246,28 @@ class NearbyStop(BaseModel):
 
 class NearbyStopsResponse(BaseModel):
     stops: list[NearbyStop] = Field(max_length=20)
+
+
+class RestaurantsRequest(BaseModel):
+    origin: LatLng
+    query: str | None = Field(default=None, min_length=1, max_length=60)
+    radius_m: int = Field(default=1500, ge=300, le=5000)
+
+
+class Restaurant(BaseModel):
+    id: str = Field(min_length=1, max_length=300)
+    name: str = Field(max_length=200)
+    location: LatLng
+    distance_m: int = Field(ge=0)
+    address: str | None = Field(default=None, max_length=300)
+    rating: float | None = Field(default=None, ge=0, le=5)
+    rating_count: int | None = Field(default=None, ge=0)
+    open_now: bool | None = None
+    kind: str | None = Field(default=None, max_length=100)
+
+
+class RestaurantsResponse(BaseModel):
+    restaurants: list[Restaurant] = Field(max_length=20)
 
 
 ApiErrorCode = Literal[
