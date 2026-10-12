@@ -685,6 +685,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -887,6 +888,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -1102,6 +1104,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -1311,6 +1314,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -1498,6 +1502,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -1693,6 +1698,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -1883,6 +1889,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -2086,6 +2093,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -2272,6 +2280,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -2455,6 +2464,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -2653,6 +2663,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -2854,6 +2865,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -3062,6 +3074,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -3239,6 +3252,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -3430,6 +3444,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -3642,6 +3657,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -3833,6 +3849,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -4024,6 +4041,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -4210,6 +4228,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -4396,6 +4415,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -4578,6 +4598,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -4771,6 +4792,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -4958,6 +4980,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -5191,6 +5214,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -5377,6 +5401,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -5564,6 +5589,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -5768,6 +5794,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -5984,6 +6011,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -6170,6 +6198,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -6284,6 +6313,11 @@
                         "type": "string",
                         "pattern": "^f\\d{1,4}$",
                         "description": "The id find_files gave the file, e.g. 'f1'"
+                      },
+                      "question": {
+                        "description": "What the user wants from it, in their words: 'гол санааг хэл', 'төлбөрийн нөхцөл юу вэ?'",
+                        "type": "string",
+                        "maxLength": 300
                       }
                     },
                     "required": [
@@ -6356,6 +6390,195 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "look_at_screen"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "question": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 300,
+                        "description": "What the user asks about what is on their screen: 'Энэ алдаа юу гэсэн үг вэ?', 'энэ хуудсыг орчуул'"
+                      }
+                    },
+                    "required": [
+                      "question"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -6543,6 +6766,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -6732,6 +6956,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -6918,6 +7143,7 @@
                               "find_files",
                               "open_file",
                               "read_file",
+                              "look_at_screen",
                               "read_webpage",
                               "check_email",
                               "read_email"
@@ -7240,6 +7466,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -7442,6 +7669,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -7657,6 +7885,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -7866,6 +8095,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -8053,6 +8283,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -8248,6 +8479,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -8438,6 +8670,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -8641,6 +8874,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -8827,6 +9061,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -9010,6 +9245,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -9208,6 +9444,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -9409,6 +9646,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -9617,6 +9855,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -9794,6 +10033,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -9985,6 +10225,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -10197,6 +10438,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -10388,6 +10630,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -10579,6 +10822,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -10765,6 +11009,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -10951,6 +11196,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -11133,6 +11379,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -11326,6 +11573,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -11513,6 +11761,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -11746,6 +11995,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -11932,6 +12182,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -12119,6 +12370,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -12323,6 +12575,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -12539,6 +12792,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -12725,6 +12979,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -12839,6 +13094,11 @@
                   "type": "string",
                   "pattern": "^f\\d{1,4}$",
                   "description": "The id find_files gave the file, e.g. 'f1'"
+                },
+                "question": {
+                  "description": "What the user wants from it, in their words: 'гол санааг хэл', 'төлбөрийн нөхцөл юу вэ?'",
+                  "type": "string",
+                  "maxLength": 300
                 }
               },
               "required": [
@@ -12911,6 +13171,195 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "look_at_screen"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "question": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300,
+                  "description": "What the user asks about what is on their screen: 'Энэ алдаа юу гэсэн үг вэ?', 'энэ хуудсыг орчуул'"
+                }
+              },
+              "required": [
+                "question"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -13098,6 +13547,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -13287,6 +13737,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -13473,6 +13924,7 @@
                         "find_files",
                         "open_file",
                         "read_file",
+                        "look_at_screen",
                         "read_webpage",
                         "check_email",
                         "read_email"
@@ -13612,6 +14064,7 @@
             "find_files",
             "open_file",
             "read_file",
+            "look_at_screen",
             "read_webpage",
             "check_email",
             "read_email"
@@ -13752,6 +14205,7 @@
                   "find_files",
                   "open_file",
                   "read_file",
+                  "look_at_screen",
                   "read_webpage",
                   "check_email",
                   "read_email"

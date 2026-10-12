@@ -10,9 +10,10 @@ import time
 import wave
 from typing import Any
 
+import httpx
 from google.genai import errors, types
 
-from .base import FunctionCall, FunctionSpec, HistoryMessage, SearchError
+from .base import FunctionCall, FunctionSpec, HistoryMessage, ReaderError, SearchError
 
 # Measured on Mongolian test clips: a strict verbatim instruction halved the character error rate.
 # The old prompt listed assistant topics, and the model "heard" commands that were never spoken
@@ -232,6 +233,35 @@ class GeminiWebSearch:
         chunks = (meta.grounding_chunks or []) if meta else []
         sources = [{"title": c.web.title, "url": c.web.uri} for c in chunks if c.web][:5]
         return {"answer": (resp.text or "").strip(), "sources": sources}
+
+
+READER_PROMPT = (
+    "You look at what the user of a Mongolian voice assistant shows you: their computer screen, or a document. "
+    "Answer their question in Mongolian (Cyrillic), as it will be read aloud: plain short sentences, no markdown, "
+    "no lists of symbols. Translate English or any other language into Mongolian. For an error message, say what "
+    "it means and what to do about it. Keep to about 100 words unless they ask for all of it. If the picture or "
+    "document does not show what they ask about, say so."
+)
+
+
+class GeminiReader:
+    """Reads a screenshot or a PDF with the planner's models (they all take pictures and PDFs)."""
+
+    def __init__(self, client: Any, models: list[str]) -> None:
+        self._client = client
+        self._models = models
+
+    async def read(self, data: bytes, mime_type: str, instruction: str) -> str:
+        try:
+            resp = await generate_with_fallback(
+                self._client,
+                self._models,
+                contents=[types.Part.from_bytes(data=data, mime_type=mime_type), instruction],
+                config=types.GenerateContentConfig(system_instruction=READER_PROMPT, max_output_tokens=1500),
+            )
+        except (errors.APIError, httpx.HTTPError) as e:
+            raise ReaderError(type(e).__name__) from e
+        return (resp.text or "").strip()
 
 
 class GeminiPlanner:

@@ -40,6 +40,7 @@ ToolName = Literal[
     "find_files",
     "open_file",
     "read_file",
+    "look_at_screen",
     "read_webpage",
     "check_email",
     "read_email",

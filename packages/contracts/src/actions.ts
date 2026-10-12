@@ -96,6 +96,7 @@ export const ActionRequest = z.discriminatedUnion("tool", [
   actionRequest("find_files"),
   actionRequest("open_file"),
   actionRequest("read_file"),
+  actionRequest("look_at_screen"),
   actionRequest("read_webpage"),
   actionRequest("check_email"),
   actionRequest("read_email"),

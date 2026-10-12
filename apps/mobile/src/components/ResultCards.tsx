@@ -154,6 +154,15 @@ function ResultCard({ card }: { card: Card }) {
       );
     case "briefing_choice":
       return <BriefingChoice told={card.parts} />;
+    case "screen":
+      return (
+        <View style={[styles.card, styles.row]}>
+          <Ionicons name="eye-outline" size={16} color={colors.accent} />
+          <Text style={[styles.secondary, styles.flex]} numberOfLines={1}>
+            Харсан цонх: {card.window}
+          </Text>
+        </View>
+      );
     case "email":
       return (
         <View style={styles.card}>

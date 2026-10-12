@@ -79,8 +79,12 @@ Tool choice:
 - "Дууг зогсоо", "үргэлжлүүл", "дараагийн дуу", "өмнөх дуу" (what is playing) -> computer_control media_play_pause,
   media_next or media_previous.
 - "Downloads-ийн хамгийн сүүлийн PDF-ийг нээ", "илтгэлийн файлаа ол", "тайлан гэдэг файлыг нээ" (on the computer)
-  -> find_files, then open_file with the id it gave. "... файлд юу байгааг хэл/товчил" -> find_files, then
-  read_file, then reply in a few sentences. Several files fit: open the newest, say which; none: say so.
+  -> find_files, then open_file with the id it gave. "... файлд юу байгааг хэл/товчил", "гэрээгээ уншаад гол
+  санааг хэл" -> find_files, then read_file (question: what they want from it), then reply in a few sentences; for a
+  PDF say its answer_mn as it is. Several files fit: open the newest, say which; none: say so.
+- "Энэ алдаа юу гэсэн үг вэ?", "энэ хуудсыг орчуулаад тайлбарла", "дэлгэц дээр юу байна?", "энийг юу гэж бичсэн бэ?"
+  (about what is on their computer screen: "энэ" with nothing else it could mean) -> look_at_screen (question: their
+  words), then say its answer_mn as it is.
 - "энэ сайтад юу бичсэн байна", "... сайтаас уншаад хэл" -> read_webpage (a URL the user gave or web_search found),
   then reply from what it says.
 - "Шинэ имэйл байна уу?", "Gmail-ээ шалгаач", "Батаас имэйл ирсэн үү?" -> check_email with a Gmail search query
@@ -191,7 +195,10 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "find_files": "Find the user's files on this computer by words of the name, folder and kind; newest first. Returns "
     "ids for open_file and read_file.",
     "open_file": "Open a file find_files found (by its id) in its usual app on the computer.",
-    "read_file": "Read the text of a file find_files found (by its id), to answer about it.",
+    "read_file": "Read a file find_files found (by its id), to answer about it. A PDF comes back answered already "
+    "(answer_mn), for the question given.",
+    "look_at_screen": "Look at the window the user is working in on their computer and answer their question about "
+    "it in Mongolian (explain an error, translate a page): answer_mn.",
     "read_webpage": "Read the text of a public web page, to answer from it.",
     "check_email": "List the user's Gmail messages for a Gmail search query (default the inbox, newest first): sender, "
     "subject, snippet, unread, id.",
@@ -302,8 +309,8 @@ def _llm_parameters(tool: str, schema: dict[str, Any], confirm: bool) -> dict[st
     return _with_summary(params)
 
 
-# The user's files: only when this API runs on their computer (desktop.py).
-PC_ONLY_TOOLS = {"find_files", "open_file", "read_file"}
+# The user's files and screen: only when this API runs on their computer (desktop.py).
+PC_ONLY_TOOLS = {"find_files", "open_file", "read_file", "look_at_screen"}
 
 
 def function_specs(on_pc: bool = False) -> list[FunctionSpec]:
@@ -323,8 +330,8 @@ def function_specs(on_pc: bool = False) -> list[FunctionSpec]:
 
 
 PC_LINE = (
-    "You run on the user's computer: find_files, open_file and read_file work on its files, read_webpage on web "
-    "pages. Use them in steps: find, then open or read, then answer.\n"
+    "You run on the user's computer: find_files, open_file and read_file work on its files, look_at_screen sees "
+    "what is on its screen, read_webpage reads web pages. Use them in steps: find, then open or read, then answer.\n"
 )
 
 DEVICE_LINES = {

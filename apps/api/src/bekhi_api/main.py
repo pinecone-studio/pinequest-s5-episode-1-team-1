@@ -63,7 +63,8 @@ from .models import (
 )
 from .compose import speakable
 from .pipeline import ContractViolation, Deps, UnknownTurn, plan_turn, report_results
-from .providers import ProviderNotConfigured, ProviderUserError, VoiceNeedsPaidPlan, get_llm, get_search, get_stt, get_tts
+from .providers import (ProviderNotConfigured, ProviderUserError, VoiceNeedsPaidPlan, get_llm, get_reader, get_search,
+                        get_stt, get_tts)
 from .store import MemoryStore
 
 log = logging.getLogger("bekhi_api")
@@ -324,7 +325,7 @@ def create_app() -> FastAPI:
             raise ApiException(503, "llm_failed", MN_NOT_CONFIGURED) from e
         http = request.app.state.http
         return Deps(
-            llm=llm, http=http, store=request.app.state.store, search=get_search(http),
+            llm=llm, http=http, store=request.app.state.store, search=get_search(http), reader=get_reader(),
             todo_store=request.app.state.todos,
             memory_store=request.app.state.memory,
             profile_store=request.app.state.profiles,

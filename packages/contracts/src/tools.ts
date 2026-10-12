@@ -32,6 +32,7 @@ export const TOOL_NAMES = [
   "find_files",
   "open_file",
   "read_file",
+  "look_at_screen",
   "read_webpage",
   "check_email",
   "read_email",
@@ -346,7 +347,23 @@ export const FindFilesArgs = z.object({
 /** A file from find_files' results, by its id ("f2"): nothing else can be opened or read. */
 const FoundFile = z.string().regex(/^f\d{1,4}$/).describe("The id find_files gave the file, e.g. 'f1'");
 export const OpenFileArgs = z.object({ file: FoundFile });
-export const ReadFileArgs = z.object({ file: FoundFile });
+export const ReadFileArgs = z.object({
+  file: FoundFile,
+  question: z
+    .string()
+    .max(300)
+    .optional()
+    .describe("What the user wants from it, in their words: 'гол санааг хэл', 'төлбөрийн нөхцөл юу вэ?'"),
+});
+
+export const LookAtScreenArgs = z.object({
+  question: z
+    .string()
+    .trim()
+    .min(1)
+    .max(300)
+    .describe("What the user asks about what is on their screen: 'Энэ алдаа юу гэсэн үг вэ?', 'энэ хуудсыг орчуул'"),
+});
 
 export const CheckEmailArgs = z.object({
   query: z
@@ -417,6 +434,7 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   find_files: FindFilesArgs,
   open_file: OpenFileArgs,
   read_file: ReadFileArgs,
+  look_at_screen: LookAtScreenArgs,
   read_webpage: ReadWebpageArgs,
   check_email: CheckEmailArgs,
   read_email: ReadEmailArgs,
@@ -756,7 +774,21 @@ export const TOOL_MANIFEST = {
     permissions: [],
     min_ios: MIN_IOS,
     app_intent: null,
-    notes: "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from.",
+    notes:
+      "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from. A PDF is " +
+      "read by Gemini (scanned ones too), which answers the question about it in Mongolian.",
+  },
+  look_at_screen: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Looks at the window the user is working in on their computer (not BEKHI's own) and answers their question " +
+      "about it in Mongolian: explains an error, translates a page. The picture goes to Gemini only for that " +
+      "answer; it is never kept or logged. Only when BEKHI runs on that computer.",
   },
   read_webpage: {
     executor: "backend",

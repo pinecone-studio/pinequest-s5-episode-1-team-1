@@ -21,7 +21,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, briefing, google_link, media, memory, pc_files, todos, webpage
+from . import backend_tools, briefing, google_link, media, memory, pc_files, screen, todos, webpage
 from . import profile as profiles
 from .compose import ACTION_MN, FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
@@ -39,7 +39,7 @@ from .models import (
     LimitationCode,
 )
 from .planner import BACKEND_FIELDS, CONFIRM_FIELD, SUMMARY_FIELD, function_specs, system_prompt
-from .providers.base import FunctionCall, HistoryMessage, LLMPlanner, WebSearch
+from .providers.base import FunctionCall, HistoryMessage, LLMPlanner, Reader, WebSearch
 from .store import MemoryStore, PendingTurn
 
 log = logging.getLogger(__name__)
@@ -76,6 +76,8 @@ class Deps:
     # This API runs on the user's computer (desktop.py): the agent may find, open and read its files.
     on_pc: bool = False
     google: google_link.Google | None = None
+    # Reads a screenshot or a PDF (look_at_screen, read_file).
+    reader: Reader | None = None
 
 
 async def _profile(deps: Deps) -> dict[str, Any]:
@@ -93,10 +95,14 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
-    if tool in pc_files.PC_TOOLS:
+    if tool in pc_files.PC_TOOLS or tool == "look_at_screen":
         if not deps.on_pc:
             return ActionResult(action_id=action_id, tool=tool, status="unsupported", executed_via=None,
                                 error_code="NOT_ON_COMPUTER", data=None)
+        if tool == "look_at_screen":
+            return await screen.look_at_screen(action_id, args, deps.reader)
+        if tool == "read_file" and pc_files.is_pdf(args["file"]):
+            return await pc_files.read_pdf(action_id, args, deps.reader)
         return await asyncio.to_thread(pc_files.PC_TOOLS[tool], action_id, args)
     if tool in ("check_email", "read_email"):
         return await google_link.run_tool(action_id, tool, args, deps.google, deps.account)

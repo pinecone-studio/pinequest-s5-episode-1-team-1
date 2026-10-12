@@ -3,10 +3,14 @@
 Only the user's folders are searched (Downloads, Documents, Desktop, Pictures, Music, Videos/Movies),
 only documents and media are listed, and a file can be opened or read only by the id find_files
 gave it, so the model can never name a path, a program or a system file.
+
+A PDF is read by Gemini (providers Reader), scanned pages too, which answers the user's question
+about it ("гол санааг хэл") in Mongolian; other files give their text for the model to answer from.
 """
 
 from __future__ import annotations
 
+import asyncio
 import html
 import os
 import re
@@ -17,6 +21,7 @@ from typing import Any
 
 from . import system
 from .models import ActionResult
+from .providers.base import ReaderError
 
 FOLDERS = ("downloads", "documents", "desktop", "pictures", "music", "videos")
 FOLDER_MN = {"downloads": "Downloads", "documents": "Documents", "desktop": "Desktop", "pictures": "Pictures",
@@ -38,7 +43,9 @@ SKIP_DIRS = {"node_modules", "appdata", "$recycle.bin", "__pycache__", ".git", "
 PACKAGES = {".app", ".photoslibrary", ".musiclibrary", ".tvlibrary", ".imovielibrary", ".fcpbundle"}
 MAX_DEPTH = 4
 MAX_ENTRIES = 30_000  # stop a search in a huge folder rather than keep the user waiting
-MAX_TEXT = 8_000  # characters of a file the model gets
+MAX_TEXT = 20_000  # characters of a file the model gets
+MAX_PDF_BYTES = 15_000_000  # Gemini takes up to 20 MB in one request
+PDF_QUESTION = "Энэ баримтын гол санааг товч хэлээд өг."
 MAX_IDS = 300
 
 CYRILLIC = dict(zip("абвгдеёжзийклмноөпрстуүфхцчшщъыьэюя",
@@ -181,6 +188,34 @@ def read_file(action_id: str, args: dict[str, Any]) -> ActionResult:
     text = re.sub(r"\n{3,}", "\n\n", text).strip()
     return _ok(action_id, "read_file", f"'{path.name}'-ийг уншлаа.", name=path.name, text=text[:MAX_TEXT],
                truncated=len(text) > MAX_TEXT)
+
+
+def is_pdf(file_id: str) -> bool:
+    path = _found.get(file_id)
+    return path is not None and path.suffix.casefold() == ".pdf"
+
+
+async def read_pdf(action_id: str, args: dict[str, Any], reader: Any) -> ActionResult:
+    """Gemini reads the PDF and answers the user's question about it (or gives its main points)."""
+    path = _found.get(args["file"])
+    if path is None or not path.is_file():
+        return _fail(action_id, "read_file", "FILE_NOT_FOUND")
+    if reader is None:
+        return _fail(action_id, "read_file", "READER_UNAVAILABLE")
+    if path.stat().st_size > MAX_PDF_BYTES:
+        return _fail(action_id, "read_file", "FILE_TOO_LARGE")
+    try:
+        data = await asyncio.to_thread(path.read_bytes)
+    except OSError:
+        return _fail(action_id, "read_file", "FILE_UNREADABLE")
+    question = (args.get("question") or "").strip() or PDF_QUESTION
+    try:
+        answer = await reader.read(data, "application/pdf", f"The file is '{path.name}'. The user asks: {question}")
+    except ReaderError:  # the model's quota or a network error: the turn says so, it does not fail
+        return _fail(action_id, "read_file", "READER_UNAVAILABLE")
+    if not answer:
+        return _fail(action_id, "read_file", "FILE_UNREADABLE")
+    return _ok(action_id, "read_file", answer, name=path.name, answer_mn=answer)
 
 
 PC_TOOLS = {"find_files": find_files, "open_file": open_file, "read_file": read_file}

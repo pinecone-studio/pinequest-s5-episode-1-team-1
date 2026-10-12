@@ -1076,7 +1076,7 @@
       "permissions": [],
       "min_ios": "17.0",
       "app_intent": null,
-      "notes": "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from.",
+      "notes": "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from. A PDF is read by Gemini (scanned ones too), which answers the question about it in Mongolian.",
       "parameters": {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
         "type": "object",
@@ -1085,10 +1085,42 @@
             "type": "string",
             "pattern": "^f\\d{1,4}$",
             "description": "The id find_files gave the file, e.g. 'f1'"
+          },
+          "question": {
+            "description": "What the user wants from it, in their words: 'гол санааг хэл', 'төлбөрийн нөхцөл юу вэ?'",
+            "type": "string",
+            "maxLength": 300
           }
         },
         "required": [
           "file"
+        ]
+      }
+    },
+    {
+      "name": "look_at_screen",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Looks at the window the user is working in on their computer (not BEKHI's own) and answers their question about it in Mongolian: explains an error, translates a page. The picture goes to Gemini only for that answer; it is never kept or logged. Only when BEKHI runs on that computer.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "description": "What the user asks about what is on their screen: 'Энэ алдаа юу гэсэн үг вэ?', 'энэ хуудсыг орчуул'"
+          }
+        },
+        "required": [
+          "question"
         ]
       }
     },

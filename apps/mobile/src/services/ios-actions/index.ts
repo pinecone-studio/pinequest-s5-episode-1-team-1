@@ -157,6 +157,7 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
     case "find_files":
     case "open_file":
     case "read_file":
+    case "look_at_screen":
     case "read_webpage":
     case "check_email":
     case "read_email":
