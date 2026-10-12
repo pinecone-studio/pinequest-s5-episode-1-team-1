@@ -387,9 +387,10 @@ def _today_schedule(r: ActionResult, now_iso: str) -> str:
     lines = [
         f"{format_when_mn(i['fire_at'], now_iso).removeprefix('өнөөдөр ')} "
         f"{i.get('title') or KIND_MN.get(i.get('kind', ''), 'сануулга')}"
-        for i in items[:5]
+        for i in items[:3]
     ]
-    return "Өнөөдөр товлосон: " + ", ".join(lines) + "."
+    more = f", бас {len(items) - 3}" if len(items) > 3 else ""
+    return "Өнөөдөр товлосон: " + ", ".join(lines) + more + "."
 
 
 def compose(actions: list[ActionRequest], results: list[ActionResult], now_iso: str) -> str:

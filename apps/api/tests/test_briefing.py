@@ -33,11 +33,13 @@ def test_todos_due_today_and_overdue_come_first():
         item("Сүү авах"),
         item("Хуучин ажил", "2026-10-06T10:00:00+08:00", done=True),
     ]
-    assert briefing.todo_sentence(items, TODAY) == (
-        "Өнөөдөр хийх 1 зүйл байна: Тайлан илгээх. Хугацаа хэтэрсэн 1 зүйл бий: Ном буцаах. Жагсаалтад бас 1 зүйл бий."
-    )
-    assert briefing.todo_sentence([item("Сүү авах")], TODAY) == "Жагсаалтад 1 зүйл байна: Сүү авах."
-    assert briefing.todo_sentence([], TODAY) == "Хийх зүйлийн жагсаалт хоосон байна."
+    # Said aloud: counts only, the card lists them.
+    assert briefing.todo_sentence(items, TODAY) == "Өнөөдөр хийх 1 зүйл, хугацаа хэтэрсэн 1 зүйл байна."
+    assert briefing.todo_sentence([item("Сүү авах")], TODAY) == "Жагсаалтад 1 зүйл байна."
+    assert briefing.todo_sentence([], TODAY) == "Хийх зүйл алга."
+    weather = {"place": "Улаанбаатар", "condition": "үүлэрхэг", "temp_max_c": 5, "precipitation_probability": 2}
+    assert briefing.weather_sentence(weather) == "Өнөөдөр Улаанбаатар орчимд үүлэрхэг, өдөртөө 5°."
+    assert briefing.weather_sentence({**weather, "precipitation_probability": 70}).endswith("магадлал 70%.")
     # The app's card: open ones only, those with a time first, soonest first.
     assert [i["title"] for i in briefing.card_todos(items)] == ["Ном буцаах", "Тайлан илгээх", "Сүү авах"]
 
@@ -68,7 +70,7 @@ def test_briefing_with_what_the_phone_has_scheduled_today(client, planner):
     ]}
     said = report("succeeded", scheduled)
     assert said.startswith("Өдрийн мэнд! ")
-    assert "Өнөөдөр хийх 1 зүйл байна: Тайлан илгээх." in said
+    assert "Өнөөдөр хийх 1 зүйл байна." in said
     # Tomorrow's alarm is left out; never asked what to tell, the briefing asks it last.
     assert said.endswith("Өнөөдөр товлосон: өдөр 4 цагт Уулзалт. " + briefing.ASK_MN)
 
@@ -125,5 +127,5 @@ def test_the_briefing_tells_what_the_user_chose_and_greets_them_by_name(client, 
                          {"id": "1", "title": "Уулзалт", "kind": "event", "fire_at": "2026-10-06T16:00:00+08:00"}]}}],
     })
     said = r.json()["response"]
-    assert said == ("Өдрийн мэнд, Нандин! Хийх зүйлийн жагсаалт хоосон байна. "
-                    "Өнөөдрийн мэдээ: «Шинэ сургууль нээгдлээ».")  # no schedule, no question: the user chose
+    assert said == ("Өдрийн мэнд, Нандин! Хийх зүйл алга. "
+                    "Өнөөдрийн гол мэдээ: «Шинэ сургууль нээгдлээ».")  # no schedule, no question: the user chose
