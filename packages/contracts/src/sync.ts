@@ -67,8 +67,8 @@ export type DeviceKind = z.infer<typeof DeviceKind>;
 
 /** What each kind of device may be asked to do. */
 export const RELAYED_TOOLS: Record<DeviceKind, readonly ToolName[]> = {
-  computer: ["open_app", "open_url", "computer_control", "type_text", "create_note"],
-  phone: ["call_contact", "send_message", "open_app", "open_url"],
+  computer: ["open_app", "open_url", "computer_control", "type_text", "create_note", "play_video"],
+  phone: ["call_contact", "send_message", "open_app", "open_url", "play_video"],
 };
 
 /** POST /api/v1/sync/commands */

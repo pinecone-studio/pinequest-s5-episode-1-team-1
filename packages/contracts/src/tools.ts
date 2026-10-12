@@ -26,7 +26,18 @@ export const TOOL_NAMES = [
   "create_routine",
   "remember",
   "forget",
+  "set_profile",
   "type_text",
+  "play_video",
+  "find_files",
+  "open_file",
+  "read_file",
+  "look_at_screen",
+  "read_webpage",
+  "check_email",
+  "read_email",
+  "draft_email",
+  "send_email",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -189,6 +200,20 @@ export const OpenAppArgs = z.object({
   device: TargetDevice.optional(),
 });
 
+export const PlayVideoArgs = z.object({
+  query: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .describe("What to play, as the user said it: 'Хүрдийн Бусгүй', 'Монгол дуу', 'lofi'"),
+  device: TargetDevice.optional(),
+  /** Set by the backend: the first YouTube video for the query (else the search page). */
+  url: z.url({ protocol: /^https$/ }).max(500).optional(),
+  /** Set by the backend: that video's title, for the reply. */
+  title: z.string().max(200).optional(),
+});
+
 export const TypeTextArgs = z.object({
   text: z
     .string()
@@ -269,6 +294,40 @@ export const RememberArgs = z.object({
     .describe("One short sentence about the user, kept for later: 'Хэрэглэгчийн эхнэрийг Сараа гэдэг'"),
 });
 
+/** What the day's briefing can tell: the user picks (set_profile, the app's Settings). */
+export const BriefingPart = z.enum(["weather", "todos", "schedule", "email", "news"]);
+export type BriefingPart = z.infer<typeof BriefingPart>;
+
+export const SetProfileArgs = z.object({
+  name: z
+    .string()
+    .trim()
+    .max(40)
+    .optional()
+    .describe("What to call the user: 'Намайг Нандин гэдэг' -> 'Нандин'. Empty to stop using a name"),
+  city: z
+    .string()
+    .trim()
+    .max(60)
+    .optional()
+    .describe("The user's own city or aimag, for the weather: 'Би Дарханд амьдардаг' -> 'Дархан'"),
+  briefing: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Exactly what the day's briefing should tell, when the user lists it"),
+  briefing_add: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Add to the briefing: 'өглөө мэдээ бас хэлж байгаарай' -> ['news']"),
+  briefing_remove: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Leave out of the briefing: 'тоймд имэйл хэрэггүй' -> ['email']"),
+});
+
 export const ForgetArgs = z.object({
   /** Words of the fact to forget ("эхнэр"). */
   query: z.string().max(100).optional(),
@@ -277,10 +336,95 @@ export const ForgetArgs = z.object({
 });
 
 export const ComputerFolder = z.enum(["downloads", "documents", "desktop", "pictures", "music", "videos"]);
+
+export const FileKind = z.enum(["any", "pdf", "document", "spreadsheet", "presentation", "image", "video", "audio", "text"]);
+
+export const FindFilesArgs = z.object({
+  query: z.string().max(100).optional().describe("Words from the file's name, if the user gave any ('тайлан', 'илтгэл')"),
+  folder: ComputerFolder.optional().describe("Where to look; omitted: all of the user's folders"),
+  kind: FileKind.default("any"),
+  limit: z.number().int().min(1).max(10).default(5),
+});
+
+/** A file from find_files' results, by its id ("f2"): nothing else can be opened or read. */
+const FoundFile = z.string().regex(/^f\d{1,4}$/).describe("The id find_files gave the file, e.g. 'f1'");
+export const OpenFileArgs = z.object({ file: FoundFile });
+export const ReadFileArgs = z.object({
+  file: FoundFile,
+  question: z
+    .string()
+    .max(300)
+    .optional()
+    .describe("What the user wants from it, in their words: 'гол санааг хэл', 'төлбөрийн нөхцөл юу вэ?'"),
+});
+
+export const LookAtScreenArgs = z.object({
+  question: z
+    .string()
+    .trim()
+    .min(1)
+    .max(300)
+    .describe("What the user asks about what is on their screen: 'Энэ алдаа юу гэсэн үг вэ?', 'энэ хуудсыг орчуул'"),
+});
+
+export const CheckEmailArgs = z.object({
+  query: z
+    .string()
+    .max(200)
+    .optional()
+    .describe("Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox"),
+  limit: z.number().int().min(1).max(10).default(5),
+});
+
+export const ReadEmailArgs = z.object({
+  id: z.string().regex(/^[0-9a-zA-Z]{8,40}$/).describe("The id check_email gave the message"),
+});
+
+export const DraftEmailArgs = z
+  .object({
+    reply_to: z
+      .string()
+      .regex(/^[0-9a-zA-Z]{8,40}$/)
+      .optional()
+      .describe("The id check_email gave the message being answered"),
+    to: z
+      .string()
+      .email()
+      .max(200)
+      .optional()
+      .describe("An email address the user said, for a new message; never made up"),
+    subject: z.string().max(200).optional().describe("For a new message"),
+    body: z
+      .string()
+      .trim()
+      .min(1)
+      .max(3000)
+      .describe("The message in the user's words, with punctuation added: 'Маргааш уулзъя.'"),
+  })
+  .refine((a) => a.reply_to !== undefined || a.to !== undefined, { message: "reply_to or to" });
+
+/** Sends the draft BEKHI showed the user in an earlier turn, once they say yes. */
+export const SendEmailArgs = z.object({});
+
+export const ReadWebpageArgs = z.object({
+  url: z.url({ protocol: /^https$/ }).max(2000).describe("The page to read, e.g. a web_search result"),
+});
 export type ComputerFolder = z.infer<typeof ComputerFolder>;
 
 export const ComputerControlArgs = z.object({
-  action: z.enum(["volume_up", "volume_down", "set_volume", "mute", "unmute", "lock_screen", "open_folder"]),
+  action: z.enum([
+    "volume_up",
+    "volume_down",
+    "set_volume",
+    "mute",
+    "unmute",
+    "lock_screen",
+    "open_folder",
+    // What is playing (YouTube, Spotify): the keyboard's media keys.
+    "media_play_pause",
+    "media_next",
+    "media_previous",
+  ]),
   /** set_volume: 0-100. */
   level: z.number().int().min(0).max(100).optional(),
   /** open_folder. */
@@ -312,7 +456,18 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   create_routine: CreateRoutineArgs,
   remember: RememberArgs,
   forget: ForgetArgs,
+  set_profile: SetProfileArgs,
   type_text: TypeTextArgs,
+  play_video: PlayVideoArgs,
+  find_files: FindFilesArgs,
+  open_file: OpenFileArgs,
+  read_file: ReadFileArgs,
+  look_at_screen: LookAtScreenArgs,
+  read_webpage: ReadWebpageArgs,
+  check_email: CheckEmailArgs,
+  read_email: ReadEmailArgs,
+  draft_email: DraftEmailArgs,
+  send_email: SendEmailArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -554,8 +709,9 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes:
-      "The day at a glance, returned inline: a greeting for the time of day, today's weather and the to-dos due " +
-      "today or overdue. Planned together with list_reminders, so the device adds what it has scheduled today.",
+      "The day at a glance, returned inline: a greeting for the time of day, then what the user chose in their " +
+      "profile: today's weather, the to-dos due today or overdue, unread mail, the news. Planned together with " +
+      "list_reminders, so the device adds what it has scheduled today. Asks what to tell until the user chooses.",
   },
   create_routine: {
     executor: "device",
@@ -588,6 +744,17 @@ export const TOOL_MANIFEST = {
     app_intent: null,
     notes: "Forgets the remembered facts containing the query words, or all of them.",
   },
+  set_profile: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The user's profile for the account: their name (the briefing greets them by it), their city (the weather's " +
+      "default place) and what the day's briefing tells (weather, todos, schedule, email, news).",
+  },
   type_text: {
     executor: "device",
     strategy: ["react_native"],
@@ -598,6 +765,111 @@ export const TOOL_MANIFEST = {
     notes:
       "Types the text where the cursor is on the user's computer (Word, a chat, a browser field): dictation in " +
       "Mongolian. Said to the phone, it is sent to the linked computer (sync commands).",
+  },
+  play_video: {
+    executor: "device",
+    strategy: ["url_scheme", "react_native"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Plays the first YouTube video for the query (the backend finds it and sets url and title): the YouTube " +
+      "app on a phone, BEKHI's own browser window on the computer, where it starts with sound.",
+  },
+  find_files: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The user's own files (Downloads, Documents, Desktop, Pictures, Music, Videos), newest first, returned to the " +
+      "model with ids for open_file and read_file. Offered only when the API runs on the user's computer.",
+  },
+  open_file: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "Opens a file find_files found, in its usual app on the computer. Documents and media only, never programs.",
+  },
+  read_file: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from. A PDF is " +
+      "read by Gemini (scanned ones too), which answers the question about it in Mongolian.",
+  },
+  look_at_screen: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Looks at the window the user is working in on their computer (not BEKHI's own) and answers their question " +
+      "about it in Mongolian: explains an error, translates a page. The picture goes to Gemini only for that " +
+      "answer; it is never kept or logged. Only when BEKHI runs on that computer.",
+  },
+  read_webpage: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "The readable text of a public https page (no private addresses), for the model to answer from.",
+  },
+  check_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The account's Gmail (linked once with Google sign-in, read-only): sender names, subjects, snippets and ids " +
+      "for a Gmail search, returned to the model. Nothing is stored.",
+  },
+  read_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "The text of one Gmail message check_email found, for the model to summarize.",
+  },
+  draft_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Writes a Gmail draft: a reply to a message check_email found, or a new message to an address the user said. " +
+      "Nothing is sent: the app shows the draft with Send / Cancel, and BEKHI asks whether to send it.",
+  },
+  send_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Sends the draft BEKHI showed in an earlier turn, after the user said yes. Refused in the same turn as the " +
+      "draft, so a draft is never sent unseen.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

@@ -141,6 +141,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
       return service.createRoutine(action.arguments);
     case "type_text":
       return service.typeText(action.arguments);
+    case "play_video":
+      return service.playVideo(action.arguments);
     case "get_weather":
     case "web_search":
     case "get_current_time":
@@ -151,6 +153,16 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
     case "daily_briefing":
     case "remember":
     case "forget":
+    case "set_profile":
+    case "find_files":
+    case "open_file":
+    case "read_file":
+    case "look_at_screen":
+    case "read_webpage":
+    case "check_email":
+    case "read_email":
+    case "draft_email":
+    case "send_email":
       return Promise.resolve({ status: "failed" as const, executed_via: null, error_code: "BACKEND_TOOL_ON_DEVICE" });
   }
 }

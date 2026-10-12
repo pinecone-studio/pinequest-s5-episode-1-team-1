@@ -27,6 +27,15 @@ DEVICE_ID = re.compile(r"^[A-Za-z0-9-]{8,64}$")
 ACTIVE_DEVICE_WINDOW = timedelta(days=30)
 
 
+def supabase_headers(service_key: str) -> dict[str, str]:
+    """Supabase's new secret keys (sb_secret_...) go only in `apikey`; a legacy service_role key is
+    a JWT and goes in `Authorization` too."""
+    headers = {"apikey": service_key}
+    if service_key.startswith("eyJ"):
+        headers["Authorization"] = f"Bearer {service_key}"
+    return headers
+
+
 def account_key(code: str | None) -> str | None:
     """The account a sync code stands for, or None if it is not a well-formed code.
     Typed codes are forgiving: case, dashes and spaces are ignored, O/I/L read as 0/1/1."""
@@ -118,7 +127,7 @@ class SupabaseSyncStore:
 
     def __init__(self, url: str, service_key: str, http: httpx.AsyncClient) -> None:
         self._rest = url.rstrip("/") + "/rest/v1"
-        self._headers = {"apikey": service_key, "Authorization": f"Bearer {service_key}"}
+        self._headers = supabase_headers(service_key)
         self._http = http
 
     async def _call(self, method: str, table: str, *, params: dict[str, str] | None = None,

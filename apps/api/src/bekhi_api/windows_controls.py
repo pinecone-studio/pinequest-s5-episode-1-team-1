@@ -130,6 +130,8 @@ KEYEVENTF_UNICODE = 0x0004
 VK_RETURN = 0x0D
 VK_TAB = 0x09
 VK_MENU = 0x12  # Alt
+MEDIA_KEYS = {"media_play_pause": 0xB3, "media_next": 0xB0, "media_previous": 0xB1}
+KEYEVENTF_EXTENDEDKEY = 0x0001
 BEKHI_WINDOW_TITLE = "BEKHI"  # the app window (desktop_app.py): the page title
 
 
@@ -173,6 +175,12 @@ def type_text(text: str) -> bool:
         _send([_key(VK_MENU, 0, 0), _key(VK_TAB, 0, 0), _key(VK_TAB, 0, KEYEVENTF_KEYUP), _key(VK_MENU, 0, KEYEVENTF_KEYUP)])
         time.sleep(0.4)
     return _send(events)
+
+
+def press_media_key(action: str) -> bool:
+    """Play/pause, next or previous for whatever is playing (YouTube in a browser, Spotify)."""
+    vk = MEDIA_KEYS[action]
+    return _send([_key(vk, 0, KEYEVENTF_EXTENDEDKEY), _key(vk, 0, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP)])
 
 
 def _send(events: list[_Input]) -> bool:

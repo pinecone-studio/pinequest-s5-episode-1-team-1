@@ -46,7 +46,18 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "create_routine": ("өдөр бүрийн тойм тохируулах", "өдөр бүрийн тойм тохируулахад"),
     "remember": ("санах", "санахад"),
     "forget": ("мартах", "мартахад"),
+    "set_profile": ("хадгалах", "хадгалахад"),
     "type_text": ("компьютер дээр бичих", "компьютер дээр бичихэд"),
+    "play_video": ("тоглуулах", "тоглуулахад"),
+    "find_files": ("файл хайх", "файл хайхад"),
+    "open_file": ("файл нээх", "файл нээхэд"),
+    "read_file": ("файл унших", "файл уншихад"),
+    "look_at_screen": ("дэлгэц харах", "дэлгэц харахад"),
+    "draft_email": ("имэйл бичих", "имэйл бичихэд"),
+    "send_email": ("имэйл илгээх", "имэйл илгээхэд"),
+    "read_webpage": ("хуудас унших", "хуудас уншихад"),
+    "check_email": ("имэйл шалгах", "имэйл шалгахад"),
+    "read_email": ("имэйл унших", "имэйл уншихад"),
 }
 
 FOLDER_NAMES = {
@@ -77,6 +88,7 @@ UNSUPPORTED_BY_CODE = {
     # Commands for the user's other device (commands.py) when no such device is listening.
     "NO_COMPUTER": "Компьютер холбогдоогүй байна. Компьютер дээрээ БЭХИ-г асаагаад энэ утастай нэг кодоор холбоорой.",
     "NO_PHONE": "Утас холбогдоогүй байна. Утсан дээрээ БЭХИ-г нээгээд энэ компьютертэй нэг кодоор холбоорой.",
+    "NOT_ON_COMPUTER": "Файл, дэлгэцтэй зөвхөн компьютер дээрх БЭХИ ажиллаж чадна.",
     # The cloud web app on a PC without BEKHI's PC agent running (apps/api agent.py).
     "DESKTOP_AGENT_OFF": "Компьютер дээр {verb} боломжгүй байна: энэ компьютерт БЭХИ агент асаагүй байна.",
 }
@@ -106,10 +118,29 @@ FAILED_BY_CODE = {
     "TODO_UNAVAILABLE": "Жагсаалт руу одоо хандаж чадсангүй. Түр хүлээгээд дахин хэлээрэй.",
     "COMPUTER_NO_ANSWER": "Компьютер хариу өгсөнгүй. Компьютер дээрээ БЭХИ асаалттай эсэхийг шалгаарай.",
     "PHONE_NO_ANSWER": "Утас хариу өгсөнгүй. Утсан дээрээ БЭХИ нээлттэй эсэхийг шалгаарай.",
+    "GOOGLE_NOT_LINKED": "Gmail холбогдоогүй байна. БЭХИ-ийн холбох цэснээс 'Gmail холбох' дарна уу.",
+    "GOOGLE_RELINK": "Gmail-ийн холболт хугацаа нь дууссан байна. Холбох цэснээс дахин 'Gmail холбох' дарна уу.",
+    "GOOGLE_NOT_CONFIGURED": "Энэ сервер дээр Gmail холболт тохируулагдаагүй байна.",
+    "GMAIL_UNAVAILABLE": "Gmail-тэй холбогдож чадсангүй. Түр хүлээгээд дахин асуугаарай.",
+    "FILE_NOT_FOUND": "Тэр файл олдсонгүй. Дахин хайгаад үзье.",
+    "FILE_NOT_ALLOWED": "Энэ төрлийн файлыг БЭХИ нээхгүй.",
+    "FILE_UNREADABLE": "Энэ файлын агуулгыг уншиж чадсангүй.",
+    "FILE_TOO_LARGE": "Энэ файл хэт том байна (15 MB-аас их). Жижиг хэсгийг нь уншуулж үзээрэй.",
+    "SCREEN_UNAVAILABLE": "Дэлгэцийг харж чадсангүй. Харах цонхоо нээлттэй, багасгаагүй байлгаад дахин асуугаарай.",
+    "READER_UNAVAILABLE": "Одоогоор уншиж чадсангүй. Түр хүлээгээд дахин асуугаарай.",
+    "GMAIL_NO_SEND": "Имэйл бичих эрх алга. Тохиргоо → Google хэсэгт Салгаад дахин Холбоод, имэйл бичих эрхийг зөвшөөрөөрэй.",
+    "EMAIL_NO_RECIPIENT": "Хэнд бичихээ хэлээрэй: ирсэн имэйлд хариулах уу, эсвэл имэйл хаягаа хэлэх үү?",
+    "EMAIL_NO_DRAFT": "Илгээх ноорог алга. Юу гэж бичихээ дахин хэлээрэй.",
+    "EMAIL_NOT_CONFIRMED": "Ноорог бэлэн боллоо. Илгээх үү?",
+    "URL_NOT_ALLOWED": "Энэ хаягийг уншиж болохгүй.",
+    "PAGE_UNREACHABLE": "Тэр хуудсыг нээж чадсангүй.",
+    "PAGE_NOT_TEXT": "Тэр хуудсанд унших текст алга.",
+    "BROWSER_NOT_FOUND": "Компьютер дээр видео тоглуулах browser олдсонгүй.",
     "TYPING_FAILED": "Компьютер дээр бичиж чадсангүй. Бичих газраа дараад дахин хэлээрэй.",
     "MEMORY_FULL": "Санах зүйл дүүрсэн байна. Заримыг нь мартуулаарай.",
     "MEMORY_NOT_FOUND": "Тийм зүйл санаагүй байна.",
     "MEMORY_UNAVAILABLE": "Санах ой руу одоо хандаж чадсангүй. Түр хүлээгээд дахин хэлээрэй.",
+    "PROFILE_UNAVAILABLE": "Таны тохиргоог одоо хадгалж чадсангүй. Түр хүлээгээд дахин хэлээрэй.",
     "REMINDER_NOT_FOUND": "Тийм сануулга олдсонгүй.",
     "VOLUME_UNAVAILABLE": "Компьютерын дууны төхөөрөмж олдсонгүй.",
 }
@@ -190,7 +221,21 @@ def _computer_sentence(a: dict, data: dict) -> str:
             return "За, компьютерээ түгжлээ."
         case "open_folder":
             return f"За, {FOLDER_NAMES.get(a.get('folder', ''), 'хавтсыг')} хавтсыг нээлээ."
+        case "media_play_pause":
+            return "За."
+        case "media_next":
+            return "За, дараагийнх руу шилжлээ."
+        case "media_previous":
+            return "За, өмнөх рүү буцлаа."
     return "За, хийчихлээ."
+
+
+def _play_sentence(a: dict, data: dict) -> str:
+    """"За, YouTube дээр 'Hurd - Busgui' тоглуулж байна", or the search page when no video was found."""
+    where = "компьютер дээр" if data.get("device") == "computer" else "YouTube дээр"
+    if a.get("title"):
+        return f"За, {where} '{a['title']}' тоглуулж байна."
+    return f"За, {where} '{a['query']}' гэж хайлаа."
 
 
 def _app_sentence(a: dict, data: dict) -> str:
@@ -264,13 +309,15 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return _computer_sentence(a, data)
             case "type_text":
                 return "За, компьютер дээр бичлээ."
+            case "play_video":
+                return _play_sentence(a, data)
             case "create_routine":
                 return (
                     f"За, өдөр бүр {clock_mn(a['time'])} өдрийн тоймын мэдэгдэл ирнэ. "
                     "Дарахад нь цаг агаар, хийх зүйлсийг тань хэлж өгье."
                 )
         if r.executed_via == "backend":
-            # Done on the Windows PC (desktop.py): toasts while BEKHI runs, notes in a file.
+            # Done on the computer (desktop.py): toasts while BEKHI runs, notes in a file.
             match action.tool:
                 case "create_reminder":
                     return f"За, {format_when_mn(a['due_at'], now_iso)} компьютер дээр мэдэгдлээр сануулъя."
@@ -314,6 +361,8 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return f"За, {toward(a['contact_name'])} бичих мессежийг бэлдлээ. Илгээх товчийг дараарай."
             case "open_url":
                 return f"За, {a.get('title') or 'хуудсыг'} нээлээ."
+            case "play_video":
+                return _play_sentence(a, r.data or {})
             case "open_app":
                 return _app_sentence(a, r.data or {})
         return "За, нээчихлээ."
@@ -348,20 +397,27 @@ def _today_schedule(r: ActionResult, now_iso: str) -> str:
     lines = [
         f"{format_when_mn(i['fire_at'], now_iso).removeprefix('өнөөдөр ')} "
         f"{i.get('title') or KIND_MN.get(i.get('kind', ''), 'сануулга')}"
-        for i in items[:5]
+        for i in items[:3]
     ]
-    return "Өнөөдөр товлосон: " + ", ".join(lines) + "."
+    more = f", бас {len(items) - 3}" if len(items) > 3 else ""
+    return "Өнөөдөр товлосон: " + ", ".join(lines) + more + "."
 
 
 def compose(actions: list[ActionRequest], results: list[ActionResult], now_iso: str) -> str:
     by_id = {a.id: a for a in actions}
-    briefing = any(a.tool == "daily_briefing" for a in actions)
+    briefing = next((r.data for r in results if r.action_id in by_id and by_id[r.action_id].tool == "daily_briefing"
+                     and r.status == "succeeded" and r.data), None)
+    # The briefing tells today's schedule only if the user wants it (profile.py).
+    schedule = briefing is None or "schedule" in (briefing.get("parts") or ["schedule"])
     parts = [
-        _today_schedule(r, now_iso) if briefing and by_id[r.action_id].tool == "list_reminders"
+        (_today_schedule(r, now_iso) if schedule else "") if briefing is not None and by_id[r.action_id].tool == "list_reminders"
         else sentence_for(by_id[r.action_id], r, now_iso)
         for r in results
         if r.action_id in by_id
     ]
+    # A briefing that asks the user what to tell next time asks it last, so they can answer.
+    if briefing is not None and briefing.get("ask_mn"):
+        parts.append(str(briefing["ask_mn"]))
     # Collapse repeated identical sentences (e.g. several "болиулчихлаа").
     seen: list[str] = []
     for p in parts:

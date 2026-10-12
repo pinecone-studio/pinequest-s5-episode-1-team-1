@@ -76,6 +76,17 @@ class SearchError(RuntimeError):
         self.code = code
 
 
+class ReaderError(RuntimeError):
+    """The model could not read it now (quota, network)."""
+
+
+class Reader(Protocol):
+    async def read(self, data: bytes, mime_type: str, instruction: str) -> str:
+        """What a picture (the user's screen) or a document (a PDF) says, answered in Mongolian.
+        Raises ReaderError when the model cannot be reached."""
+        ...
+
+
 class WebSearch(Protocol):
     async def search(self, query: str) -> dict[str, Any]:
         """{"answer": Mongolian text, "sources": [{"title": ..., "url": ...}]}"""

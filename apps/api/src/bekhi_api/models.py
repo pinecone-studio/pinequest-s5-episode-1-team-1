@@ -34,7 +34,18 @@ ToolName = Literal[
     "create_routine",
     "remember",
     "forget",
+    "set_profile",
     "type_text",
+    "play_video",
+    "find_files",
+    "open_file",
+    "read_file",
+    "look_at_screen",
+    "read_webpage",
+    "check_email",
+    "read_email",
+    "draft_email",
+    "send_email",
 ]
 ExecutionTarget = Literal["backend", "react_native", "native_swift", "app_intent", "shortcut", "url_scheme"]
 ActionStatus = Literal[

@@ -89,7 +89,18 @@ export const ActionRequest = z.discriminatedUnion("tool", [
   actionRequest("daily_briefing"),
   actionRequest("create_routine"),
   actionRequest("remember"),
+  actionRequest("set_profile"),
   actionRequest("forget"),
   actionRequest("type_text"),
+  actionRequest("play_video"),
+  actionRequest("find_files"),
+  actionRequest("open_file"),
+  actionRequest("read_file"),
+  actionRequest("look_at_screen"),
+  actionRequest("read_webpage"),
+  actionRequest("check_email"),
+  actionRequest("read_email"),
+  actionRequest("draft_email"),
+  actionRequest("send_email"),
 ]);
 export type ActionRequest = z.infer<typeof ActionRequest>;

@@ -208,6 +208,33 @@
         "arguments": [{ "action": "volume_down" }],
         "requires_confirmation": false
       }
+    },
+    {
+      "id": "21_play_a_song",
+      "utterance": "Хүрдийн Бусгүй дууг тоглуулаач.",
+      "variants": ["YouTube-ээс Монгол дуу олоод тоглуул."],
+      "expected": {
+        "tools": ["play_video"],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "22_next_song",
+      "utterance": "Дараагийн дуу руу шилжүүл.",
+      "expected": {
+        "tools": ["computer_control"],
+        "arguments": [{ "action": "media_next" }],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "23_check_email",
+      "utterance": "Шинэ имэйл ирсэн үү?",
+      "variants": ["Gmail-ээ шалгаад өгөөч"],
+      "expected": {
+        "tools": ["check_email"],
+        "requires_confirmation": false
+      }
     }
   ],
   "conversations": [

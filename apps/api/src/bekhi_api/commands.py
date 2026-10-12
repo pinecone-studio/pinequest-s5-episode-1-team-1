@@ -22,8 +22,8 @@ import httpx
 
 TARGETS = ("computer", "phone")
 RELAYED_TOOLS = {
-    "computer": {"open_app", "open_url", "computer_control", "type_text", "create_note"},
-    "phone": {"call_contact", "send_message", "open_app", "open_url"},
+    "computer": {"open_app", "open_url", "computer_control", "type_text", "create_note", "play_video"},
+    "phone": {"call_contact", "send_message", "open_app", "open_url", "play_video"},
 }
 TAKE_WAIT_MAX = 25  # seconds a device waits for commands per request
 STATE_WAIT_MAX = 20  # seconds a sender waits for the outcome per request

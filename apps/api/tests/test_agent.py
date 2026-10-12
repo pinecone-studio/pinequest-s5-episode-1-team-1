@@ -82,7 +82,8 @@ def test_only_web_links_are_opened(client, planner):
     assert chat(client, "Энийг нээ")["intent"] == "error"
 
 
-def test_find_app_uses_the_start_menu(tmp_path):
+def test_find_app_uses_the_start_menu(tmp_path, monkeypatch):
+    monkeypatch.setattr(desktop.system, "IS_MAC", False)
     programs = tmp_path / "Programs"
     (programs / "Visual Studio Code").mkdir(parents=True)
     (programs / "Visual Studio Code" / "Visual Studio Code.lnk").write_bytes(b"")
@@ -98,7 +99,7 @@ def test_find_app_uses_the_start_menu(tmp_path):
 def test_open_app_on_the_pc(tmp_path, monkeypatch):
     opened = []
     monkeypatch.setattr(desktop, "find_app", lambda name: "C:/x/Spotify.lnk" if name == "Spotify" else None)
-    monkeypatch.setattr(desktop.os, "startfile", opened.append, raising=False)
+    monkeypatch.setattr(desktop.system, "open_path", opened.append)
     s = desktop.DesktopScheduler(tmp_path / "r.json")
     assert desktop.run("open_app", {"app_name": "Spotify"}, s)["status"] == "succeeded"
     assert desktop.run("open_app", {"app_name": "Photoshop"}, s)["error_code"] == "APP_NOT_FOUND"

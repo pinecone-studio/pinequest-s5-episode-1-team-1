@@ -20,6 +20,7 @@ import httpx
 
 from .config import API_ROOT
 from .models import ActionResult
+from .sync import supabase_headers
 
 MAX_FACTS = 50
 
@@ -74,7 +75,7 @@ class SupabaseFactStore:
 
     def __init__(self, url: str, service_key: str, http: httpx.AsyncClient, legacy: FileFactStore) -> None:
         self._rest = url.rstrip("/") + "/rest/v1/memories"
-        self._headers = {"apikey": service_key, "Authorization": f"Bearer {service_key}", "Prefer": "return=minimal"}
+        self._headers = {**supabase_headers(service_key), "Prefer": "return=minimal"}
         self._http = http
         self._legacy = legacy
 
