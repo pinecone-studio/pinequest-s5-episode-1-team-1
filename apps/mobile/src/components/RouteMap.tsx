@@ -1,14 +1,23 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Platform, StyleSheet } from "react-native";
 import { isRunningInExpoGo } from "expo";
 import Constants from "expo-constants";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
-import type { DirectionsResponse, LatLng } from "@bekhi/contracts";
+import type {
+  DirectionsResponse,
+  LatLng,
+  NearbyStop,
+} from "@bekhi/contracts";
+import { NEARBY_STOP_COLOR, stopMarkers } from "@/services/maps/transit";
 import { colors } from "@/theme";
 
 export type RouteMapProps = {
   location: LatLng | null;
   route: DirectionsResponse | null;
+  /** Bus stops around the user, shown while there is no route. */
+  stops: NearbyStop[];
+  /** Moves the map here when it changes, e.g. a stop picked from the list. */
+  focus: LatLng | null;
   /** Room taken by overlays (search bar, route card), so the route is fitted between them. */
   inset: { top: number; bottom: number };
 };
@@ -26,9 +35,16 @@ const provider =
     ? PROVIDER_GOOGLE
     : undefined;
 
-export function RouteMap({ location, route, inset }: RouteMapProps) {
+export function RouteMap({
+  location,
+  route,
+  stops,
+  focus,
+  inset,
+}: RouteMapProps) {
   const map = useRef<MapView>(null);
   const centered = useRef(false);
+  const rideStops = useMemo(() => (route ? stopMarkers(route) : []), [route]);
 
   useEffect(() => {
     if (!route) return;
@@ -51,10 +67,18 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
     if (!location || route || centered.current) return;
     centered.current = true;
     map.current?.animateCamera(
-      { center: location, zoom: 15 },
+      { center: location, zoom: 16 },
       { duration: 600 },
     );
   }, [location, route]);
+
+  useEffect(() => {
+    if (focus)
+      map.current?.animateCamera(
+        { center: focus, zoom: 17 },
+        { duration: 500 },
+      );
+  }, [focus]);
 
   return (
     <MapView
@@ -80,6 +104,25 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
         />
       )}
       {route && <Marker coordinate={route.destination} />}
+      {rideStops.map((s) => (
+        <Marker
+          key={s.key}
+          coordinate={s.coordinate}
+          title={s.title}
+          description={s.description}
+          pinColor={s.color}
+        />
+      ))}
+      {!route &&
+        stops.map((s) => (
+          <Marker
+            key={s.id}
+            coordinate={s.location}
+            title={s.name}
+            description="Автобусны буудал"
+            pinColor={NEARBY_STOP_COLOR}
+          />
+        ))}
     </MapView>
   );
 }

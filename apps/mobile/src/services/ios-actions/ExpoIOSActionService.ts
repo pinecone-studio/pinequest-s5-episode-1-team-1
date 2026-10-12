@@ -5,7 +5,7 @@ import { toLocalIso } from "@/lib/time";
 import { lookupPhone, type ContactLookup } from "./contacts";
 import { type ActionOutcome, type NotificationRequest, unsupported } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
-import { openInAppMap } from "./maps";
+import { findStopsOnMap, openInAppMap } from "./maps";
 import { cancelScheduled, listScheduled, scheduleNotification } from "./notifications";
 import { pickScheduled } from "./scheduled";
 
@@ -17,6 +17,7 @@ import { pickScheduled } from "./scheduled";
  */
 export class ExpoIOSActionService extends LinkingIOSActionService {
   openMaps = (args: ToolArguments<"open_maps">) => openInAppMap(args);
+  findBusStops = () => findStopsOnMap();
 
   callContact = async (args: ToolArguments<"call_contact">): Promise<ActionOutcome> => {
     const contact = await lookupPhone(args.contact_name).catch(lookupFailed);

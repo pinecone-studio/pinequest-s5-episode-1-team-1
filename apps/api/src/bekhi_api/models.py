@@ -16,6 +16,7 @@ ToolName = Literal[
     "create_alarm",
     "get_weather",
     "open_maps",
+    "find_bus_stops",
     "create_note",
     "send_message",
     "web_search",
@@ -176,9 +177,32 @@ class DirectionsRequest(BaseModel):
     mode: TravelMode = "driving"
 
 
+TransitVehicle = Literal["bus", "trolleybus", "tram", "train", "other"]
+HEX_COLOR = r"^#[0-9a-fA-F]{6}$"
+
+
+class TransitStop(BaseModel):
+    name: str = Field(max_length=200)
+    location: LatLng | None = None
+
+
+class TransitDetails(BaseModel):
+    vehicle: TransitVehicle
+    line: str = Field(min_length=1, max_length=100)
+    color: str | None = Field(default=None, pattern=HEX_COLOR)
+    text_color: str | None = Field(default=None, pattern=HEX_COLOR)
+    headsign: str | None = Field(default=None, max_length=200)
+    departure_stop: TransitStop
+    arrival_stop: TransitStop
+    stop_count: int = Field(ge=0)
+    departure_time: str | None = None
+
+
 class DirectionsStep(BaseModel):
     instruction: str = Field(max_length=500)
     distance_m: int = Field(ge=0)
+    duration_s: int = Field(default=0, ge=0)
+    transit: TransitDetails | None = None
 
 
 class DirectionsResponse(BaseModel):
@@ -187,6 +211,22 @@ class DirectionsResponse(BaseModel):
     destination: LatLng
     path: list[LatLng] = Field(max_length=5000)
     steps: list[DirectionsStep] = Field(max_length=200)
+
+
+class NearbyStopsRequest(BaseModel):
+    origin: LatLng
+    radius_m: int = Field(default=600, ge=100, le=2000)
+
+
+class NearbyStop(BaseModel):
+    id: str = Field(min_length=1, max_length=300)
+    name: str = Field(max_length=200)
+    location: LatLng
+    distance_m: int = Field(ge=0)
+
+
+class NearbyStopsResponse(BaseModel):
+    stops: list[NearbyStop] = Field(max_length=20)
 
 
 ApiErrorCode = Literal[

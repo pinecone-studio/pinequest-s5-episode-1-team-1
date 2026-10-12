@@ -28,6 +28,7 @@ export interface IOSActionService {
   createNote(args: ToolArguments<"create_note">): Promise<ActionOutcome>;
   createNotification(req: NotificationRequest): Promise<ActionOutcome>;
   openMaps(args: ToolArguments<"open_maps">): Promise<ActionOutcome>;
+  findBusStops(args: ToolArguments<"find_bus_stops">): Promise<ActionOutcome>;
   openUrl(args: ToolArguments<"open_url">): Promise<ActionOutcome>;
   openApp(args: ToolArguments<"open_app">): Promise<ActionOutcome>;
   setTimer(args: ToolArguments<"set_timer">): Promise<ActionOutcome>;

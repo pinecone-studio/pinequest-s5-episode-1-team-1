@@ -22,11 +22,17 @@ import {
   TravelMode,
   type DirectionsResponse,
   type LatLng,
+  type NearbyStop,
+  type TransitDetails,
 } from "@bekhi/contracts";
 import { RouteMap } from "@/components/RouteMap";
 import { tap } from "@/lib/haptics";
 import { googleMapsUrl } from "@/services/ios-actions/maps";
-import { fetchDirections } from "@/services/maps/directions";
+import {
+  fetchDirections,
+  fetchNearbyStops,
+  NEARBY_RADIUS_M,
+} from "@/services/maps/directions";
 import {
   distanceM,
   formatDistance,
@@ -34,6 +40,17 @@ import {
   pathLengthM,
   progressAlong,
 } from "@/services/maps/geo";
+import {
+  catchFirstBus,
+  clock,
+  lineColors,
+  NEARBY_STOP_COLOR,
+  rides,
+  uniqueByName,
+  VEHICLE_ICONS,
+  walkSeconds,
+  type BusCatch,
+} from "@/services/maps/transit";
 import { useLiveLocation } from "@/services/maps/useLiveLocation";
 import { colors, MAX_CONTENT_WIDTH, radius } from "@/theme";
 
@@ -42,6 +59,11 @@ const OFF_ROUTE_M = 60;
 /** Each lookup is a billed Routes API request. */
 const REROUTE_EVERY_MS = 20_000;
 const ARRIVED_M = 30;
+/** Stops are looked up again after moving this far (a billed Places API request). */
+const STOPS_AGAIN_M = 300;
+const STOPS_LISTED = 5;
+/** How often the bus countdown is refreshed. */
+const TICK_MS = 10_000;
 
 const MODES: {
   mode: TravelMode;
@@ -80,11 +102,18 @@ export default function MapScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [overlays, setOverlays] = useState({ top: 0, bottom: 0 });
+  const [stops, setStops] = useState<NearbyStop[]>([]);
+  const [stopsError, setStopsError] = useState<string | null>(null);
+  const [focus, setFocus] = useState<LatLng | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
+  const stopsFrom = useRef<LatLng | null>(null);
   const request = useRef(0);
   const lastLookup = useRef(0);
   const locationRef = useRef(location);
-  locationRef.current = location;
+  useEffect(() => {
+    locationRef.current = location;
+  }, [location]);
 
   const lookUp = useCallback(
     async (to: Target, from: LatLng, reroute: boolean) => {
@@ -103,6 +132,7 @@ export default function MapScreen() {
         });
         if (id === request.current) {
           setRoute(found);
+          setNow(Date.now());
           setError(null);
         }
       } catch (e) {
@@ -123,7 +153,39 @@ export default function MapScreen() {
       void lookUp(target, locationRef.current, false);
   }, [target, hasFix, lookUp]);
 
+  // Bus stops around the user while no destination is chosen.
+  useEffect(() => {
+    if (target || !location) return;
+    if (stopsFrom.current && distanceM(stopsFrom.current, location) < STOPS_AGAIN_M)
+      return;
+    stopsFrom.current = location;
+    fetchNearbyStops({ origin: location, radius_m: NEARBY_RADIUS_M })
+      .then((found) => {
+        setStops(found.stops);
+        setStopsError(null);
+      })
+      .catch((e: unknown) => {
+        stopsFrom.current = null;
+        setStopsError(e instanceof Error ? e.message : String(e));
+      });
+  }, [target, location]);
+
   const totalM = useMemo(() => (route ? pathLengthM(route.path) : 0), [route]);
+  const lines = useMemo(() => (route ? rides(route) : []), [route]);
+  const listedStops = useMemo(
+    () => uniqueByName(stops).slice(0, STOPS_LISTED),
+    [stops],
+  );
+
+  useEffect(() => {
+    if (lines.length === 0) return;
+    const timer = setInterval(() => setNow(Date.now()), TICK_MS);
+    return () => clearInterval(timer);
+  }, [lines]);
+  const busCatch = useMemo(
+    () => (route ? catchFirstBus(route, location, now) : null),
+    [route, location, now],
+  );
   const progress = useMemo(
     () => (route && location ? progressAlong(route.path, location) : null),
     [route, location],
@@ -174,6 +236,18 @@ export default function MapScreen() {
     void Linking.openURL(googleMapsUrl(target, { navigate: true }));
   }
 
+  function nextBus() {
+    if (!target || !location) return;
+    tap();
+    void lookUp(target, location, false);
+  }
+
+  function showStop(stop: NearbyStop) {
+    tap();
+    // A new object, so picking the same stop again moves the map back to it.
+    setFocus({ ...stop.location });
+  }
+
   // Share of the route still ahead, for the time and distance left.
   const left = route
     ? progress && totalM > 0
@@ -187,6 +261,8 @@ export default function MapScreen() {
       <RouteMap
         location={location}
         route={route}
+        stops={target ? [] : stops}
+        focus={focus}
         inset={{
           top: safe.top + overlays.top,
           bottom: safe.bottom + overlays.bottom,
@@ -299,6 +375,9 @@ export default function MapScreen() {
               <Text style={styles.errorText}>{error}</Text>
             ) : route && target ? (
               <>
+                {busCatch && !arrived && (
+                  <CatchBanner busCatch={busCatch} onNextBus={nextBus} />
+                )}
                 {arrived ? (
                   <Text style={styles.eta}>Хүрлээ 🎉</Text>
                 ) : (
@@ -315,21 +394,49 @@ export default function MapScreen() {
                 <Text style={styles.destination} numberOfLines={1}>
                   {target.destination}
                 </Text>
+                {lines.length > 0 && !arrived && (
+                  <View style={styles.lines}>
+                    {lines.map((t, i) => (
+                      <View key={i} style={styles.lineChain}>
+                        {i > 0 && (
+                          <Ionicons
+                            name="chevron-forward"
+                            size={14}
+                            color={colors.tertiaryLabel}
+                          />
+                        )}
+                        <LineBadge transit={t} />
+                      </View>
+                    ))}
+                  </View>
+                )}
+                {target.mode === "transit" &&
+                  lines.length === 0 &&
+                  !arrived && (
+                    <Text style={styles.messageText}>
+                      Энэ замд автобус хэрэггүй: алхаад очих нь хамгийн
+                      ойрхон байна.
+                    </Text>
+                  )}
                 {route.steps.length > 0 && !arrived && (
                   <ScrollView
                     style={styles.steps}
                     showsVerticalScrollIndicator={false}
                   >
-                    {route.steps.map((s, i) => (
-                      <View key={i} style={styles.step}>
-                        <Text style={styles.stepText}>{s.instruction}</Text>
-                        {s.distance_m > 0 && (
-                          <Text style={styles.stepDistance}>
-                            {formatDistance(s.distance_m)}
-                          </Text>
-                        )}
-                      </View>
-                    ))}
+                    {route.steps.map((s, i) =>
+                      s.transit ? (
+                        <TransitStep key={i} transit={s.transit} />
+                      ) : (
+                        <View key={i} style={styles.step}>
+                          <Text style={styles.stepText}>{s.instruction}</Text>
+                          {s.distance_m > 0 && (
+                            <Text style={styles.stepDistance}>
+                              {formatDistance(s.distance_m)}
+                            </Text>
+                          )}
+                        </View>
+                      ),
+                    )}
                   </ScrollView>
                 )}
                 <Pressable
@@ -350,10 +457,48 @@ export default function MapScreen() {
                 </Pressable>
               </>
             ) : (
-              <Text style={styles.messageText}>
-                Очих газраа бичээд хайна уу. Жишээ нь: Сансар, Зайсан, Улсын их
-                дэлгүүр.
-              </Text>
+              <>
+                {listedStops.length > 0 && (
+                  <View style={styles.nearby}>
+                    <Text style={styles.sectionTitle}>
+                      Ойрын автобусны буудал
+                    </Text>
+                    {listedStops.map((s) => (
+                      <Pressable
+                        key={s.id}
+                        accessibilityRole="button"
+                        onPress={() => showStop(s)}
+                        style={({ pressed }) => [
+                          styles.stopRow,
+                          pressed && styles.pressed,
+                        ]}
+                      >
+                        <View style={styles.stopIcon}>
+                          <Ionicons
+                            name="bus"
+                            size={14}
+                            color={colors.background}
+                          />
+                        </View>
+                        <Text style={styles.stepText} numberOfLines={1}>
+                          {s.name}
+                        </Text>
+                        <Text style={styles.stepDistance}>
+                          {formatDistance(s.distance_m)} · 🚶{" "}
+                          {formatDuration(walkSeconds(s.distance_m))}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+                {stopsError && listedStops.length === 0 && (
+                  <Text style={styles.errorText}>{stopsError}</Text>
+                )}
+                <Text style={styles.messageText}>
+                  Очих газраа бичээд хайна уу. Автобусаар явах бол
+                  &quot;Нийтийн тээвэр&quot;-ийг сонгоорой.
+                </Text>
+              </>
             )}
           </View>
         </View>
@@ -363,8 +508,96 @@ export default function MapScreen() {
 }
 
 function arrivalTime(secondsFromNow: number): string {
-  const at = new Date(Date.now() + secondsFromNow * 1000);
-  return `${String(at.getHours()).padStart(2, "0")}:${String(at.getMinutes()).padStart(2, "0")}`;
+  return clock(new Date(Date.now() + secondsFromNow * 1000));
+}
+
+const CATCH = {
+  relaxed: { icon: "checkmark-circle", color: colors.success, title: "Амжина" },
+  hurry: { icon: "flash", color: colors.warning, title: "Яараарай!" },
+  at_stop: { icon: "time", color: colors.success, title: "Буудал дээрээ байна" },
+  missed: { icon: "close-circle", color: colors.danger, title: "Энэ автобусанд амжихгүй" },
+} as const;
+
+/** Whether the first bus of the route can still be caught, by its timetabled departure. */
+function CatchBanner({
+  busCatch,
+  onNextBus,
+}: {
+  busCatch: BusCatch;
+  onNextBus: () => void;
+}) {
+  const { kind, transit, departs, seconds } = busCatch;
+  const look = CATCH[kind];
+  const detail = {
+    relaxed: `Гарах хүртэл ${formatDuration(seconds)}`,
+    hurry: "Одоо гарвал амжина",
+    at_stop: `Ирэх хүртэл ${formatDuration(seconds)}`,
+    missed: "алхаад амжихааргүй",
+  }[kind];
+  return (
+    <View style={[styles.catch, { borderColor: look.color }]}>
+      <Ionicons name={look.icon} size={22} color={look.color} />
+      <View style={styles.catchBody}>
+        <Text style={[styles.catchTitle, { color: look.color }]}>
+          {look.title}
+        </Text>
+        <Text style={styles.catchText}>
+          {transit.line} · {clock(departs)}-д · {detail}
+        </Text>
+        <Text style={styles.catchNote}>Цагийн хуваариар</Text>
+      </View>
+      {kind === "missed" && (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onNextBus}
+          style={styles.secondaryButton}
+        >
+          <Text style={styles.secondaryButtonText}>Дараагийн автобус</Text>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
+function LineBadge({ transit }: { transit: TransitDetails }) {
+  const { background, text } = lineColors(transit);
+  return (
+    <View style={[styles.badge, { backgroundColor: background }]}>
+      <Ionicons name={VEHICLE_ICONS[transit.vehicle]} size={13} color={text} />
+      <Text style={[styles.badgeText, { color: text }]}>{transit.line}</Text>
+    </View>
+  );
+}
+
+function TransitStep({ transit }: { transit: TransitDetails }) {
+  const leaves = transit.departure_time
+    ? clock(new Date(transit.departure_time))
+    : null;
+  return (
+    <View style={[styles.step, styles.transitStep]}>
+      <View style={styles.transitHeader}>
+        <LineBadge transit={transit} />
+        {transit.headsign && (
+          <Text style={styles.headsign} numberOfLines={1}>
+            → {transit.headsign}
+          </Text>
+        )}
+      </View>
+      <Text style={styles.stepText}>
+        Суух: {transit.departure_stop.name}
+        {leaves && <Text style={styles.stepDistance}> · {leaves}</Text>}
+      </Text>
+      <Text style={styles.stepText}>
+        Буух: {transit.arrival_stop.name}
+        {transit.stop_count > 0 && (
+          <Text style={styles.stepDistance}>
+            {" "}
+            · {transit.stop_count} буудал
+          </Text>
+        )}
+      </Text>
+    </View>
+  );
 }
 
 const glass = {
@@ -442,7 +675,62 @@ const styles = StyleSheet.create({
   },
   summaryText: { fontSize: 15, color: colors.secondaryLabel },
   destination: { fontSize: 17, fontWeight: "600", color: colors.label },
-  steps: { maxHeight: 150 },
+  steps: { maxHeight: 180 },
+  lines: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 4,
+  },
+  lineChain: { flexDirection: "row", alignItems: "center", gap: 4 },
+  badge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  badgeText: { fontSize: 13, fontWeight: "800" },
+  transitStep: { flexDirection: "column", justifyContent: "flex-start", gap: 4 },
+  transitHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
+  headsign: { flex: 1, fontSize: 13, color: colors.secondaryLabel },
+  catch: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    backgroundColor: colors.surface,
+  },
+  catchBody: { flex: 1, gap: 2 },
+  catchTitle: { fontSize: 16, fontWeight: "800" },
+  catchText: { fontSize: 14, color: colors.label },
+  catchNote: { fontSize: 11, color: colors.tertiaryLabel },
+  nearby: { gap: 2 },
+  sectionTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: colors.secondaryLabel,
+    marginBottom: 4,
+  },
+  stopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 7,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.border,
+  },
+  stopIcon: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: NEARBY_STOP_COLOR,
+  },
   step: {
     flexDirection: "row",
     justifyContent: "space-between",
