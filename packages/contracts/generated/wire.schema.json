@@ -679,8 +679,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -874,8 +881,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1082,8 +1096,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1284,8 +1305,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1464,8 +1492,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1652,8 +1687,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -1835,8 +1877,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2031,8 +2080,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2210,8 +2266,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2386,8 +2449,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2577,8 +2647,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2771,8 +2848,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -2972,8 +3056,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3142,8 +3233,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3326,8 +3424,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3531,8 +3636,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3715,8 +3827,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -3899,8 +4018,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4078,8 +4204,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4257,8 +4390,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4432,8 +4572,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4618,8 +4765,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4798,8 +4952,248 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "set_profile"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "description": "What to call the user: 'Намайг Нандин гэдэг' -> 'Нандин'. Empty to stop using a name",
+                        "type": "string",
+                        "maxLength": 40
+                      },
+                      "city": {
+                        "description": "The user's own city or aimag, for the weather: 'Би Дарханд амьдардаг' -> 'Дархан'",
+                        "type": "string",
+                        "maxLength": 60
+                      },
+                      "briefing": {
+                        "description": "Exactly what the day's briefing should tell, when the user lists it",
+                        "maxItems": 5,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "weather",
+                            "todos",
+                            "schedule",
+                            "email",
+                            "news"
+                          ]
+                        }
+                      },
+                      "briefing_add": {
+                        "description": "Add to the briefing: 'өглөө мэдээ бас хэлж байгаарай' -> ['news']",
+                        "maxItems": 5,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "weather",
+                            "todos",
+                            "schedule",
+                            "email",
+                            "news"
+                          ]
+                        }
+                      },
+                      "briefing_remove": {
+                        "description": "Leave out of the briefing: 'тоймд имэйл хэрэггүй' -> ['email']",
+                        "maxItems": 5,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "weather",
+                            "todos",
+                            "schedule",
+                            "email",
+                            "news"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -4977,8 +5371,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -5157,8 +5558,15 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -5354,8 +5762,1165 @@
                               "create_routine",
                               "remember",
                               "forget",
+                              "set_profile",
                               "type_text",
-                              "play_video"
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "find_files"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "description": "Words from the file's name, if the user gave any ('тайлан', 'илтгэл')",
+                        "type": "string",
+                        "maxLength": 100
+                      },
+                      "folder": {
+                        "description": "Where to look; omitted: all of the user's folders",
+                        "type": "string",
+                        "enum": [
+                          "downloads",
+                          "documents",
+                          "desktop",
+                          "pictures",
+                          "music",
+                          "videos"
+                        ]
+                      },
+                      "kind": {
+                        "default": "any",
+                        "type": "string",
+                        "enum": [
+                          "any",
+                          "pdf",
+                          "document",
+                          "spreadsheet",
+                          "presentation",
+                          "image",
+                          "video",
+                          "audio",
+                          "text"
+                        ]
+                      },
+                      "limit": {
+                        "default": 5,
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10
+                      }
+                    }
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "open_file"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "pattern": "^f\\d{1,4}$",
+                        "description": "The id find_files gave the file, e.g. 'f1'"
+                      }
+                    },
+                    "required": [
+                      "file"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "read_file"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "type": "string",
+                        "pattern": "^f\\d{1,4}$",
+                        "description": "The id find_files gave the file, e.g. 'f1'"
+                      }
+                    },
+                    "required": [
+                      "file"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "read_webpage"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string",
+                        "maxLength": 2000,
+                        "format": "uri",
+                        "description": "The page to read, e.g. a web_search result"
+                      }
+                    },
+                    "required": [
+                      "url"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "check_email"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "description": "Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox",
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      "limit": {
+                        "default": 5,
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 10
+                      }
+                    }
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "read_email"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[0-9a-zA-Z]{8,40}$",
+                        "description": "The id check_email gave the message"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "read_webpage",
+                              "check_email",
+                              "read_email"
                             ]
                           },
                           "status": {
@@ -5669,8 +7234,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -5864,8 +7436,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -6072,8 +7651,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -6274,8 +7860,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -6454,8 +8047,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -6642,8 +8242,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -6825,8 +8432,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7021,8 +8635,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7200,8 +8821,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7376,8 +9004,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7567,8 +9202,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7761,8 +9403,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -7962,8 +9611,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8132,8 +9788,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8316,8 +9979,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8521,8 +10191,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8705,8 +10382,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -8889,8 +10573,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9068,8 +10759,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9247,8 +10945,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9422,8 +11127,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9608,8 +11320,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9788,8 +11507,248 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "set_profile"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "description": "What to call the user: 'Намайг Нандин гэдэг' -> 'Нандин'. Empty to stop using a name",
+                  "type": "string",
+                  "maxLength": 40
+                },
+                "city": {
+                  "description": "The user's own city or aimag, for the weather: 'Би Дарханд амьдардаг' -> 'Дархан'",
+                  "type": "string",
+                  "maxLength": 60
+                },
+                "briefing": {
+                  "description": "Exactly what the day's briefing should tell, when the user lists it",
+                  "maxItems": 5,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "weather",
+                      "todos",
+                      "schedule",
+                      "email",
+                      "news"
+                    ]
+                  }
+                },
+                "briefing_add": {
+                  "description": "Add to the briefing: 'өглөө мэдээ бас хэлж байгаарай' -> ['news']",
+                  "maxItems": 5,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "weather",
+                      "todos",
+                      "schedule",
+                      "email",
+                      "news"
+                    ]
+                  }
+                },
+                "briefing_remove": {
+                  "description": "Leave out of the briefing: 'тоймд имэйл хэрэггүй' -> ['email']",
+                  "maxItems": 5,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "enum": [
+                      "weather",
+                      "todos",
+                      "schedule",
+                      "email",
+                      "news"
+                    ]
+                  }
+                }
+              }
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -9967,8 +11926,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10147,8 +12113,15 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10344,8 +12317,1165 @@
                         "create_routine",
                         "remember",
                         "forget",
+                        "set_profile",
                         "type_text",
-                        "play_video"
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "find_files"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "description": "Words from the file's name, if the user gave any ('тайлан', 'илтгэл')",
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "folder": {
+                  "description": "Where to look; omitted: all of the user's folders",
+                  "type": "string",
+                  "enum": [
+                    "downloads",
+                    "documents",
+                    "desktop",
+                    "pictures",
+                    "music",
+                    "videos"
+                  ]
+                },
+                "kind": {
+                  "default": "any",
+                  "type": "string",
+                  "enum": [
+                    "any",
+                    "pdf",
+                    "document",
+                    "spreadsheet",
+                    "presentation",
+                    "image",
+                    "video",
+                    "audio",
+                    "text"
+                  ]
+                },
+                "limit": {
+                  "default": 5,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                }
+              }
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "open_file"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "pattern": "^f\\d{1,4}$",
+                  "description": "The id find_files gave the file, e.g. 'f1'"
+                }
+              },
+              "required": [
+                "file"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "read_file"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "file": {
+                  "type": "string",
+                  "pattern": "^f\\d{1,4}$",
+                  "description": "The id find_files gave the file, e.g. 'f1'"
+                }
+              },
+              "required": [
+                "file"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "read_webpage"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "maxLength": 2000,
+                  "format": "uri",
+                  "description": "The page to read, e.g. a web_search result"
+                }
+              },
+              "required": [
+                "url"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "check_email"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "description": "Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox",
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "limit": {
+                  "default": 5,
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10
+                }
+              }
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "read_email"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[0-9a-zA-Z]{8,40}$",
+                  "description": "The id check_email gave the message"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "read_webpage",
+                        "check_email",
+                        "read_email"
                       ]
                     },
                     "status": {
@@ -10476,8 +13606,15 @@
             "create_routine",
             "remember",
             "forget",
+            "set_profile",
             "type_text",
-            "play_video"
+            "play_video",
+            "find_files",
+            "open_file",
+            "read_file",
+            "read_webpage",
+            "check_email",
+            "read_email"
           ]
         },
         "status": {
@@ -10609,8 +13746,15 @@
                   "create_routine",
                   "remember",
                   "forget",
+                  "set_profile",
                   "type_text",
-                  "play_video"
+                  "play_video",
+                  "find_files",
+                  "open_file",
+                  "read_file",
+                  "read_webpage",
+                  "check_email",
+                  "read_email"
                 ]
               },
               "status": {

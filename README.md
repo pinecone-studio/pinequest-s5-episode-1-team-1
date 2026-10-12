@@ -234,6 +234,22 @@ Then, said to the phone, "Компьютерийн дууг багасга", "К
 phone (BEKHI open on it). The phone uses this PC's API when they are on the same Wi-Fi (Expo Go finds it
 by itself); through the cloud API once it runs this code.
 
+**On a Mac.** Needs [uv](https://docs.astral.sh/uv/) and Node.js (`brew install uv node`), and Google
+Chrome or Microsoft Edge for the window:
+
+```bash
+bash apps/api/install-desktop.sh   # once, and again after pulling new code
+```
+
+It makes **BEKHI.app** in `~/Applications` (open it from Launchpad or Spotlight, or drag it to the Dock).
+It does the same as on Windows, the Mac way: apps from Applications, Wi-Fi and Bluetooth pages in System
+Settings, volume, lock screen (⌃⌘Q), reminders and alarms as notifications, notes in
+`Documents/BEKHI тэмдэглэл.txt`, dictated text pasted where the cursor is. Play/pause and next track
+control Spotify or Music (a Mac has no way to press its media keys from a script). The first time, macOS
+asks to allow the microphone (for Chrome) and to let BEKHI control System Events; for typing and the lock
+screen, also turn BEKHI on in **System Settings → Privacy & Security → Accessibility**. Data and the log
+are in `~/Library/Application Support/BEKHI`.
+
 #### E. The cloud web app on your PC, with the PC agent
 
 https://bekhi.pages.dev talks to the cloud API (https://bekhi-api.onrender.com), so it needs nothing
@@ -295,6 +311,8 @@ Some things to say:
 | "Ээж рүү залга" | Finds the contact (any script) and asks before calling |
 | "Компьютерийн дууг багасга" / "Компьютер дээр ... гэж бич" (to the phone) | The linked computer does it: volume, apps, typing |
 | "Хүрдийн Бусгүйг тоглуул" / "Дараагийн дуу" / "Дууг зогсоо" | Finds the first YouTube video and plays it (the YouTube app on a phone, a player window on the computer); media keys for what is playing |
+| "Downloads-ийн сүүлийн PDF-ийг нээ" / "Тайлан файлд юу байгааг хэл" (BEKHI on the computer) | Finds the file in your folders, then opens or reads it, in steps |
+| "Энэ сайтад юу бичсэн байна: …" | Reads the page and answers from it |
 
 ---
 

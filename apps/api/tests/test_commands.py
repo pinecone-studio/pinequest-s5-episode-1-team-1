@@ -78,11 +78,9 @@ async def test_the_pc_runs_what_the_phone_asks(tmp_path, monkeypatch):
 
 
 def test_typing_and_links_on_the_pc(tmp_path, monkeypatch):
-    from bekhi_api import windows_controls
-
     typed, opened = [], []
-    monkeypatch.setattr(windows_controls, "type_text", lambda text: typed.append(text) or True)
-    monkeypatch.setattr(desktop.os, "startfile", opened.append, raising=False)
+    monkeypatch.setattr(desktop.system.controls(), "type_text", lambda text: typed.append(text) or True)
+    monkeypatch.setattr(desktop.system, "open_path", opened.append)
     s = desktop.DesktopScheduler(tmp_path / "r.json")
     assert desktop.run("type_text", {"text": "Маргааш уулзъя."}, s)["status"] == "succeeded"
     assert desktop.run("open_url", {"url": "https://www.youtube.com/"}, s)["status"] == "handed_off"

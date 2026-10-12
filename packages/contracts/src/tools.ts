@@ -26,8 +26,15 @@ export const TOOL_NAMES = [
   "create_routine",
   "remember",
   "forget",
+  "set_profile",
   "type_text",
   "play_video",
+  "find_files",
+  "open_file",
+  "read_file",
+  "read_webpage",
+  "check_email",
+  "read_email",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -284,6 +291,40 @@ export const RememberArgs = z.object({
     .describe("One short sentence about the user, kept for later: 'Хэрэглэгчийн эхнэрийг Сараа гэдэг'"),
 });
 
+/** What the day's briefing can tell: the user picks (set_profile, the app's Settings). */
+export const BriefingPart = z.enum(["weather", "todos", "schedule", "email", "news"]);
+export type BriefingPart = z.infer<typeof BriefingPart>;
+
+export const SetProfileArgs = z.object({
+  name: z
+    .string()
+    .trim()
+    .max(40)
+    .optional()
+    .describe("What to call the user: 'Намайг Нандин гэдэг' -> 'Нандин'. Empty to stop using a name"),
+  city: z
+    .string()
+    .trim()
+    .max(60)
+    .optional()
+    .describe("The user's own city or aimag, for the weather: 'Би Дарханд амьдардаг' -> 'Дархан'"),
+  briefing: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Exactly what the day's briefing should tell, when the user lists it"),
+  briefing_add: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Add to the briefing: 'өглөө мэдээ бас хэлж байгаарай' -> ['news']"),
+  briefing_remove: z
+    .array(BriefingPart)
+    .max(5)
+    .optional()
+    .describe("Leave out of the briefing: 'тоймд имэйл хэрэггүй' -> ['email']"),
+});
+
 export const ForgetArgs = z.object({
   /** Words of the fact to forget ("эхнэр"). */
   query: z.string().max(100).optional(),
@@ -292,6 +333,37 @@ export const ForgetArgs = z.object({
 });
 
 export const ComputerFolder = z.enum(["downloads", "documents", "desktop", "pictures", "music", "videos"]);
+
+export const FileKind = z.enum(["any", "pdf", "document", "spreadsheet", "presentation", "image", "video", "audio", "text"]);
+
+export const FindFilesArgs = z.object({
+  query: z.string().max(100).optional().describe("Words from the file's name, if the user gave any ('тайлан', 'илтгэл')"),
+  folder: ComputerFolder.optional().describe("Where to look; omitted: all of the user's folders"),
+  kind: FileKind.default("any"),
+  limit: z.number().int().min(1).max(10).default(5),
+});
+
+/** A file from find_files' results, by its id ("f2"): nothing else can be opened or read. */
+const FoundFile = z.string().regex(/^f\d{1,4}$/).describe("The id find_files gave the file, e.g. 'f1'");
+export const OpenFileArgs = z.object({ file: FoundFile });
+export const ReadFileArgs = z.object({ file: FoundFile });
+
+export const CheckEmailArgs = z.object({
+  query: z
+    .string()
+    .max(200)
+    .optional()
+    .describe("Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox"),
+  limit: z.number().int().min(1).max(10).default(5),
+});
+
+export const ReadEmailArgs = z.object({
+  id: z.string().regex(/^[0-9a-zA-Z]{8,40}$/).describe("The id check_email gave the message"),
+});
+
+export const ReadWebpageArgs = z.object({
+  url: z.url({ protocol: /^https$/ }).max(2000).describe("The page to read, e.g. a web_search result"),
+});
 export type ComputerFolder = z.infer<typeof ComputerFolder>;
 
 export const ComputerControlArgs = z.object({
@@ -339,8 +411,15 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   create_routine: CreateRoutineArgs,
   remember: RememberArgs,
   forget: ForgetArgs,
+  set_profile: SetProfileArgs,
   type_text: TypeTextArgs,
   play_video: PlayVideoArgs,
+  find_files: FindFilesArgs,
+  open_file: OpenFileArgs,
+  read_file: ReadFileArgs,
+  read_webpage: ReadWebpageArgs,
+  check_email: CheckEmailArgs,
+  read_email: ReadEmailArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -582,8 +661,9 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes:
-      "The day at a glance, returned inline: a greeting for the time of day, today's weather and the to-dos due " +
-      "today or overdue. Planned together with list_reminders, so the device adds what it has scheduled today.",
+      "The day at a glance, returned inline: a greeting for the time of day, then what the user chose in their " +
+      "profile: today's weather, the to-dos due today or overdue, unread mail, the news. Planned together with " +
+      "list_reminders, so the device adds what it has scheduled today. Asks what to tell until the user chooses.",
   },
   create_routine: {
     executor: "device",
@@ -616,6 +696,17 @@ export const TOOL_MANIFEST = {
     app_intent: null,
     notes: "Forgets the remembered facts containing the query words, or all of them.",
   },
+  set_profile: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The user's profile for the account: their name (the briefing greets them by it), their city (the weather's " +
+      "default place) and what the day's briefing tells (weather, todos, schedule, email, news).",
+  },
   type_text: {
     executor: "device",
     strategy: ["react_native"],
@@ -637,6 +728,64 @@ export const TOOL_MANIFEST = {
     notes:
       "Plays the first YouTube video for the query (the backend finds it and sets url and title): the YouTube " +
       "app on a phone, BEKHI's own browser window on the computer, where it starts with sound.",
+  },
+  find_files: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The user's own files (Downloads, Documents, Desktop, Pictures, Music, Videos), newest first, returned to the " +
+      "model with ids for open_file and read_file. Offered only when the API runs on the user's computer.",
+  },
+  open_file: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "Opens a file find_files found, in its usual app on the computer. Documents and media only, never programs.",
+  },
+  read_file: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from.",
+  },
+  read_webpage: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "The readable text of a public https page (no private addresses), for the model to answer from.",
+  },
+  check_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "The account's Gmail (linked once with Google sign-in, read-only): sender names, subjects, snippets and ids " +
+      "for a Gmail search, returned to the model. Nothing is stored.",
+  },
+  read_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes: "The text of one Gmail message check_email found, for the model to summarize.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 
