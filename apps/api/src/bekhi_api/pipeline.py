@@ -78,6 +78,8 @@ class Deps:
     google: google_link.Google | None = None
     # Reads a screenshot or a PDF (look_at_screen, read_file).
     reader: Reader | None = None
+    # This request: a mail draft written in it is not sent in it (google_link.run_mail_tool).
+    request_id: str = field(default_factory=lambda: uuid4().hex)
 
 
 async def _profile(deps: Deps) -> dict[str, Any]:
@@ -106,6 +108,8 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
         return await asyncio.to_thread(pc_files.PC_TOOLS[tool], action_id, args)
     if tool in ("check_email", "read_email"):
         return await google_link.run_tool(action_id, tool, args, deps.google, deps.account)
+    if tool in ("draft_email", "send_email"):
+        return await google_link.run_mail_tool(action_id, tool, args, deps.google, deps.account, deps.request_id)
     if tool == "read_webpage":
         return await webpage.read_webpage(action_id, args, deps.http)
     if tool == "daily_briefing":

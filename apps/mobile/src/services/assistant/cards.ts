@@ -13,6 +13,8 @@ export type Card =
   | { kind: "email"; subject: string; from: string; text: string }
   | { kind: "scheduled"; items: { title: string; kind: string; fire_at: string }[] }
   | { kind: "news"; items: { title: string; url: string; source: string }[] }
+  /** A Gmail draft BEKHI wrote (draft_email): sent only with the user's yes or the card's Send. */
+  | { kind: "email_draft"; draftId: string; to: string; address: string; subject: string; body: string }
   /** Which window BEKHI looked at to answer (look_at_screen). */
   | { kind: "screen"; window: string }
   /** The briefing asks what to tell from now on: the parts it told this time are picked. */
@@ -87,6 +89,17 @@ function cardsOf(r: ActionResult, briefing: BriefingPart[] | "none"): Card[] {
     }
     case "check_email":
       return [emails(d.emails)].filter(present);
+    case "draft_email":
+      return isText(d.draft_id) && isText(d.body)
+        ? [{
+            kind: "email_draft",
+            draftId: d.draft_id,
+            to: isText(d.to) ? d.to : "",
+            address: isText(d.to_address) ? d.to_address : "",
+            subject: isText(d.subject) ? d.subject : "",
+            body: d.body,
+          }]
+        : [];
     case "look_at_screen":
       return isText(d.window) && d.window ? [{ kind: "screen", window: d.window }] : [];
     case "read_email":

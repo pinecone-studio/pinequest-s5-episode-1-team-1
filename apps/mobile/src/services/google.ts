@@ -10,6 +10,26 @@ export interface GoogleStatus {
   available: boolean;
   linked: boolean;
   email: string | null;
+  /** May write and send mail (linked after BEKHI could answer mail). */
+  send?: boolean;
+}
+
+/**
+ * The draft card's buttons: send the Gmail draft BEKHI wrote, or throw it away. Resolves to an error
+ * message to show, or null.
+ */
+export async function finishDraft(draftId: string, what: "send" | "delete"): Promise<string | null> {
+  try {
+    const res = await fetch(`${apiBaseUrl()}/api/v1/google/drafts/${encodeURIComponent(draftId)}/${what}`, {
+      method: "POST",
+      headers: syncHeaders(),
+    });
+    if (res.ok) return null;
+    const body = (await res.json().catch(() => null)) as { error?: { message?: string } } | null;
+    return body?.error?.message ?? "Gmail-тэй холбогдож чадсангүй.";
+  } catch {
+    return "Сервертэй холбогдож чадсангүй.";
+  }
 }
 
 export async function googleStatus(): Promise<GoogleStatus | null> {

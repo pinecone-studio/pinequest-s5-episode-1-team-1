@@ -161,6 +161,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
     case "read_webpage":
     case "check_email":
     case "read_email":
+    case "draft_email":
+    case "send_email":
       return Promise.resolve({ status: "failed" as const, executed_via: null, error_code: "BACKEND_TOOL_ON_DEVICE" });
   }
 }

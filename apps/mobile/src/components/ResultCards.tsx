@@ -3,6 +3,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { BriefingPart } from "@bekhi/contracts";
 import { type Card, isOverdue, shortWhen } from "@/services/assistant/cards";
+import { finishDraft } from "@/services/google";
 import { BRIEFING_PARTS, DEFAULT_BRIEFING, saveProfile } from "@/services/profile";
 import { colors, radius } from "@/theme";
 
@@ -154,6 +155,8 @@ function ResultCard({ card }: { card: Card }) {
       );
     case "briefing_choice":
       return <BriefingChoice told={card.parts} />;
+    case "email_draft":
+      return <EmailDraft card={card} />;
     case "screen":
       return (
         <View style={[styles.card, styles.row]}>
@@ -174,6 +177,58 @@ function ResultCard({ card }: { card: Card }) {
         </View>
       );
   }
+}
+
+/** A Gmail draft BEKHI wrote: nothing is sent until the user says yes or taps Send. */
+function EmailDraft({ card }: { card: Extract<Card, { kind: "email_draft" }> }) {
+  const [state, setState] = useState<"draft" | "busy" | "sent" | "dropped">("draft");
+  const [problem, setProblem] = useState<string | null>(null);
+
+  async function finish(what: "send" | "delete") {
+    setState("busy");
+    const error = await finishDraft(card.draftId, what);
+    setProblem(error);
+    setState(error ? "draft" : what === "send" ? "sent" : "dropped");
+  }
+
+  return (
+    <View style={styles.card}>
+      <Header icon="create-outline" title={card.subject || "Имэйлийн ноорог"} />
+      <Text style={styles.secondary} numberOfLines={1}>
+        Хэнд: {card.to}
+        {card.address && card.address !== card.to ? ` <${card.address}>` : ""}
+      </Text>
+      <Text selectable style={styles.body}>
+        {card.body}
+      </Text>
+      {problem && <Text style={[styles.secondary, { color: colors.warning }]}>{problem}</Text>}
+      {state === "sent" || state === "dropped" ? (
+        <Text style={[styles.secondary, state === "sent" && { color: colors.success }]}>
+          {state === "sent" ? "Илгээлээ." : "Болиулсан. Ноорог устлаа."}
+        </Text>
+      ) : (
+        <View style={styles.saveRow}>
+          <Text style={[styles.secondary, styles.flex]}>"Тийм" гэж хэлж ч болно.</Text>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void finish("delete")}
+            disabled={state === "busy"}
+            style={({ pressed }) => [styles.quiet, pressed && { opacity: 0.6 }]}
+          >
+            <Text style={styles.quietText}>Болих</Text>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => void finish("send")}
+            disabled={state === "busy"}
+            style={({ pressed }) => [styles.save, pressed && { opacity: 0.6 }]}
+          >
+            <Text style={styles.saveText}>Илгээх</Text>
+          </Pressable>
+        </View>
+      )}
+    </View>
+  );
 }
 
 /** The briefing's question as buttons: pick what it tells every time, then save (or answer by voice). */
@@ -290,4 +345,14 @@ const styles = StyleSheet.create({
   saveRow: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 4 },
   save: { height: 38, paddingHorizontal: 16, borderRadius: radius.chip, alignItems: "center", justifyContent: "center", backgroundColor: colors.accent },
   saveText: { fontSize: 14, fontWeight: "700", color: colors.background },
+  quiet: {
+    height: 38,
+    paddingHorizontal: 14,
+    borderRadius: radius.chip,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.border,
+  },
+  quietText: { fontSize: 14, fontWeight: "600", color: colors.secondaryLabel },
 });

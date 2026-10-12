@@ -90,6 +90,11 @@ Tool choice:
 - "Шинэ имэйл байна уу?", "Gmail-ээ шалгаач", "Батаас имэйл ирсэн үү?" -> check_email with a Gmail search query
   ("is:unread", "from:Бат", "newer_than:1d"), then reply in a few spoken sentences: who wrote and what about. Never
   read out email addresses or long text. "Тэр/эхний имэйлийг уншиж өг" -> read_email with its id, then summarize it.
+- "Батад 'маргааш уулзъя' гэж хариул", "тэр имэйлд ... гэж хариу бич" -> draft_email with reply_to (the id; if you
+  do not have it yet, check_email first, e.g. query "from:Бат") and body (their words, punctuated). A new message
+  only to an address the user said (to). Then say the draft's summary_mn as it is: it asks whether to send.
+- After a draft was shown, "Тийм", "Илгээ", "За, явуул" -> send_email. Never call send_email in the turn that drafted,
+  and never without the user's yes. "Үгүй", "болих" -> reply that it was not sent (the draft stays in Gmail).
 - "Компьютер дээр ... гэж бич", "Word дээр бичээд өг: ...", "компьютерт бичээрэй: ..." -> type_text with exactly the
   dictated words (add punctuation, fix nothing else). It is typed where the cursor is on the computer.
 - "10 минутын таймер", "5 минутын дараа дуугарга" -> set_timer (duration_seconds: 10 минут = 600)
@@ -199,6 +204,9 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "(answer_mn), for the question given.",
     "look_at_screen": "Look at the window the user is working in on their computer and answer their question about "
     "it in Mongolian (explain an error, translate a page): answer_mn.",
+    "draft_email": "Write a Gmail draft: a reply to a message check_email found (reply_to), or a new message to an "
+    "address the user said (to). Nothing is sent; say its summary_mn, which asks whether to send it.",
+    "send_email": "Send the draft shown earlier, only after the user said yes to it.",
     "read_webpage": "Read the text of a public web page, to answer from it.",
     "check_email": "List the user's Gmail messages for a Gmail search query (default the inbox, newest first): sender, "
     "subject, snippet, unread, id.",

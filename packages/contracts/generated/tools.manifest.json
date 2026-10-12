@@ -1205,6 +1205,67 @@
           "id"
         ]
       }
+    },
+    {
+      "name": "draft_email",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Writes a Gmail draft: a reply to a message check_email found, or a new message to an address the user said. Nothing is sent: the app shows the draft with Send / Cancel, and BEKHI asks whether to send it.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "reply_to": {
+            "description": "The id check_email gave the message being answered",
+            "type": "string",
+            "pattern": "^[0-9a-zA-Z]{8,40}$"
+          },
+          "to": {
+            "description": "An email address the user said, for a new message; never made up",
+            "type": "string",
+            "maxLength": 200,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "subject": {
+            "description": "For a new message",
+            "type": "string",
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000,
+            "description": "The message in the user's words, with punctuation added: 'Маргааш уулзъя.'"
+          }
+        },
+        "required": [
+          "body"
+        ]
+      }
+    },
+    {
+      "name": "send_email",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Sends the draft BEKHI showed in an earlier turn, after the user said yes. Refused in the same turn as the draft, so a draft is never sent unseen.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {}
+      }
     }
   ]
 }

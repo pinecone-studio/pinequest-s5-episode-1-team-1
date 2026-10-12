@@ -181,6 +181,11 @@ export function LinkSection({ shown }: { shown: boolean }) {
               </Pressable>
             </View>
             {googleNote && <Text style={[styles.status, { color: colors.warning }]}>{googleNote}</Text>}
+            {google.linked && google.send === false && (
+              <Text style={[styles.status, { color: colors.warning }]}>
+                Имэйлд хариу бичүүлэхийн тулд Салгаад дахин Холбож, имэйл бичих эрхийг зөвшөөрнө үү.
+              </Text>
+            )}
             <Text style={[s.hint, { marginTop: 10 }]}>
               Имэйлээ асуухад БЭХИ уншиж өгнө (зөвхөн уншина). Хийх зүйлс тань Google Tasks-тэй нэг жагсаалт болно.
             </Text>

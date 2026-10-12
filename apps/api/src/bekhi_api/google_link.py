@@ -1,6 +1,10 @@
 """Google for BEKHI: the user links their Google account once (OAuth). Then the agent can check and
-read their mail (check_email, read_email; read-only) and the to-do list is their Google Tasks list,
-the same one their phones' Google Tasks app and Gmail show (todos.GoogleTasksTodoStore).
+read their mail (check_email, read_email), and the to-do list is their Google Tasks list, the same
+one their phones' Google Tasks app and Gmail show (todos.GoogleTasksTodoStore).
+
+Answering mail goes through a Gmail draft (draft_email): the app shows it and BEKHI asks; only a
+later "тийм" (send_email) or the app's Send button sends it. A draft is never sent in the turn that
+wrote it.
 
 The link belongs to the sync account, so every device linked with the same code can use it. The
 refresh token is encrypted (GOOGLE_TOKEN_KEY). On the user's own computer (desktop.py) it is
@@ -17,6 +21,8 @@ import re
 import secrets
 import time
 from dataclasses import dataclass
+from email.message import EmailMessage
+from email.utils import parseaddr
 from pathlib import Path
 from typing import Any, Protocol
 from urllib.parse import urlencode
@@ -37,7 +43,10 @@ USERINFO_URL = "https://openidconnect.googleapis.com/v1/userinfo"
 GMAIL = "https://gmail.googleapis.com/gmail/v1/users/me"
 TASKS = "https://tasks.googleapis.com/tasks/v1/lists/@default/tasks"
 TASKS_SCOPE = "https://www.googleapis.com/auth/tasks"
-SCOPES = f"openid email profile https://www.googleapis.com/auth/gmail.readonly {TASKS_SCOPE}"
+COMPOSE_SCOPE = "https://www.googleapis.com/auth/gmail.compose"  # drafts, and sending them
+SCOPES = f"openid email profile https://www.googleapis.com/auth/gmail.readonly {COMPOSE_SCOPE} {TASKS_SCOPE}"
+DRAFT_TTL = 1800  # a draft older than this is no longer what "тийм, илгээ" means
+SPOKEN_BODY = 200  # characters of a draft read back to the user
 STATE_TTL = 600  # seconds the user has to finish signing in
 MAX_TEXT = 6_000
 
@@ -102,6 +111,10 @@ class _Pending:
     expires: float
 
 
+class NoSendPermission(Exception):
+    """Linked before BEKHI could write mail: the user links Google again to allow it."""
+
+
 class Google:
     """The OAuth client, the links, and Gmail."""
 
@@ -113,6 +126,8 @@ class Google:
         self._http = http
         self._pending: dict[str, _Pending] = {}
         self._access: dict[str, tuple[str, float]] = {}  # account -> (access token, expiry), memory only
+        # account -> (draft id, when, the request that wrote it): what "тийм, илгээ" sends.
+        self._drafts: dict[str, tuple[str, float, str]] = {}
 
     # Signing in -------------------------------------------------------------------------------------
     def start(self, account: str, redirect_uri: str) -> str:
@@ -153,7 +168,8 @@ class Google:
     async def status(self, account: str) -> dict[str, Any]:
         link = await self._store.get(account)
         return {"linked": bool(link), "email": link.get("email") if link else None,
-                "tasks": bool(link and TASKS_SCOPE in (link.get("scopes") or ""))}
+                "tasks": bool(link and TASKS_SCOPE in (link.get("scopes") or "")),
+                "send": bool(link and COMPOSE_SCOPE in (link.get("scopes") or ""))}
 
     async def has_tasks(self, account: str) -> bool:
         link = await self._store.get(account)
@@ -227,6 +243,71 @@ class Google:
             })
         return emails
 
+    async def _gmail_write(self, account: str, method: str, path: str, body: Any = None) -> Any:
+        token = await self._token(account)
+        if token is None:
+            raise LookupError("not linked")
+        r = await self._http.request(method, GMAIL + path, json=body, headers={"Authorization": f"Bearer {token}"})
+        if r.status_code == 401:
+            self._access.pop(account, None)
+            raise PermissionError("relink")
+        if r.status_code == 403:
+            raise NoSendPermission()
+        r.raise_for_status()
+        return r.json() if r.content else None
+
+    async def draft(self, account: str, args: dict[str, Any]) -> dict[str, Any]:
+        """A Gmail draft answering `reply_to` (in its thread), or a new message to `to`."""
+        link = await self._store.get(account)
+        if link is None:
+            raise LookupError("not linked")
+        if COMPOSE_SCOPE not in (link.get("scopes") or ""):
+            raise NoSendPermission()
+        mime, thread = EmailMessage(), None
+        if args.get("reply_to"):
+            msg = await self._gmail(account, f"/messages/{args['reply_to']}", format="metadata",
+                                    metadataHeaders=["From", "Reply-To", "Subject", "Message-ID", "References"])
+            head = {h["name"].lower(): h["value"] for h in msg.get("payload", {}).get("headers", [])}
+            to = head.get("reply-to") or head.get("from", "")
+            subject = head.get("subject", "")
+            subject = subject if subject.lower().startswith("re:") else f"Re: {subject}".strip()
+            if head.get("message-id"):
+                mime["In-Reply-To"] = head["message-id"]
+                mime["References"] = f"{head.get('references', '')} {head['message-id']}".strip()
+            thread = msg.get("threadId")
+        else:
+            to, subject = args["to"], args.get("subject") or ""
+        mime["To"], mime["Subject"] = to, subject
+        mime.set_content(args["body"])
+        raw = base64.urlsafe_b64encode(mime.as_bytes()).decode()
+        made = await self._gmail_write(account, "POST", "/drafts",
+                                       {"message": {"raw": raw, **({"threadId": thread} if thread else {})}})
+        return {"draft_id": made["id"], "to": _sender(to), "to_address": parseaddr(to)[1], "subject": subject,
+                "body": args["body"], "reply": bool(args.get("reply_to"))}
+
+    def remember_draft(self, account: str, draft_id: str, request: str) -> None:
+        self._drafts[account] = (draft_id, time.time(), request)
+
+    def pending_draft(self, account: str) -> tuple[str, str] | None:
+        """(draft id, the request that wrote it) of the account's last draft, while it is fresh."""
+        draft = self._drafts.get(account)
+        if draft is None or draft[1] < time.time() - DRAFT_TTL:
+            return None
+        return draft[0], draft[2]
+
+    def forget_draft(self, account: str, draft_id: str | None = None) -> None:
+        pending = self._drafts.get(account)
+        if pending and (draft_id is None or pending[0] == draft_id):
+            del self._drafts[account]
+
+    async def send_draft(self, account: str, draft_id: str) -> None:
+        await self._gmail_write(account, "POST", "/drafts/send", {"id": draft_id})
+        self.forget_draft(account, draft_id)
+
+    async def delete_draft(self, account: str, draft_id: str) -> None:
+        await self._gmail_write(account, "DELETE", f"/drafts/{draft_id}")
+        self.forget_draft(account, draft_id)
+
     async def read_email(self, account: str, message_id: str) -> dict[str, Any]:
         msg = await self._gmail(account, f"/messages/{message_id}", format="full")
         head = {h["name"]: h["value"] for h in msg.get("payload", {}).get("headers", [])}
@@ -298,6 +379,53 @@ async def run_tool(action_id: str, tool: str, args: dict[str, Any], google: Goog
         return _fail(action_id, tool, "GOOGLE_NOT_LINKED")
     except PermissionError:
         return _fail(action_id, tool, "GOOGLE_RELINK")
+    except httpx.HTTPError as e:
+        log.warning("gmail failed: %s", type(e).__name__)
+        return _fail(action_id, tool, "GMAIL_UNAVAILABLE")
+    return ActionResult(action_id=action_id, tool=tool, status="succeeded", executed_via="backend", error_code=None, data=data)
+
+
+def _draft_summary(d: dict[str, Any]) -> str:
+    body = d["body"] if len(d["body"]) <= SPOKEN_BODY else d["body"][:SPOKEN_BODY].rsplit(" ", 1)[0] + "…"
+    kind = "Хариуны" if d["reply"] else "Имэйлийн"
+    return f"{kind} ноорог бэлэн: «{body}». Хүлээн авагч: {d['to'] or d['to_address']}. Илгээх үү?"
+
+
+async def run_mail_tool(action_id: str, tool: str, args: dict[str, Any], google: Google | None, account: str | None,
+                        request: str) -> ActionResult:
+    """draft_email writes a draft and asks; send_email sends it, but never in the request that wrote it."""
+    if google is None:
+        return _fail(action_id, tool, "GOOGLE_NOT_CONFIGURED")
+    if account is None:
+        return _fail(action_id, tool, "GOOGLE_NOT_LINKED")
+    try:
+        if tool == "draft_email":
+            if not args.get("reply_to") and not args.get("to"):
+                return _fail(action_id, tool, "EMAIL_NO_RECIPIENT")
+            d = await google.draft(account, args)
+            google.remember_draft(account, d["draft_id"], request)
+            data: dict[str, Any] = {**d, "summary_mn": _draft_summary(d)}
+        else:
+            pending = google.pending_draft(account)
+            if pending is None:
+                return _fail(action_id, tool, "EMAIL_NO_DRAFT")
+            draft_id, written_in = pending
+            if written_in == request:  # the user has not seen it yet
+                return _fail(action_id, tool, "EMAIL_NOT_CONFIRMED")
+            await google.send_draft(account, draft_id)
+            data = {"summary_mn": "За, илгээлээ."}
+    except LookupError:
+        return _fail(action_id, tool, "GOOGLE_NOT_LINKED")
+    except PermissionError:
+        return _fail(action_id, tool, "GOOGLE_RELINK")
+    except NoSendPermission:
+        return _fail(action_id, tool, "GMAIL_NO_SEND")
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 404:  # sent or deleted in Gmail meanwhile
+            google.forget_draft(account)
+            return _fail(action_id, tool, "EMAIL_NO_DRAFT")
+        log.warning("gmail failed: http=%s", e.response.status_code)
+        return _fail(action_id, tool, "GMAIL_UNAVAILABLE")
     except httpx.HTTPError as e:
         log.warning("gmail failed: %s", type(e).__name__)
         return _fail(action_id, tool, "GMAIL_UNAVAILABLE")

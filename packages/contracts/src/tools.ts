@@ -36,6 +36,8 @@ export const TOOL_NAMES = [
   "read_webpage",
   "check_email",
   "read_email",
+  "draft_email",
+  "send_email",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -378,6 +380,32 @@ export const ReadEmailArgs = z.object({
   id: z.string().regex(/^[0-9a-zA-Z]{8,40}$/).describe("The id check_email gave the message"),
 });
 
+export const DraftEmailArgs = z
+  .object({
+    reply_to: z
+      .string()
+      .regex(/^[0-9a-zA-Z]{8,40}$/)
+      .optional()
+      .describe("The id check_email gave the message being answered"),
+    to: z
+      .string()
+      .email()
+      .max(200)
+      .optional()
+      .describe("An email address the user said, for a new message; never made up"),
+    subject: z.string().max(200).optional().describe("For a new message"),
+    body: z
+      .string()
+      .trim()
+      .min(1)
+      .max(3000)
+      .describe("The message in the user's words, with punctuation added: 'Маргааш уулзъя.'"),
+  })
+  .refine((a) => a.reply_to !== undefined || a.to !== undefined, { message: "reply_to or to" });
+
+/** Sends the draft BEKHI showed the user in an earlier turn, once they say yes. */
+export const SendEmailArgs = z.object({});
+
 export const ReadWebpageArgs = z.object({
   url: z.url({ protocol: /^https$/ }).max(2000).describe("The page to read, e.g. a web_search result"),
 });
@@ -438,6 +466,8 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   read_webpage: ReadWebpageArgs,
   check_email: CheckEmailArgs,
   read_email: ReadEmailArgs,
+  draft_email: DraftEmailArgs,
+  send_email: SendEmailArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -818,6 +848,28 @@ export const TOOL_MANIFEST = {
     min_ios: MIN_IOS,
     app_intent: null,
     notes: "The text of one Gmail message check_email found, for the model to summarize.",
+  },
+  draft_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Writes a Gmail draft: a reply to a message check_email found, or a new message to an address the user said. " +
+      "Nothing is sent: the app shows the draft with Send / Cancel, and BEKHI asks whether to send it.",
+  },
+  send_email: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Sends the draft BEKHI showed in an earlier turn, after the user said yes. Refused in the same turn as the " +
+      "draft, so a draft is never sent unseen.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

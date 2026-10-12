@@ -23,6 +23,7 @@ import io
 import ipaddress
 import logging
 import math
+import re
 import time
 import uuid
 import wave
@@ -61,7 +62,7 @@ from .models import (
     SyncPublishResponse,
     SyncPullResponse,
 )
-from .compose import speakable
+from .compose import FAILED_BY_CODE, speakable
 from .pipeline import ContractViolation, Deps, UnknownTurn, plan_turn, report_results
 from .providers import (ProviderNotConfigured, ProviderUserError, VoiceNeedsPaidPlan, get_llm, get_reader, get_search,
                         get_stt, get_tts)
@@ -685,6 +686,27 @@ def create_app() -> FastAPI:
     async def google_unlink(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
         account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
         await google_or_404(request).unlink(account)
+        return {"ok": True}
+
+    @app.post("/api/v1/google/drafts/{draft_id}/{what}")
+    async def google_draft(draft_id: str, what: Literal["send", "delete"], request: Request,
+                           x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """The draft card's buttons: send the draft BEKHI wrote, or throw it away."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        google = google_or_404(request)
+        if not re.fullmatch(r"[0-9A-Za-z_-]{1,64}", draft_id):
+            raise ApiException(422, "invalid_request", MN_INVALID)
+        try:
+            await (google.send_draft if what == "send" else google.delete_draft)(account, draft_id)
+        except (LookupError, PermissionError, google_link.NoSendPermission) as e:
+            code = "GMAIL_NO_SEND" if isinstance(e, google_link.NoSendPermission) else "GOOGLE_RELINK"
+            raise ApiException(403, "unauthorized", FAILED_BY_CODE[code]) from e
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                raise ApiException(404, "invalid_request", FAILED_BY_CODE["EMAIL_NO_DRAFT"]) from e
+            raise ApiException(502, "internal", FAILED_BY_CODE["GMAIL_UNAVAILABLE"]) from e
+        except httpx.HTTPError as e:
+            raise ApiException(502, "internal", FAILED_BY_CODE["GMAIL_UNAVAILABLE"]) from e
         return {"ok": True}
 
     @app.post("/api/v1/assistant/actions/results", response_model=ActionResultsResponse)

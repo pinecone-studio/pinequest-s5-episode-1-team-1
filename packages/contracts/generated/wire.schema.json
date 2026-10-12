@@ -688,7 +688,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -891,7 +893,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -1107,7 +1111,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -1317,7 +1323,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -1505,7 +1513,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -1701,7 +1711,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -1892,7 +1904,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -2096,7 +2110,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -2283,7 +2299,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -2467,7 +2485,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -2666,7 +2686,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -2868,7 +2890,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -3077,7 +3101,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -3255,7 +3281,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -3447,7 +3475,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -3660,7 +3690,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -3852,7 +3884,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -4044,7 +4078,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -4231,7 +4267,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -4418,7 +4456,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -4601,7 +4641,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -4795,7 +4837,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -4983,7 +5027,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -5217,7 +5263,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -5404,7 +5452,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -5592,7 +5642,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -5797,7 +5849,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -6014,7 +6068,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -6201,7 +6257,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -6393,7 +6451,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -6581,7 +6641,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -6769,7 +6831,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -6959,7 +7023,9 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -7146,7 +7212,396 @@
                               "look_at_screen",
                               "read_webpage",
                               "check_email",
-                              "read_email"
+                              "read_email",
+                              "draft_email",
+                              "send_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "draft_email"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "reply_to": {
+                        "description": "The id check_email gave the message being answered",
+                        "type": "string",
+                        "pattern": "^[0-9a-zA-Z]{8,40}$"
+                      },
+                      "to": {
+                        "description": "An email address the user said, for a new message; never made up",
+                        "type": "string",
+                        "maxLength": 200,
+                        "format": "email",
+                        "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                      },
+                      "subject": {
+                        "description": "For a new message",
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      "body": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 3000,
+                        "description": "The message in the user's words, with punctuation added: 'Маргааш уулзъя.'"
+                      }
+                    },
+                    "required": [
+                      "body"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "look_at_screen",
+                              "read_webpage",
+                              "check_email",
+                              "read_email",
+                              "draft_email",
+                              "send_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "send_email"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "look_at_screen",
+                              "read_webpage",
+                              "check_email",
+                              "read_email",
+                              "draft_email",
+                              "send_email"
                             ]
                           },
                           "status": {
@@ -7469,7 +7924,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -7672,7 +8129,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -7888,7 +8347,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -8098,7 +8559,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -8286,7 +8749,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -8482,7 +8947,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -8673,7 +9140,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -8877,7 +9346,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -9064,7 +9535,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -9248,7 +9721,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -9447,7 +9922,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -9649,7 +10126,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -9858,7 +10337,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -10036,7 +10517,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -10228,7 +10711,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -10441,7 +10926,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -10633,7 +11120,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -10825,7 +11314,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -11012,7 +11503,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -11199,7 +11692,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -11382,7 +11877,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -11576,7 +12073,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -11764,7 +12263,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -11998,7 +12499,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -12185,7 +12688,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -12373,7 +12878,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -12578,7 +13085,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -12795,7 +13304,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -12982,7 +13493,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -13174,7 +13687,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -13362,7 +13877,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -13550,7 +14067,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -13740,7 +14259,9 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -13927,7 +14448,396 @@
                         "look_at_screen",
                         "read_webpage",
                         "check_email",
-                        "read_email"
+                        "read_email",
+                        "draft_email",
+                        "send_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "draft_email"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "reply_to": {
+                  "description": "The id check_email gave the message being answered",
+                  "type": "string",
+                  "pattern": "^[0-9a-zA-Z]{8,40}$"
+                },
+                "to": {
+                  "description": "An email address the user said, for a new message; never made up",
+                  "type": "string",
+                  "maxLength": 200,
+                  "format": "email",
+                  "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+                },
+                "subject": {
+                  "description": "For a new message",
+                  "type": "string",
+                  "maxLength": 200
+                },
+                "body": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 3000,
+                  "description": "The message in the user's words, with punctuation added: 'Маргааш уулзъя.'"
+                }
+              },
+              "required": [
+                "body"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "look_at_screen",
+                        "read_webpage",
+                        "check_email",
+                        "read_email",
+                        "draft_email",
+                        "send_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "send_email"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {}
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "look_at_screen",
+                        "read_webpage",
+                        "check_email",
+                        "read_email",
+                        "draft_email",
+                        "send_email"
                       ]
                     },
                     "status": {
@@ -14067,7 +14977,9 @@
             "look_at_screen",
             "read_webpage",
             "check_email",
-            "read_email"
+            "read_email",
+            "draft_email",
+            "send_email"
           ]
         },
         "status": {
@@ -14208,7 +15120,9 @@
                   "look_at_screen",
                   "read_webpage",
                   "check_email",
-                  "read_email"
+                  "read_email",
+                  "draft_email",
+                  "send_email"
                 ]
               },
               "status": {
