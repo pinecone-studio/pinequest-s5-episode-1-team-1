@@ -420,6 +420,14 @@
             "maxLength": 2000,
             "format": "uri"
           },
+          "device": {
+            "type": "string",
+            "enum": [
+              "computer",
+              "phone"
+            ],
+            "description": "Only when the user names the other device: 'компьютер дээрээ нээ' -> computer, 'утсан дээрээ' -> phone"
+          },
           "title": {
             "type": "string",
             "maxLength": 100
@@ -457,6 +465,14 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 300
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "computer",
+              "phone"
+            ],
+            "description": "Only when the user names the other device: 'компьютер дээрээ нээ' -> computer, 'утсан дээрээ' -> phone"
           }
         },
         "required": [
@@ -590,7 +606,10 @@
               "mute",
               "unmute",
               "lock_screen",
-              "open_folder"
+              "open_folder",
+              "media_play_pause",
+              "media_next",
+              "media_previous"
             ]
           },
           "level": {
@@ -727,6 +746,544 @@
             "type": "boolean"
           }
         }
+      }
+    },
+    {
+      "name": "daily_briefing",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The day at a glance, returned inline: a greeting for the time of day, then what the user chose in their profile: today's weather, the to-dos due today or overdue, unread mail, the news. Planned together with list_reminders, so the device adds what it has scheduled today. Asks what to tell until the user chooses.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "location_name": {
+            "type": "string",
+            "maxLength": 100
+          }
+        }
+      }
+    },
+    {
+      "name": "create_routine",
+      "executor": "device",
+      "strategy": [
+        "react_native"
+      ],
+      "confirmation": "never",
+      "permissions": [
+        "notifications"
+      ],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "A notification every day at `time` (replacing the routine's earlier time); tapping it opens BEKHI, which then runs the routine (the day's briefing) and speaks it. Listed and cancelled like reminders. Phones only.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "description": "Every day at this local time, 24-hour HH:MM: 'өглөө 7' -> '07:00', 'орой 9' -> '21:00'"
+          },
+          "routine": {
+            "default": "daily_briefing",
+            "type": "string",
+            "enum": [
+              "daily_briefing"
+            ]
+          }
+        },
+        "required": [
+          "time"
+        ]
+      }
+    },
+    {
+      "name": "remember",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Keeps a short fact about the user for the account (the sync code's devices); the planner gets the facts with every request. At most 50.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "fact": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "One short sentence about the user, kept for later: 'Хэрэглэгчийн эхнэрийг Сараа гэдэг'"
+          }
+        },
+        "required": [
+          "fact"
+        ]
+      }
+    },
+    {
+      "name": "forget",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Forgets the remembered facts containing the query words, or all of them.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "all": {
+            "default": false,
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    {
+      "name": "set_profile",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The user's profile for the account: their name (the briefing greets them by it), their city (the weather's default place) and what the day's briefing tells (weather, todos, schedule, email, news).",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "What to call the user: 'Намайг Нандин гэдэг' -> 'Нандин'. Empty to stop using a name",
+            "type": "string",
+            "maxLength": 40
+          },
+          "city": {
+            "description": "The user's own city or aimag, for the weather: 'Би Дарханд амьдардаг' -> 'Дархан'",
+            "type": "string",
+            "maxLength": 60
+          },
+          "briefing": {
+            "description": "Exactly what the day's briefing should tell, when the user lists it",
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weather",
+                "todos",
+                "schedule",
+                "email",
+                "news"
+              ]
+            }
+          },
+          "briefing_add": {
+            "description": "Add to the briefing: 'өглөө мэдээ бас хэлж байгаарай' -> ['news']",
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weather",
+                "todos",
+                "schedule",
+                "email",
+                "news"
+              ]
+            }
+          },
+          "briefing_remove": {
+            "description": "Leave out of the briefing: 'тоймд имэйл хэрэггүй' -> ['email']",
+            "maxItems": 5,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "weather",
+                "todos",
+                "schedule",
+                "email",
+                "news"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "type_text",
+      "executor": "device",
+      "strategy": [
+        "react_native"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Types the text where the cursor is on the user's computer (Word, a chat, a browser field): dictation in Mongolian. Said to the phone, it is sent to the linked computer (sync commands).",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "description": "Exactly the words to type, as the user dictated them, with punctuation"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    },
+    {
+      "name": "play_video",
+      "executor": "device",
+      "strategy": [
+        "url_scheme",
+        "react_native"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Plays the first YouTube video for the query (the backend finds it and sets url and title): the YouTube app on a phone, BEKHI's own browser window on the computer, where it starts with sound.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "What to play, as the user said it: 'Хүрдийн Бусгүй', 'Монгол дуу', 'lofi'"
+          },
+          "device": {
+            "type": "string",
+            "enum": [
+              "computer",
+              "phone"
+            ],
+            "description": "Only when the user names the other device: 'компьютер дээрээ нээ' -> computer, 'утсан дээрээ' -> phone"
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "format": "uri"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "find_files",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The user's own files (Downloads, Documents, Desktop, Pictures, Music, Videos), newest first, returned to the model with ids for open_file and read_file. Offered only when the API runs on the user's computer.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "Words from the file's name, if the user gave any ('тайлан', 'илтгэл')",
+            "type": "string",
+            "maxLength": 100
+          },
+          "folder": {
+            "description": "Where to look; omitted: all of the user's folders",
+            "type": "string",
+            "enum": [
+              "downloads",
+              "documents",
+              "desktop",
+              "pictures",
+              "music",
+              "videos"
+            ]
+          },
+          "kind": {
+            "default": "any",
+            "type": "string",
+            "enum": [
+              "any",
+              "pdf",
+              "document",
+              "spreadsheet",
+              "presentation",
+              "image",
+              "video",
+              "audio",
+              "text"
+            ]
+          },
+          "limit": {
+            "default": 5,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        }
+      }
+    },
+    {
+      "name": "open_file",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Opens a file find_files found, in its usual app on the computer. Documents and media only, never programs.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "pattern": "^f\\d{1,4}$",
+            "description": "The id find_files gave the file, e.g. 'f1'"
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    },
+    {
+      "name": "read_file",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The text of a file find_files found (txt, md, csv, json, html, docx), for the model to answer from. A PDF is read by Gemini (scanned ones too), which answers the question about it in Mongolian.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "pattern": "^f\\d{1,4}$",
+            "description": "The id find_files gave the file, e.g. 'f1'"
+          },
+          "question": {
+            "description": "What the user wants from it, in their words: 'гол санааг хэл', 'төлбөрийн нөхцөл юу вэ?'",
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "file"
+        ]
+      }
+    },
+    {
+      "name": "look_at_screen",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Looks at the window the user is working in on their computer (not BEKHI's own) and answers their question about it in Mongolian: explains an error, translates a page. The picture goes to Gemini only for that answer; it is never kept or logged. Only when BEKHI runs on that computer.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300,
+            "description": "What the user asks about what is on their screen: 'Энэ алдаа юу гэсэн үг вэ?', 'энэ хуудсыг орчуул'"
+          }
+        },
+        "required": [
+          "question"
+        ]
+      }
+    },
+    {
+      "name": "read_webpage",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The readable text of a public https page (no private addresses), for the model to answer from.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "maxLength": 2000,
+            "format": "uri",
+            "description": "The page to read, e.g. a web_search result"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "check_email",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The account's Gmail (linked once with Google sign-in, read-only): sender names, subjects, snippets and ids for a Gmail search, returned to the model. Nothing is stored.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "Gmail search: 'is:unread', 'from:Бат', 'newer_than:1d', 'subject:тайлан'; omitted: the inbox",
+            "type": "string",
+            "maxLength": 200
+          },
+          "limit": {
+            "default": 5,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        }
+      }
+    },
+    {
+      "name": "read_email",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The text of one Gmail message check_email found, for the model to summarize.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[0-9a-zA-Z]{8,40}$",
+            "description": "The id check_email gave the message"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      }
+    },
+    {
+      "name": "draft_email",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Writes a Gmail draft: a reply to a message check_email found, or a new message to an address the user said. Nothing is sent: the app shows the draft with Send / Cancel, and BEKHI asks whether to send it.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "reply_to": {
+            "description": "The id check_email gave the message being answered",
+            "type": "string",
+            "pattern": "^[0-9a-zA-Z]{8,40}$"
+          },
+          "to": {
+            "description": "An email address the user said, for a new message; never made up",
+            "type": "string",
+            "maxLength": 200,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "subject": {
+            "description": "For a new message",
+            "type": "string",
+            "maxLength": 200
+          },
+          "body": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000,
+            "description": "The message in the user's words, with punctuation added: 'Маргааш уулзъя.'"
+          }
+        },
+        "required": [
+          "body"
+        ]
+      }
+    },
+    {
+      "name": "send_email",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Sends the draft BEKHI showed in an earlier turn, after the user said yes. Refused in the same turn as the draft, so a draft is never sent unseen.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {}
       }
     }
   ]

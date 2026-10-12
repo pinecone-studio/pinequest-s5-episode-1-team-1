@@ -1,18 +1,9 @@
 import { AppState, Platform } from "react-native";
-import {
-  SYNC_CODE_ALPHABET,
-  SYNC_CODE_HEADER,
-  SYNC_CODE_LENGTH,
-  SYNC_DEVICE_HEADER,
-  SyncPublishResponse,
-  SyncPullResponse,
-  type SyncAlarm,
-  type SyncPlatform,
-} from "@bekhi/contracts";
+import { SyncPublishResponse, SyncPullResponse, type SyncAlarm, type SyncPlatform } from "@bekhi/contracts";
 import { toLocalIso } from "@/lib/time";
-import { apiBaseUrl } from "@/services/assistant/connect";
+import { apiBaseUrl, desktopBaseUrl } from "@/services/assistant/connect";
 import { cancelScheduled, listScheduled, scheduleNotification } from "@/services/ios-actions/notifications";
-import { loadSync, saveSync, type SavedSync } from "./sync-storage";
+import { ensureIdentity, formatSyncCode, normalizeSyncCode, platform, setIdentity, syncHeaders } from "./identity";
 
 /**
  * Alarms and timers on every device linked with the same sync code (apps/api sync.py).
@@ -28,55 +19,10 @@ const TIMEOUT_MS = 8_000;
 /** An alarm ringing within seconds is not scheduled again: device clocks differ a little. */
 const MIN_LEAD_MS = 5_000;
 
-const platform: SyncPlatform = Platform.OS === "android" ? "android" : Platform.OS === "web" ? "web" : "ios";
-
-let identity: SavedSync | null = null;
 let running = false;
 let inFlight: Promise<void> | null = null;
 /** Synced alarms already scheduled here, so one that has rung is not scheduled again. */
 const scheduled = new Set<string>();
-
-function randomInts(count: number, below: number): number[] {
-  const bytes = new Uint8Array(count);
-  if (globalThis.crypto?.getRandomValues) globalThis.crypto.getRandomValues(bytes);
-  else for (let i = 0; i < count; i++) bytes[i] = Math.floor(Math.random() * 256);
-  return Array.from(bytes, (b) => b % below);
-}
-
-function newCode(): string {
-  return randomInts(SYNC_CODE_LENGTH, SYNC_CODE_ALPHABET.length)
-    .map((i) => SYNC_CODE_ALPHABET[i])
-    .join("");
-}
-
-function newDeviceId(): string {
-  const hex = randomInts(16, 16)
-    .map((i) => i.toString(16))
-    .join("");
-  return `${platform}-${hex}`;
-}
-
-/** Same rules as the server: case, dashes and spaces ignored, O/I/L read as 0/1/1. */
-export function normalizeSyncCode(input: string): string | null {
-  const code = input
-    .toUpperCase()
-    .replace(/[\s-]/g, "")
-    .replace(/O/g, "0")
-    .replace(/[IL]/g, "1");
-  return code.length === SYNC_CODE_LENGTH && [...code].every((c) => SYNC_CODE_ALPHABET.includes(c)) ? code : null;
-}
-
-/** "ABCDEFGHJKMN" -> "ABCD-EFGH-JKMN", easier to read out and type. */
-export const formatSyncCode = (code: string) => code.match(/.{1,4}/g)?.join("-") ?? code;
-
-function ensureIdentity(): SavedSync {
-  if (identity) return identity;
-  const saved = loadSync();
-  const code = saved.code ? normalizeSyncCode(saved.code) : null;
-  identity = { code: code ?? newCode(), deviceId: saved.deviceId ?? newDeviceId() };
-  if (identity.code !== saved.code || identity.deviceId !== saved.deviceId) saveSync(identity);
-  return identity;
-}
 
 /** This device's code, to type on the user's other devices. */
 export function syncCode(): string {
@@ -84,15 +30,13 @@ export function syncCode(): string {
 }
 
 async function call(path: string, init: { method?: string; body?: unknown } = {}): Promise<unknown> {
-  const { code, deviceId } = ensureIdentity();
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const res = await fetch(apiBaseUrl() + path, {
       method: init.method ?? "GET",
       headers: {
-        [SYNC_CODE_HEADER]: code,
-        [SYNC_DEVICE_HEADER]: deviceId,
+        ...syncHeaders(),
         ...(init.body !== undefined ? { "content-type": "application/json" } : {}),
       },
       body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
@@ -105,25 +49,28 @@ async function call(path: string, init: { method?: string; body?: unknown } = {}
   }
 }
 
-/** Phone: "this device is linked". Web: link the PC's API itself, which rings the alarms. */
-async function linkDevice(): Promise<void> {
+/**
+ * Phone: "this device is linked". Web: link the PC's API or agent itself, which rings the alarms.
+ * A computer already linked keeps its code and this browser joins it, unless the user typed this
+ * code to join it (`replace`).
+ */
+async function linkDevice(replace = false): Promise<void> {
   const id = ensureIdentity();
   if (Platform.OS !== "web") {
     await call("/api/v1/sync/devices", { method: "POST", body: { platform } });
     return;
   }
-  const res = await fetch(`${apiBaseUrl()}/api/v1/desktop/sync`, {
+  const res = await fetch(`${desktopBaseUrl()}/api/v1/desktop/sync`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ code: id.code }),
+    body: JSON.stringify({ code: id.code, replace }),
   });
   if (!res.ok) return; // not the browser on the PC that runs the API: nothing rings here
-  const body = (await res.json().catch(() => null)) as { device_id?: unknown } | null;
+  const body = (await res.json().catch(() => null)) as { device_id?: unknown; code?: unknown } | null;
+  const code = (typeof body?.code === "string" && normalizeSyncCode(body.code)) || id.code;
   // Publish as the PC, so the other devices' replies say "компьютер" once, not twice.
-  if (typeof body?.device_id === "string" && body.device_id !== id.deviceId) {
-    identity = { ...id, deviceId: body.device_id };
-    saveSync(identity);
-  }
+  const deviceId = typeof body?.device_id === "string" ? body.device_id : id.deviceId;
+  if (code !== id.code || deviceId !== id.deviceId) setIdentity({ code, deviceId });
 }
 
 /** Phone: schedule what the other devices set, drop what any device cancelled. */
@@ -169,10 +116,9 @@ export async function cancelAlarms(ids: string[]): Promise<void> {
 export async function linkWithCode(input: string): Promise<boolean> {
   const code = normalizeSyncCode(input);
   if (!code) return false;
-  identity = { ...ensureIdentity(), code };
-  saveSync(identity);
+  setIdentity({ ...ensureIdentity(), code });
   scheduled.clear();
-  await linkDevice();
+  await linkDevice(true);
   if (Platform.OS !== "web") await refreshAlarms();
   return true;
 }

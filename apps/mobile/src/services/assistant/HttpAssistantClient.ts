@@ -7,6 +7,7 @@ import {
   type AssistantContext,
 } from "@bekhi/contracts";
 import { appendAudio } from "@/services/audio/audio-upload";
+import { syncHeaders } from "@/services/sync/identity";
 import { AssistantError, type AssistantClient } from "./AssistantClient";
 
 const TIMEOUT_MS = 30_000;
@@ -47,7 +48,9 @@ export class HttpAssistantClient implements AssistantClient {
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     let res: Response;
     try {
-      res = await fetch(this.baseUrl + path, { ...init, method: "POST", signal: controller.signal });
+      // The sync code tells the API whose to-do list this is (apps/api todos.py).
+      const headers = { ...syncHeaders(), ...(init.headers as Record<string, string> | undefined) };
+      res = await fetch(this.baseUrl + path, { ...init, headers, method: "POST", signal: controller.signal });
     } catch (e) {
       console.warn(`request ${path} failed`, e); // the real cause, for the dev server log
       throw new AssistantError("Сервертэй холбогдож чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.", "network");

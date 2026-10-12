@@ -106,13 +106,12 @@ def test_timers_lists_and_cancelling(tmp_path):
 
 
 def test_computer_control(monkeypatch):
-    from bekhi_api import windows_controls as win
-
+    win = desktop.system.controls()
     calls, opened = [], []
     monkeypatch.setattr(win, "change_volume", lambda **kw: calls.append(kw) or 40)
     monkeypatch.setattr(win, "lock_screen", lambda: True)
     monkeypatch.setattr(win, "known_folder", lambda name: f"C:/Users/x/{name}")
-    monkeypatch.setattr(desktop.os, "startfile", opened.append, raising=False)
+    monkeypatch.setattr(desktop.system, "open_path", opened.append)
 
     up = desktop.computer_control({"action": "volume_up"})
     assert up["status"] == "succeeded" and up["data"] == {"volume": 40} and calls[-1] == {"delta": 10}

@@ -1,3 +1,4 @@
+import type { RoutineKind } from "@bekhi/contracts";
 import type { ActionOutcome } from "./IOSActionService";
 import type { ScheduledItem } from "./scheduled";
 
@@ -15,3 +16,11 @@ export async function listScheduled(): Promise<ScheduledItem[]> {
 }
 
 export async function cancelScheduled(_ids: string[]): Promise<void> {}
+
+export async function scheduleRoutine(_time: string, _routine: RoutineKind): Promise<ActionOutcome> {
+  return { status: "unsupported", executed_via: null, error_code: "WEB_NO_IPHONE_ACTIONS" };
+}
+
+export function onRoutineOpened(_run: (routine: RoutineKind) => void): () => void {
+  return () => {};
+}

@@ -36,6 +36,12 @@ export class LinkingIOSActionService implements IOSActionService {
   listReminders: IOSActionService["listReminders"] = async () => unsupported(this.nativeUnavailableCode);
   cancelReminder: IOSActionService["cancelReminder"] = async () => unsupported(this.nativeUnavailableCode);
   computerControl: IOSActionService["computerControl"] = async () => unsupported(this.nativeUnavailableCode);
+  createRoutine: IOSActionService["createRoutine"] = async () => unsupported(this.nativeUnavailableCode);
+  typeText: IOSActionService["typeText"] = async () => unsupported(this.nativeUnavailableCode);
+
+  // A youtube.com link: phones open it in the YouTube app, which starts the video.
+  playVideo = async (args: ToolArguments<"play_video">): Promise<ActionOutcome> =>
+    openUrl(args.url ?? `https://www.youtube.com/results?search_query=${encodeURIComponent(args.query)}`);
 
   executeShortcut = async (name: string, input?: string): Promise<ActionOutcome> => {
     let url = `shortcuts://run-shortcut?name=${encodeURIComponent(name)}`;

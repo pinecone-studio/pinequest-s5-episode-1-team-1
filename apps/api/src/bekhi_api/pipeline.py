@@ -10,17 +10,20 @@ phrases a pending device action as done. Rules enforced here, in code:
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
-from dataclasses import dataclass
+import re
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Any, get_args
 from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, todos
-from .compose import FAILED_BY_CODE, compose
+from . import backend_tools, briefing, google_link, media, memory, pc_files, screen, todos, webpage
+from . import profile as profiles
+from .compose import ACTION_MN, FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
 from .models import (
     ActionRequest,
@@ -36,7 +39,7 @@ from .models import (
     LimitationCode,
 )
 from .planner import BACKEND_FIELDS, CONFIRM_FIELD, SUMMARY_FIELD, function_specs, system_prompt
-from .providers.base import FunctionCall, HistoryMessage, LLMPlanner, WebSearch
+from .providers.base import FunctionCall, HistoryMessage, LLMPlanner, Reader, WebSearch
 from .store import MemoryStore, PendingTurn
 
 log = logging.getLogger(__name__)
@@ -65,22 +68,90 @@ class Deps:
     http: httpx.AsyncClient
     store: MemoryStore
     search: WebSearch | None = None
+    todo_store: todos.TodoStore = field(default_factory=todos.FileTodoStore)
+    memory_store: memory.FactStore = field(default_factory=memory.FileFactStore)
+    profile_store: profiles.ProfileStore = field(default_factory=profiles.FileProfileStore)
+    # The sync account of the device asking (sync.account_key): whose to-do list it is.
+    account: str | None = None
+    # This API runs on the user's computer (desktop.py): the agent may find, open and read its files.
+    on_pc: bool = False
+    google: google_link.Google | None = None
+    # Reads a screenshot or a PDF (look_at_screen, read_file).
+    reader: Reader | None = None
+    # This request: a mail draft written in it is not sent in it (google_link.run_mail_tool).
+    request_id: str = field(default_factory=lambda: uuid4().hex)
+
+
+async def _profile(deps: Deps) -> dict[str, Any]:
+    try:
+        return profiles.clean(await deps.profile_store.get(deps.account))
+    except httpx.HTTPError as e:
+        log.warning("profile store failed: %s", type(e).__name__)
+        return {}
 
 
 async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx: AssistantContext, deps: Deps) -> ActionResult:
     if tool == "get_weather":
+        if not args.get("location_name"):  # the user's own city, once they said it (profile.py)
+            args = {**args, "location_name": (await _profile(deps)).get("city")}
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
-    if tool == "add_todo":
-        return todos.add_todo(action_id, args, ctx.client_now)
-    if tool == "list_todos":
-        return todos.list_todos(action_id, args, ctx.client_now)
-    if tool == "complete_todo":
-        return todos.complete_todo(action_id, args)
-    if tool == "delete_todo":
-        return todos.delete_todo(action_id, args)
+    if tool in pc_files.PC_TOOLS or tool == "look_at_screen":
+        if not deps.on_pc:
+            return ActionResult(action_id=action_id, tool=tool, status="unsupported", executed_via=None,
+                                error_code="NOT_ON_COMPUTER", data=None)
+        if tool == "look_at_screen":
+            return await screen.look_at_screen(action_id, args, deps.reader)
+        if tool == "read_file" and pc_files.is_pdf(args["file"]):
+            return await pc_files.read_pdf(action_id, args, deps.reader)
+        return await asyncio.to_thread(pc_files.PC_TOOLS[tool], action_id, args)
+    if tool in ("check_email", "read_email"):
+        return await google_link.run_tool(action_id, tool, args, deps.google, deps.account)
+    if tool in ("draft_email", "send_email"):
+        return await google_link.run_mail_tool(action_id, tool, args, deps.google, deps.account, deps.request_id)
+    if tool == "read_webpage":
+        return await webpage.read_webpage(action_id, args, deps.http)
+    if tool == "daily_briefing":
+        return await briefing.daily_briefing(action_id, args, ctx.client_now, deps.http, deps.todo_store, deps.account,
+                                             profile=await _profile(deps), google=deps.google, search=deps.search)
+    if tool == "set_profile":
+        try:
+            return await profiles.set_profile(action_id, args, deps.profile_store, deps.account)
+        except httpx.HTTPError as e:
+            log.warning("profile store failed: %s", type(e).__name__)
+            return ActionResult(action_id=action_id, tool=tool, status="failed", executed_via="backend",
+                                error_code="PROFILE_UNAVAILABLE", data=None)
+    if tool in TODO_TOOLS:
+        try:
+            return await _run_todo_tool(action_id, tool, args, ctx, deps)
+        except httpx.HTTPError as e:
+            log.warning("todo store failed: %s", type(e).__name__)
+            return ActionResult(action_id=action_id, tool=tool, status="failed", executed_via="backend",
+                                error_code="TODO_UNAVAILABLE", data=None)
+    if tool in ("remember", "forget"):
+        try:
+            if tool == "remember":
+                return await memory.remember(action_id, args, ctx.client_now, deps.memory_store, deps.account)
+            return await memory.forget(action_id, args, deps.memory_store, deps.account)
+        except httpx.HTTPError as e:
+            log.warning("memory store failed: %s", type(e).__name__)
+            return ActionResult(action_id=action_id, tool=tool, status="failed", executed_via="backend",
+                                error_code="MEMORY_UNAVAILABLE", data=None)
     return await backend_tools.web_search(action_id, args, deps.search)
+
+
+TODO_TOOLS = ("add_todo", "list_todos", "complete_todo", "delete_todo")
+
+
+async def _run_todo_tool(action_id: str, tool: str, args: dict[str, Any], ctx: AssistantContext, deps: Deps) -> ActionResult:
+    if tool == "add_todo":
+        return await todos.add_todo(action_id, args, ctx.client_now, deps.todo_store, deps.account)
+    if tool == "list_todos":
+        return await todos.list_todos(action_id, args, ctx.client_now, deps.todo_store, deps.account)
+    if tool == "complete_todo":
+        return await todos.complete_todo(action_id, args, deps.todo_store, deps.account)
+    return await todos.delete_todo(action_id, args, deps.todo_store, deps.account)
 
 
 def _tool_response(result: ActionResult) -> dict[str, Any]:
@@ -103,13 +174,21 @@ def _fill_backend_fields(tool: str, args: dict[str, Any], ctx: AssistantContext)
     if tool == "set_timer":
         ends = _server_now() + timedelta(seconds=int(args["duration_seconds"]))
         args["fire_at"] = ends.astimezone(ctx.client_now.tzinfo).isoformat(timespec="seconds")
-    if tool in BACKEND_FIELDS and args.get("target", "all") == "all":
+    if tool in ("create_alarm", "set_timer") and args.get("target", "all") == "all":
         args["sync_id"] = str(uuid4())
 
 
 def _fallback_confirmation(tool: str, args: dict[str, Any]) -> str:
     who = args.get("contact_name", "")
     return f"{who}: залгах уу?" if tool == "call_contact" else f"{who}: '{args.get('body', '')}' гэж явуулах уу?"
+
+
+# A tool's name that slipped into words for the user ("open_app ашиглаж болно") becomes plain Mongolian.
+_TOOL_WORDS = re.compile(r"`?\b(" + "|".join(sorted(ACTION_MN, key=len, reverse=True)) + r")\b`?")
+
+
+def _plain(text: str) -> str:
+    return _TOOL_WORDS.sub(lambda m: ACTION_MN[m.group(1)][0], text)
 
 
 def _history_note(actions: list[ActionRequest]) -> str:
@@ -121,11 +200,13 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
     conversation_id, conv = deps.store.get_or_create(ctx.conversation_id)
     manifest = tool_manifest()
 
+    facts = await memory.facts_for(deps.memory_store, deps.account)
+    about = profiles.prompt_line(await _profile(deps))
     calls = await deps.llm.plan(
-        system=system_prompt(ctx.client_now, ctx.timezone, ctx.device.platform),
+        system=system_prompt(ctx.client_now, ctx.timezone, ctx.device.platform, facts, on_pc=deps.on_pc, about=about),
         history=list(conv.history),
         user_text=text,
-        functions=function_specs(),
+        functions=function_specs(on_pc=deps.on_pc),
     )
 
     actions: list[ActionRequest] = []
@@ -162,6 +243,8 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                     results.append((call, {"error": "INVALID_ARGUMENTS"}))
                     continue
                 _fill_backend_fields(call.name, args, ctx)
+                if call.name == "play_video":
+                    await media.fill_video(args, deps.http)
                 entry = manifest[call.name]
                 required = entry["confirmation"] == "always"
                 prompt = None
@@ -182,7 +265,7 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                 actions.append(action)
                 continue
             if call.name == "reply" and call.args.get("text"):
-                replies.append(str(call.args["text"]).strip())
+                replies.append(_plain(str(call.args["text"]).strip()))
             elif call.name == "ask_clarification" and call.args.get("question"):
                 clarification = Clarification(
                     question=str(call.args["question"]).strip(),
@@ -195,8 +278,8 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                 limitations.append(
                     Limitation(
                         code=code if code in LIMITATION_CODES else "other",
-                        message=str(call.args["message"]).strip(),
-                        alternative=Alternative(kind=kind, description=str(call.args.get("alternative_description") or "").strip())
+                        message=_plain(str(call.args["message"]).strip()),
+                        alternative=Alternative(kind=kind, description=_plain(str(call.args.get("alternative_description") or "").strip()))
                         if kind != "none"
                         else None,
                     )

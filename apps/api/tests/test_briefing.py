@@ -1,0 +1,131 @@
+from datetime import date, datetime
+
+import pytest
+
+from bekhi_api import briefing
+from bekhi_api import main as main_mod
+from bekhi_api.compose import clock_mn
+
+from .conftest import context
+
+TODAY = date(2026, 10, 6)
+
+
+@pytest.fixture(autouse=True)
+def todo_file(tmp_path, monkeypatch):
+    monkeypatch.setenv("TODO_FILE", str(tmp_path / "todos.json"))
+    monkeypatch.setenv("PROFILE_FILE", str(tmp_path / "profile.json"))
+
+
+def item(title, due=None, done=False):
+    return {"id": title, "title": title, "due_at": due, "done": done, "created_at": "2026-10-01T09:00:00+08:00"}
+
+
+def test_greeting_follows_the_time_of_day():
+    at = lambda h: briefing.greeting(datetime(2026, 10, 6, h, 0))  # noqa: E731
+    assert [at(7), at(13), at(20), at(2)] == ["Өглөөний мэнд!", "Өдрийн мэнд!", "Оройн мэнд!", "Сайн байна уу!"]
+
+
+def test_todos_due_today_and_overdue_come_first():
+    items = [
+        item("Тайлан илгээх", "2026-10-06T23:59:00+08:00"),
+        item("Ном буцаах", "2026-10-04T12:00:00+08:00"),
+        item("Сүү авах"),
+        item("Хуучин ажил", "2026-10-06T10:00:00+08:00", done=True),
+    ]
+    # Said aloud: counts only, the card lists them.
+    assert briefing.todo_sentence(items, TODAY) == "Өнөөдөр хийх 1 зүйл, хугацаа хэтэрсэн 1 зүйл байна."
+    assert briefing.todo_sentence([item("Сүү авах")], TODAY) == "Жагсаалтад 1 зүйл байна."
+    assert briefing.todo_sentence([], TODAY) == "Хийх зүйл алга."
+    weather = {"place": "Улаанбаатар", "condition": "үүлэрхэг", "temp_max_c": 5, "precipitation_probability": 2}
+    assert briefing.weather_sentence(weather) == "Өнөөдөр Улаанбаатар орчимд үүлэрхэг, өдөртөө 5°."
+    assert briefing.weather_sentence({**weather, "precipitation_probability": 70}).endswith("магадлал 70%.")
+    # The app's card: open ones only, those with a time first, soonest first.
+    assert [i["title"] for i in briefing.card_todos(items)] == ["Ном буцаах", "Тайлан илгээх", "Сүү авах"]
+
+
+def test_briefing_with_what_the_phone_has_scheduled_today(client, planner):
+    planner.then(("add_todo", {"user_request": "x", "title": "Тайлан илгээх", "due_at": "2026-10-06T23:59:00+08:00"}))
+    client.post("/api/v1/assistant/chat", json={"text": "x", "context": context()})
+
+    planner.then(("daily_briefing", {"user_request": "Өдрийн тойм"}), ("list_reminders", {"user_request": "x"}))
+    turn = client.post("/api/v1/assistant/chat", json={"text": "Өнөөдөр юу байна?", "context": context()}).json()
+    assert turn["stage"] == "awaiting_device"  # nothing is said before the phone lists its schedule
+    assert turn["actions"][0]["result"]["data"]["todos"] == [
+        {"title": "Тайлан илгээх", "due_at": "2026-10-06T23:59:00+08:00", "done": False}]  # for the app's card
+
+    def report(status, data=None):
+        # The app reports every action: the briefing's inline result, then what the phone listed.
+        r = client.post("/api/v1/assistant/actions/results", json={
+            "conversation_id": turn["conversation_id"], "turn_id": turn["turn_id"],
+            "results": [turn["actions"][0]["result"],
+                        {"action_id": "a2", "tool": "list_reminders", "status": status, "executed_via": "react_native",
+                         "error_code": None, "data": data}],
+        })
+        return r.json()["response"]
+
+    scheduled = {"items": [
+        {"id": "1", "title": "Уулзалт", "kind": "event", "fire_at": "2026-10-06T16:00:00+08:00"},
+        {"id": "2", "title": "Сэрүүлэг", "kind": "alarm", "fire_at": "2026-10-07T07:00:00+08:00"},
+    ]}
+    said = report("succeeded", scheduled)
+    assert said.startswith("Өдрийн мэнд! ")
+    assert "Өнөөдөр хийх 1 зүйл байна." in said
+    # Tomorrow's alarm is left out; never asked what to tell, the briefing asks it last.
+    assert said.endswith("Өнөөдөр товлосон: өдөр 4 цагт Уулзалт. " + briefing.ASK_MN)
+
+
+def test_briefing_says_nothing_about_a_schedule_it_cannot_see(client, planner):
+    planner.then(("daily_briefing", {"user_request": "x"}), ("list_reminders", {"user_request": "x"}))
+    turn = client.post("/api/v1/assistant/chat", json={"text": "Өглөөний мэнд", "context": context()}).json()
+    r = client.post("/api/v1/assistant/actions/results", json={
+        "conversation_id": turn["conversation_id"], "turn_id": turn["turn_id"],
+        "results": [turn["actions"][0]["result"],
+                    {"action_id": "a2", "tool": "list_reminders", "status": "unsupported", "executed_via": None,
+                     "error_code": "WEB_NO_IPHONE_ACTIONS"}],
+    })
+    said = r.json()["response"]
+    assert said.startswith("Өдрийн мэнд! ") and "browser" not in said
+
+
+def test_clock_mn():
+    assert [clock_mn("07:00"), clock_mn("21:30"), clock_mn("12:00")] == ["өглөө 7 цагт", "орой 9:30-д", "өдөр 12 цагт"]
+
+
+def test_a_routine_is_set_for_every_day(client, planner):
+    planner.then(("create_routine", {"user_request": "x", "time": "07:00"}))
+    turn = client.post("/api/v1/assistant/chat", json={"text": "x", "context": context()}).json()
+    assert turn["actions"][0]["arguments"] == {"time": "07:00", "routine": "daily_briefing"}
+    r = client.post("/api/v1/assistant/actions/results", json={
+        "conversation_id": turn["conversation_id"], "turn_id": turn["turn_id"],
+        "results": [{"action_id": "a1", "tool": "create_routine", "status": "succeeded", "executed_via": "react_native",
+                     "error_code": None}],
+    })
+    assert r.json()["response"].startswith("За, өдөр бүр өглөө 7 цагт өдрийн тоймын мэдэгдэл ирнэ.")
+
+
+def test_the_briefing_tells_what_the_user_chose_and_greets_them_by_name(client, planner, monkeypatch):
+    planner.then(("set_profile", {"user_request": "x", "name": "Нандин", "briefing": ["todos", "news"]}))
+    turn = client.post("/api/v1/assistant/chat", json={"text": "Намайг Нандин гэдэг, өглөө мэдээ хэлж байгаарай",
+                                                        "context": context()}).json()
+    assert turn["response"] == "За, таныг Нандин гэж дуудна, өдрийн тоймд хийх зүйлс болон мэдээ хэлнэ."
+
+    class News:
+        async def news(self):
+            return [{"title": "Шинэ сургууль нээгдлээ", "url": "https://montsame.mn/mn/read/1", "source": "montsame.mn"}]
+
+    monkeypatch.setattr(main_mod, "get_search", lambda http: News())
+    planner.then(("daily_briefing", {"user_request": "x"}), ("list_reminders", {"user_request": "x"}))
+    turn = client.post("/api/v1/assistant/chat", json={"text": "Өглөөний мэнд", "context": context()}).json()
+    data = turn["actions"][0]["result"]["data"]
+    assert data["parts"] == ["todos", "news"] and "weather" not in data and data["news"][0]["source"] == "montsame.mn"
+    r = client.post("/api/v1/assistant/actions/results", json={
+        "conversation_id": turn["conversation_id"], "turn_id": turn["turn_id"],
+        "results": [turn["actions"][0]["result"],
+                    {"action_id": "a2", "tool": "list_reminders", "status": "succeeded", "executed_via": "react_native",
+                     "error_code": None, "data": {"items": [
+                         {"id": "1", "title": "Уулзалт", "kind": "event", "fire_at": "2026-10-06T16:00:00+08:00"}]}}],
+    })
+    said = r.json()["response"]
+    assert said == ("Өдрийн мэнд, Нандин! Хийх зүйл алга. "
+                    "Өнөөдрийн гол мэдээ: «Шинэ сургууль нээгдлээ».")  # no schedule, no question: the user chose
