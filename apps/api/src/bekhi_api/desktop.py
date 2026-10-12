@@ -1,6 +1,7 @@
-"""Actions on this Windows PC, for the web app running on it: the PC is the device.
+"""Actions on this computer (Windows or Mac, see system.py), for the web app running on it: the
+computer is the device.
 
-Reminders, alarms and event reminders are Windows toast notifications. They are kept
+Reminders, alarms and event reminders are Windows toasts or Mac notifications. They are kept
 in the API process (and in a small JSON file, so a restart does not lose them): they
 fire while the BEKHI API is running, and ones missed while it was stopped fire at start.
 Nothing is registered with the OS (no scheduled tasks, no autostart).
@@ -16,13 +17,16 @@ import base64
 import json
 import logging
 import os
-import sys
+import re
+import subprocess
 import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from xml.sax.saxutils import escape
+
+from . import system
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +40,9 @@ OLD_NOTES_FILE_NAME = "Duud тэмдэглэл.txt"
 OLD_DATA_DIR_NAME = "Duud"
 CREATE_NO_WINDOW = 0x08000000
 SYNC_EVERY_SECONDS = 30
+COMMAND_WAIT_SECONDS = 20  # one long poll for commands from the user's other devices
+COMMAND_RETRY_SECONDS = 5
+COMMAND_MISSING_RETRY_SECONDS = 300
 # A synced alarm about to ring (or ringing) is not scheduled again: clocks differ by a few seconds.
 SYNC_MIN_LEAD = timedelta(seconds=5)
 
@@ -51,7 +58,7 @@ $xml.LoadXml(@'
 
 
 def available() -> bool:
-    return sys.platform == "win32"
+    return system.supported()
 
 
 @dataclass
@@ -66,20 +73,17 @@ class Toast:
 
 
 def _data_dir() -> Path:
-    base = Path(os.environ.get("LOCALAPPDATA") or Path.home())
-    d = base / "BEKHI"
-    if (base / OLD_DATA_DIR_NAME).is_dir() and not d.exists():
-        (base / OLD_DATA_DIR_NAME).rename(d)
-    d.mkdir(parents=True, exist_ok=True)
-    return d
+    if system.IS_WINDOWS:
+        base = Path(os.environ.get("LOCALAPPDATA") or Path.home())
+        if (base / OLD_DATA_DIR_NAME).is_dir() and not (base / "BEKHI").exists():
+            (base / OLD_DATA_DIR_NAME).rename(base / "BEKHI")
+    return system.data_dir()
 
 
 def _documents_dir() -> Path:
-    """The real Documents folder (it is often redirected into OneDrive)."""
-    from .windows_controls import known_folder
-
+    """The real Documents folder (on Windows it is often redirected into OneDrive)."""
     try:
-        return Path(known_folder("documents"))
+        return Path(system.controls().known_folder("documents"))
     except OSError:
         return Path.home() / "Documents"
 
@@ -96,7 +100,10 @@ def toast_xml(title: str, body: str, alarm: bool) -> str:
 
 
 async def show_toast(title: str, body: str, alarm: bool = False) -> None:
-    script = TOAST_SCRIPT.format(xml=toast_xml(title, body, alarm), app_id=APP_ID)
+    if system.IS_MAC:
+        await asyncio.to_thread(system.controls().notify, title, body, alarm)
+        return
+    script =TOAST_SCRIPT.format(xml=toast_xml(title, body, alarm), app_id=APP_ID)
     proc = await asyncio.create_subprocess_exec(
         "powershell.exe", "-NoProfile", "-NonInteractive", "-EncodedCommand",
         base64.b64encode(script.encode("utf-16-le")).decode(),
@@ -109,12 +116,17 @@ async def show_toast(title: str, body: str, alarm: bool = False) -> None:
 
 
 class DesktopScheduler:
-    def __init__(self, store: Path | None = None, sync: Any = None) -> None:
+    def __init__(self, store: Path | None = None, sync: Any = None, commands: Any = None,
+                 remote_commands: Any = None) -> None:
         self._store = store or _data_dir() / "reminders.json"
         self._link_file = self._store.with_name("sync.json")
         self._pending: list[Toast] = self._load()
         self._task: asyncio.Task | None = None
+        self._tasks: list[asyncio.Task] = []
         self._sync = sync  # sync.SyncStore
+        # What the user's other devices ask of this PC: commands.CommandStore here, RemoteCommands on the cloud.
+        self._commands = commands
+        self._remote_commands = remote_commands
         self._link: dict[str, str] | None = self._load_link()
         self._synced: set[str] = {t.sync_id for t in self._pending if t.sync_id}
 
@@ -125,11 +137,12 @@ class DesktopScheduler:
         except (OSError, ValueError):
             return None
 
-    def link(self, account: str) -> str:
+    def link(self, account: str, code: str | None = None) -> str:
         """Joins the PC to a sync account; returns its device id. The account is the hash of the code,
-        or for a PC agent the code itself (sync.RemoteSyncStore), kept only on this PC."""
+        or for a PC agent the code itself (sync.RemoteSyncStore). The code is also kept, only on this
+        PC, to wait for the phone's commands on the cloud API."""
         device_id = (self._link or {}).get("device_id") or f"pc-{uuid.uuid4().hex[:16]}"
-        self._link = {"account": account, "device_id": device_id}
+        self._link = {"account": account, "device_id": device_id, **({"code": code} if code else {})}
         self._link_file.write_text(json.dumps(self._link), encoding="utf-8")
         return device_id
 
@@ -194,10 +207,88 @@ class DesktopScheduler:
             self._pending = [t for t in self._pending if t not in stale]
             self._save()
         self._task = asyncio.create_task(self._run())
+        if self._commands is not None:
+            self._tasks.append(asyncio.create_task(self._serve_commands(self._take_here, self._finish_here, "local")))
+        if self._remote_commands is not None:
+            self._tasks.append(asyncio.create_task(self._serve_commands(self._take_remote, self._finish_remote, "cloud")))
 
     async def stop(self) -> None:
-        if self._task:
-            self._task.cancel()
+        for task in [self._task, *self._tasks]:
+            if task:
+                task.cancel()
+
+    def _account_hash(self) -> str | None:
+        """The linked account as stored by the sync stores (a PC agent keeps the code itself)."""
+        if self._link is None:
+            return None
+        key = self._link["account"]
+        if re.fullmatch(r"[0-9a-f]{64}", key):
+            return key
+        from . import sync
+
+        return sync.account_key(key)
+
+    async def _take_here(self) -> list[dict[str, Any]]:
+        account = self._account_hash()
+        if account is None:
+            await asyncio.sleep(COMMAND_RETRY_SECONDS)
+            return []
+        return [c.wire() for c in await self._commands.take(account, "computer", COMMAND_WAIT_SECONDS)]
+
+    async def _finish_here(self, command_id: str, outcome: dict[str, Any]) -> None:
+        account = self._account_hash()
+        if account is not None:
+            self._commands.finish(account, command_id, outcome)
+
+    @property
+    def device_id(self) -> str | None:
+        return (self._link or {}).get("device_id")
+
+    def linked_code(self) -> str | None:
+        """The sync code this computer is linked with, when it knows it."""
+        return self._code()
+
+    def _code(self) -> str | None:
+        """The sync code itself, which the cloud API asks for (it hashes it)."""
+        link = self._link or {}
+        if link.get("code"):
+            return link["code"]
+        account = link.get("account")
+        return account if account and not re.fullmatch(r"[0-9a-f]{64}", account) else None
+
+    async def _take_remote(self) -> list[dict[str, Any]]:
+        code = self._code()
+        if code is None or self._link is None:
+            await asyncio.sleep(COMMAND_RETRY_SECONDS)  # not linked with a code the cloud understands
+            return []
+        return await self._remote_commands.take(code, self._link["device_id"], "computer", COMMAND_WAIT_SECONDS)
+
+    async def _finish_remote(self, command_id: str, outcome: dict[str, Any]) -> None:
+        code = self._code()
+        if code is not None and self._link is not None:
+            await self._remote_commands.finish(code, self._link["device_id"], command_id, outcome)
+
+    async def _serve_commands(self, take: Any, finish: Any, where: str) -> None:
+        """Runs, one by one, what the user's phone asks of this PC ("компьютерийн дууг багасга")."""
+        while True:
+            try:
+                taken = await take()
+            except Exception as e:  # offline, or the cloud is waking up
+                log.warning("%s commands failed: %s", where, type(e).__name__)
+                # A cloud API without commands yet (404) is asked again only now and then.
+                missing = getattr(getattr(e, "response", None), "status_code", None) == 404
+                await asyncio.sleep(COMMAND_MISSING_RETRY_SECONDS if missing else COMMAND_RETRY_SECONDS)
+                continue
+            for cmd in taken:
+                try:
+                    outcome = run(cmd["tool"], cmd["arguments"], self)
+                except Exception:
+                    log.exception("command %s failed", cmd["tool"])
+                    outcome = _result("failed", "DESKTOP_FAILED")
+                try:
+                    await finish(cmd["id"], outcome)
+                except Exception as e:
+                    log.warning("%s command result failed: %s", where, type(e).__name__)
 
     async def _run(self) -> None:
         last_sync = 0.0
@@ -239,6 +330,34 @@ BUILTIN_APPS = {
     "file explorer": "explorer.exe",
     "explorer": "explorer.exe",
 }
+MAC_BUILTIN_APPS = {
+    "notepad": "/System/Applications/TextEdit.app",
+    "textedit": "/System/Applications/TextEdit.app",
+    "calculator": "/System/Applications/Calculator.app",
+    "paint": "/System/Applications/Preview.app",
+    "file explorer": "/System/Library/CoreServices/Finder.app",
+    "explorer": "/System/Library/CoreServices/Finder.app",
+    "finder": "/System/Library/CoreServices/Finder.app",
+}
+
+
+# Windows settings pages, by the names the phone's app catalog uses too ("Wi-Fi тохиргоо").
+SETTINGS_PAGES = {
+    "wifi": "ms-settings:network-wifi",
+    "wifiтохиргоо": "ms-settings:network-wifi",
+    "вайфай": "ms-settings:network-wifi",
+    "bluetooth": "ms-settings:bluetooth",
+    "bluetoothтохиргоо": "ms-settings:bluetooth",
+    "блютүүс": "ms-settings:bluetooth",
+    "тохиргоо": "ms-settings:",
+    "settings": "ms-settings:",
+}
+# The same pages in a Mac's System Settings.
+MAC_SETTINGS = {
+    "ms-settings:network-wifi": "x-apple.systempreferences:com.apple.wifi-settings-extension",
+    "ms-settings:bluetooth": "x-apple.systempreferences:com.apple.BluetoothSettings",
+    "ms-settings:": "x-apple.systempreferences:",
+}
 
 
 def _norm(name: str) -> str:
@@ -250,24 +369,52 @@ def _start_menu_dirs() -> list[Path]:
     return [Path(r) / "Microsoft" / "Windows" / "Start Menu" / "Programs" for r in roots if r]
 
 
-def find_app(name: str, start_menu: list[Path] | None = None) -> str | None:
-    """A Start menu shortcut (or built-in tool) for the app the user named. Only apps that
-    are installed and listed in the Start menu can be opened, never an arbitrary file."""
+def _mac_app_dirs() -> list[Path]:
+    return [Path("/Applications"), Path("/System/Applications"), Path.home() / "Applications"]
+
+
+def _mac_apps(dirs: list[Path]) -> list[Path]:
+    """The .app bundles in the folders and one level down ("Utilities", "Adobe Photoshop 2025")."""
+    apps: list[Path] = []
+    for d in dirs:
+        try:
+            entries = list(d.iterdir()) if d.is_dir() else []
+        except OSError:
+            continue
+        for p in entries:
+            if p.suffix == ".app":
+                apps.append(p)
+            elif p.is_dir():
+                try:
+                    apps += [q for q in p.iterdir() if q.suffix == ".app"]
+                except OSError:
+                    continue
+    return apps
+
+
+def find_app(name: str, places: list[Path] | None = None) -> str | None:
+    """A Start menu shortcut, a Mac app or a built-in tool for the app the user named. Only apps
+    that are installed can be opened, never an arbitrary file."""
     wanted = name.strip().lower()
     wanted = APP_ALIASES.get(wanted, wanted)
     key = _norm(wanted)
     if not key:
         return None
-    for builtin, exe in BUILTIN_APPS.items():
+    if key in SETTINGS_PAGES:
+        return MAC_SETTINGS[SETTINGS_PAGES[key]] if system.IS_MAC else SETTINGS_PAGES[key]
+    for builtin, exe in (MAC_BUILTIN_APPS if system.IS_MAC else BUILTIN_APPS).items():
         if _norm(builtin) == key:
             return exe
-    shortcuts = [
-        p
-        for d in (start_menu if start_menu is not None else _start_menu_dirs())
-        if d.is_dir()
-        for p in d.rglob("*.lnk")
-        if "uninstall" not in p.stem.lower()
-    ]
+    if system.IS_MAC:
+        shortcuts = _mac_apps(places if places is not None else _mac_app_dirs())
+    else:
+        shortcuts = [
+            p
+            for d in (places if places is not None else _start_menu_dirs())
+            if d.is_dir()
+            for p in d.rglob("*.lnk")
+        ]
+    shortcuts = [p for p in shortcuts if "uninstall" not in p.stem.lower()]
     for matches in (
         [p for p in shortcuts if _norm(p.stem) == key],
         [p for p in shortcuts if _norm(p.stem).startswith(key)],
@@ -315,14 +462,15 @@ def _result(status: str, error_code: str | None = None, data: dict[str, Any] | N
 
 
 def computer_control(args: dict[str, Any]) -> dict[str, Any]:
-    from . import windows_controls as win
-
+    win = system.controls()
     action = args["action"]
     if action == "lock_screen":
         return _result("succeeded") if win.lock_screen() else _result("failed", "LOCK_FAILED")
     if action == "open_folder":
-        os.startfile(win.known_folder(args.get("folder") or "downloads"))
+        system.open_path(win.known_folder(args.get("folder") or "downloads"))
         return _result("succeeded")
+    if action in win.MEDIA_KEYS:
+        return _result("succeeded") if win.press_media_key(action) else _result("failed", "MEDIA_KEY_FAILED")
     if action == "set_volume" and args.get("level") is None:
         return _result("failed", "INVALID_ARGUMENTS")
     change = {
@@ -337,6 +485,36 @@ def computer_control(args: dict[str, Any]) -> dict[str, Any]:
     except OSError:
         return _result("failed", "VOLUME_UNAVAILABLE")
     return _result("succeeded", data={"volume": level})
+
+
+_player: subprocess.Popen | None = None
+
+
+def browser() -> Path | None:
+    """Edge or Chrome, which can show a page as an app window (system.browsers)."""
+    return next((p for p in system.browsers() if p.is_file()), None)
+
+
+def play_in_window(url: str) -> bool:
+    """Opens the video in BEKHI's own player window (Edge or Chrome in app mode, its own profile), where
+    it may start with sound. One video at a time: the window of the last one closes first."""
+    global _player
+    exe = browser()
+    if exe is None:
+        system.open_path(url)
+        return True
+    if _player is not None and _player.poll() is None:
+        _player.terminate()
+        try:
+            _player.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            _player.kill()
+    _player = subprocess.Popen([
+        str(exe), f"--app={url}", f"--user-data-dir={_data_dir() / 'player'}",
+        "--autoplay-policy=no-user-gesture-required", "--window-size=1100,680",
+        "--no-first-run", "--no-default-browser-check", "--hide-crash-restore-bubble",
+    ])
+    return True
 
 
 def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[str, Any]:
@@ -354,7 +532,7 @@ def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[st
         target = find_app(args["app_name"])
         if target is None:
             return _result("failed", "APP_NOT_FOUND")
-        os.startfile(target)
+        system.open_path(target)
         return _result("succeeded")
     if tool == "set_timer":
         # The backend sets fire_at from its clock, so all linked devices ring together.
@@ -382,6 +560,14 @@ def run(tool: str, args: dict[str, Any], scheduler: DesktopScheduler) -> dict[st
         })
     if tool == "computer_control":
         return computer_control(args)
+    if tool == "type_text":
+        typed = system.controls().type_text(args["text"])
+        return _result("succeeded") if typed else _result("failed", "TYPING_FAILED")
+    if tool == "open_url":
+        system.open_path(args["url"])  # the default browser; the contract allows only http(s)
+        return _result("handed_off")
+    if tool == "play_video":
+        return _result("succeeded") if play_in_window(args["url"]) else _result("failed", "BROWSER_NOT_FOUND")
     fields = {
         "create_reminder": ("due_at", "reminder", lambda: (args["title"], args.get("notes") or "БЭХИ сануулга", False)),
         "create_alarm": ("fire_at", "alarm", lambda: (args.get("label") or "Сэрэх цаг боллоо", "БЭХИ сэрүүлэг", True)),

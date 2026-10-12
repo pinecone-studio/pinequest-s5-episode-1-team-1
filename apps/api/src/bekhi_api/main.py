@@ -12,14 +12,18 @@ Endpoints (Phase 3/4):
   GET  /api/v1/sync/alarms                 alarms/timers to ring on every linked device
   POST /api/v1/sync/alarms                 publish one this device has set
   POST /api/v1/sync/alarms/cancel          cancel some on every linked device
-  POST /api/v1/desktop/sync                link this Windows PC (the API's own scheduler) to a sync code
+  POST /api/v1/desktop/sync                link this computer (the API's own scheduler) to a sync code
 """
 
 from __future__ import annotations
 
+import asyncio
+import html
 import io
+import ipaddress
 import logging
 import math
+import re
 import time
 import uuid
 import wave
@@ -27,15 +31,19 @@ from array import array
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Literal
 
 import httpx
 from fastapi import FastAPI, File, Form, Header, Request, UploadFile
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, Field, ValidationError
 
-from . import desktop, directions, sync, todos
+from . import commands, desktop, directions, google_link, hotkey, memory, sync, system, todos
+from . import profile as profiles
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
 from .models import (
@@ -54,9 +62,10 @@ from .models import (
     SyncPublishResponse,
     SyncPullResponse,
 )
-from .compose import speakable
+from .compose import FAILED_BY_CODE, speakable
 from .pipeline import ContractViolation, Deps, UnknownTurn, plan_turn, report_results
-from .providers import ProviderNotConfigured, ProviderUserError, VoiceNeedsPaidPlan, get_llm, get_search, get_stt, get_tts
+from .providers import (ProviderNotConfigured, ProviderUserError, VoiceNeedsPaidPlan, get_llm, get_reader, get_search,
+                        get_stt, get_tts)
 from .store import MemoryStore
 
 log = logging.getLogger("bekhi_api")
@@ -64,6 +73,9 @@ log = logging.getLogger("bekhi_api")
 MN_STT_FAILED = "Уучлаарай, сайн сонсогдсонгүй. Дахин хэлээд өгөөч."
 MN_MIC_SILENT = "Бичлэгт дуу огт алга байна. Микрофон тань дуугүй (mute) болсон эсэхийг шалгана уу."
 MN_AI_FAILED = "Уучлаарай, одоогоор ойлгоход асуудал гарлаа."
+MN_AI_BUSY = "Одоо хэт олон хүсэлт ирж байна. Түр хүлээгээд дахин асуугаарай."
+# The app waits 30 s for an answer; a turn that would take longer is stopped first, with a clear reply.
+PLAN_TIMEOUT_SECONDS = 27
 MN_NOT_CONFIGURED = "Gemini API key тохируулаагүй байна (apps/api/.env)."
 MN_KEY_MISSING = "{} API key тохируулаагүй байна (apps/api/.env)."
 PROVIDER_NAMES = {"gemini": "Gemini", "duudlaga": "Duudlaga", "elevenlabs": "ElevenLabs"}
@@ -79,9 +91,12 @@ MN_DIRECTIONS = {
 }
 # Billed per request, so these share the assistant's per-minute limit. Sync too: a sync code
 # must not be guessable by trying many.
+WAKE_WAIT_SECONDS = 25
 RATE_LIMITED_PATHS = ("/api/v1/assistant", "/api/v1/maps", "/api/v1/sync")
 MN_SYNC_CODE_INVALID = "Холбох код буруу байна."
 MN_SYNC_FAILED = "Бусад төхөөрөмжтэй холбогдож чадсангүй."
+MN_GOOGLE_UNAVAILABLE = "Gmail холболт энэ сервер дээр тохируулагдаагүй байна."
+MN_GOOGLE_FROM_PC = "Gmail-ийг компьютер дээрх БЭХИ-ээс холбоно уу. Холбогдсоны дараа утсан дээр ч ажиллана."
 LOCAL_HOSTS = {"127.0.0.1", "::1", "localhost"}
 
 WAV_TYPES = {"audio/wav", "audio/x-wav", "audio/wave", "audio/vnd.wave"}
@@ -108,6 +123,52 @@ class DesktopActionRequest(BaseModel):
 
 class DesktopSyncRequest(BaseModel):
     code: str = Field(max_length=32)
+    # The user typed this code to join it. Otherwise a browser opening BEKHI on a computer that is
+    # already linked joins the computer's code, rather than taking the computer over.
+    replace: bool = False
+
+
+class ProfileRequest(BaseModel):
+    name: str | None = Field(None, max_length=profiles.MAX_NAME)
+    city: str | None = Field(None, max_length=profiles.MAX_CITY)
+    briefing: list[Literal["weather", "todos", "schedule", "email", "news"]] | None = None
+
+
+class SendCommandRequest(BaseModel):
+    target: Literal["computer", "phone"]
+    tool: str = Field(max_length=64)
+    arguments: dict
+
+
+class CommandOutcome(BaseModel):
+    status: str = Field(max_length=32)
+    executed_via: str | None = Field(default=None, max_length=32)
+    error_code: str | None = Field(default=None, max_length=64)
+    data: dict | None = None
+
+
+def _google_redirect(request: Request) -> str | None:
+    """Google's callback on this API, as registered in Google Cloud: http://127.0.0.1:8000 on the user's
+    PC, https on a public host. None from a LAN address (a phone on the PC's Wi-Fi), which Google refuses."""
+    host = request.url.hostname or ""
+    if host in LOCAL_HOSTS:
+        return f"http://127.0.0.1:{request.url.port or 80}/api/v1/auth/google/callback"
+    try:
+        if not ipaddress.ip_address(host).is_global:
+            return None
+    except ValueError:
+        pass
+    return f"https://{host}/api/v1/auth/google/callback"
+
+
+def _google_page(title: str, body: str, close: bool = False) -> HTMLResponse:
+    script = "<script>setTimeout(function(){window.close()},2500)</script>" if close else ""
+    return HTMLResponse(
+        "<!doctype html><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<title>BEKHI</title><body style='font-family:system-ui,sans-serif;background:#05060b;color:#f2f4f8;"
+        "display:grid;place-items:center;min-height:100vh;margin:0;padding:24px;text-align:center'><div>"
+        f"<h2>{html.escape(title)}</h2><p style='color:#a9b1bf'>{html.escape(body)}</p></div>{script}"
+    )
 
 
 def _is_local(request: Request) -> bool:
@@ -154,6 +215,18 @@ def _error(status: int, code: str, message: str, request: Request) -> JSONRespon
     return JSONResponse(status_code=status, content=body.model_dump())
 
 
+class _AppFiles(StaticFiles):
+    """The web app: any path that is not a file is one of its screens, so it gets index.html."""
+
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as e:
+            if e.status_code != 404 or path.startswith("api"):
+                raise
+            return await super().get_response("index.html", scope)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with httpx.AsyncClient(timeout=10) as http:
@@ -162,13 +235,37 @@ async def lifespan(app: FastAPI):
         settings = get_settings()
         app.state.sync = sync.make_store(settings.supabase_url, settings.supabase_service_role_key, http, settings.sync_api_url)
         app.state.todos = todos.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
+        app.state.memory = memory.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
+        app.state.profiles = profiles.make_store(settings.supabase_url, settings.supabase_service_role_key, http)
+        app.state.commands = commands.CommandStore()
+        # On the user's PC (agent.py): commands for a device not listening here go on to the cloud.
+        app.state.remote_commands = commands.RemoteCommands(settings.sync_api_url, http) if settings.sync_api_url else None
+        app.state.google = google_link.make(settings, http, on_pc=settings.desktop_actions and desktop.available(),
+                                            data_dir=google_link.local_data_dir())
+        if app.state.google is not None:  # a linked account's to-dos are its Google Tasks
+            app.state.todos = todos.GoogleTasksTodoStore(app.state.google, app.state.todos)
         app.state.desktop = None
+        app.state.wakeups = hotkey.Wakeups()
+        app.state.wakeups.bind(asyncio.get_running_loop())
+        key = None
         if settings.desktop_actions and desktop.available():
-            app.state.desktop = desktop.DesktopScheduler(sync=app.state.sync)
+            app.state.desktop = desktop.DesktopScheduler(
+                sync=app.state.sync, commands=app.state.commands, remote_commands=app.state.remote_commands
+            )
             app.state.desktop.start()
+            if settings.desktop_hotkey and system.IS_WINDOWS:
+                def wake() -> None:
+                    hotkey.bring_to_front(system.controls().BEKHI_WINDOW_TITLE)
+                    app.state.wakeups.press()
+
+                key = hotkey.Hotkey(wake)
+                key.start()
+        app.state.hotkey = key
         try:
             yield
         finally:
+            if key:
+                key.stop()
             if app.state.desktop:
                 await app.state.desktop.stop()
 
@@ -193,7 +290,9 @@ def create_app() -> FastAPI:
     @app.middleware("http")
     async def request_context(request: Request, call_next):
         request.state.request_id = uuid.uuid4().hex[:12]
-        if request.url.path.startswith(RATE_LIMITED_PATHS):
+        # Waiting for commands is long polling: only sending them counts.
+        polling = request.method == "GET" and request.url.path.startswith("/api/v1/sync/commands")
+        if request.url.path.startswith(RATE_LIMITED_PATHS) and not polling:
             key = request.client.host if request.client else "unknown"
             now = time.monotonic()
             window = hits[key]
@@ -204,6 +303,8 @@ def create_app() -> FastAPI:
             window.append(now)
         start = time.perf_counter()
         response = await call_next(request)
+        if request.url.path == "/api/v1/desktop/wake":
+            return response  # the window waits there all day: not worth a log line every 25 s
         # Safe logging: method, path, status, latency. Never bodies, audio or transcripts.
         log.info("%s %s %s %.0fms rid=%s", request.method, request.url.path, response.status_code,
                  (time.perf_counter() - start) * 1000, request.state.request_id)
@@ -225,8 +326,12 @@ def create_app() -> FastAPI:
             raise ApiException(503, "llm_failed", MN_NOT_CONFIGURED) from e
         http = request.app.state.http
         return Deps(
-            llm=llm, http=http, store=request.app.state.store, search=get_search(http),
+            llm=llm, http=http, store=request.app.state.store, search=get_search(http), reader=get_reader(),
             todo_store=request.app.state.todos,
+            memory_store=request.app.state.memory,
+            profile_store=request.app.state.profiles,
+            on_pc=request.app.state.desktop is not None,
+            google=request.app.state.google,
             # The asking device's sync code picks its account's to-do list (sync.py).
             account=sync.account_key(request.headers.get(SYNC_CODE_HEADER)),
         )
@@ -234,12 +339,19 @@ def create_app() -> FastAPI:
     async def run_plan(text: str, ctx: AssistantContext, request: Request) -> AssistantTurn:
         d = deps(request)
         try:
-            return await plan_turn(text, ctx, d)
+            async with asyncio.timeout(PLAN_TIMEOUT_SECONDS):
+                return await plan_turn(text, ctx, d)
         except ContractViolation as e:
             raise ApiException(500, "internal", MN_AI_FAILED) from e
         except ApiException:
             raise
+        except TimeoutError as e:
+            log.warning("planning timed out rid=%s", request.state.request_id)
+            raise ApiException(503, "llm_failed", MN_AI_BUSY) from e
         except Exception as e:  # provider/network errors
+            if getattr(e, "code", None) == 429:  # every model out of quota, also after waiting
+                log.warning("planning out of quota rid=%s", request.state.request_id)
+                raise ApiException(503, "llm_failed", MN_AI_BUSY) from e
             log.exception("planning failed rid=%s", request.state.request_id)
             raise ApiException(502, "llm_failed", MN_AI_FAILED) from e
 
@@ -366,7 +478,7 @@ def create_app() -> FastAPI:
 
     @app.post("/api/v1/desktop/actions")
     async def desktop_action(body: DesktopActionRequest, request: Request):
-        """The web app on this Windows PC: run a device action here (reminder, alarm, note...)."""
+        """The web app on this computer: run a device action here (reminder, alarm, note...)."""
         scheduler = request.app.state.desktop
         if scheduler is None or not _is_local(request):
             raise ApiException(404, "invalid_request", MN_DESKTOP_UNAVAILABLE)
@@ -381,18 +493,31 @@ def create_app() -> FastAPI:
             log.exception("desktop action failed rid=%s", request.state.request_id)
             return {"status": "failed", "executed_via": "backend", "error_code": "DESKTOP_FAILED"}
 
+    @app.get("/api/v1/desktop/wake")
+    async def desktop_wake(request: Request, after: int = -1):
+        """BEKHI's window on this computer waits here; the answer comes when the key (hotkey.py) is pressed
+        (a count above `after`), or after a while with nothing new. `key`: the key, when there is one."""
+        if request.app.state.desktop is None or not _is_local(request):
+            raise ApiException(404, "invalid_request", MN_DESKTOP_UNAVAILABLE)
+        count = await request.app.state.wakeups.after(after, WAKE_WAIT_SECONDS)
+        key = request.app.state.hotkey
+        return {"count": count, "key": key.label if key else None}
+
     @app.post("/api/v1/desktop/sync")
     async def desktop_sync(body: DesktopSyncRequest, request: Request):
-        """The web app on this Windows PC links the PC itself, so it rings synced alarms with the browser closed."""
+        """The web app on this computer links the computer itself, so it rings synced alarms with the browser closed."""
         scheduler = request.app.state.desktop
         if scheduler is None or not _is_local(request):
             raise ApiException(404, "invalid_request", MN_DESKTOP_UNAVAILABLE)
         account = sync.account_key(body.code)
         if account is None:
             raise ApiException(401, "unauthorized", MN_SYNC_CODE_INVALID)
+        current = scheduler.linked_code()
+        if current and not body.replace and sync.account_key(current) != account:
+            return {"device_id": scheduler.device_id, "code": current}
         # A PC agent pulls from the cloud, which takes the code itself (it stays on this PC).
         remote = isinstance(request.app.state.sync, sync.RemoteSyncStore)
-        device_id = scheduler.link(body.code if remote else account)
+        device_id = scheduler.link(body.code if remote else account, code=body.code)
         try:
             await scheduler.sync_now()
         except Exception:
@@ -445,6 +570,145 @@ def create_app() -> FastAPI:
         await sync_call(request, lambda store, now: store.cancel(account, ids, now))
         return {"ok": True}
 
+    @app.post("/api/v1/sync/commands")
+    async def send_command(body: SendCommandRequest, request: Request,
+                           x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """Asks the user's other device (computer or phone) to do something; `id` null: none is listening."""
+        account, device = sync_identity(x_bekhi_sync, x_bekhi_device)
+        if body.tool not in commands.RELAYED_TOOLS[body.target]:
+            raise ApiException(422, "invalid_request", MN_INVALID)
+        args = apply_defaults(body.tool, body.arguments)
+        if validate_tool_args(body.tool, args):
+            raise ApiException(422, "invalid_request", MN_INVALID)
+        cmd = request.app.state.commands.send(account, device, body.target, body.tool, args)
+        if cmd is not None:
+            return {"id": cmd.id}
+        remote = request.app.state.remote_commands
+        if remote is None:
+            return {"id": None}
+        try:
+            remote_id = await remote.send(x_bekhi_sync or "", device, body.target, body.tool, args)
+        except httpx.HTTPError as e:
+            log.warning("command relay failed: %s rid=%s", type(e).__name__, request.state.request_id)
+            return {"id": None}
+        if remote_id:
+            forwarded[remote_id] = account
+        return {"id": remote_id}
+
+    # Commands this API passed on to the cloud: their outcome is asked there.
+    forwarded: dict[str, str] = {}
+
+    @app.get("/api/v1/sync/commands/{command_id}")
+    async def command_state(command_id: str, request: Request, wait: float = 0,
+                            x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, device = sync_identity(x_bekhi_sync, x_bekhi_device)
+        if forwarded.get(command_id) == account and request.app.state.remote_commands is not None:
+            try:
+                return await request.app.state.remote_commands.state(x_bekhi_sync or "", device, command_id, wait)
+            except httpx.HTTPError as e:
+                raise ApiException(502, "internal", MN_SYNC_FAILED) from e
+        cmd = await request.app.state.commands.state(account, command_id, wait)
+        if cmd is None:
+            raise ApiException(404, "invalid_request", MN_INVALID)
+        return {"state": cmd.state, "outcome": cmd.outcome}
+
+    @app.get("/api/v1/sync/commands")
+    async def take_commands(request: Request, target: Literal["computer", "phone"], wait: float = 0,
+                            x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """A device waits here for what the user's other devices ask of it."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        taken = await request.app.state.commands.take(account, target, wait)
+        return {"commands": [c.wire() for c in taken]}
+
+    @app.post("/api/v1/sync/commands/{command_id}/result")
+    async def command_result(command_id: str, body: CommandOutcome, request: Request,
+                             x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        log.info("command %s %s rid=%s", body.status, body.error_code or "-", request.state.request_id)
+        if not request.app.state.commands.finish(account, command_id, body.model_dump()):
+            raise ApiException(404, "invalid_request", MN_INVALID)
+        return {"ok": True}
+
+    def google_or_404(request: Request) -> google_link.Google:
+        if request.app.state.google is None:
+            raise ApiException(404, "invalid_request", MN_GOOGLE_UNAVAILABLE)
+        return request.app.state.google
+
+    @app.post("/api/v1/auth/google/start")
+    async def google_start(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """The Google sign-in page for linking Gmail to this account; the app opens `url`."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        google = google_or_404(request)
+        redirect = _google_redirect(request)
+        if redirect is None:
+            raise ApiException(400, "invalid_request", MN_GOOGLE_FROM_PC)
+        return {"url": google.start(account, redirect)}
+
+    @app.get("/api/v1/auth/google/callback")
+    async def google_callback(request: Request, state: str = "", code: str = "", error: str = ""):
+        google = google_or_404(request)
+        if error or not code:
+            return _google_page("Google холболт цуцлагдлаа.", "Дахин оролдохдоо БЭХИ дээр 'Gmail холбох' дарна уу.")
+        try:
+            email = await google.finish(state, code)
+        except PermissionError:
+            return _google_page("Холбож чадсангүй.", "Gmail унших зөвшөөрлийг тэмдэглээд дахин оролдоно уу.")
+        except httpx.HTTPError:
+            log.warning("google sign-in failed rid=%s", request.state.request_id)
+            return _google_page("Холбож чадсангүй.", "Google-тэй холбогдоход алдаа гарлаа. Дахин оролдоно уу.")
+        return _google_page(f"Google холбогдлоо: {email}",
+                            "Gmail, Google Tasks бэлэн. Энэ цонхыг хаагаад БЭХИ-д 'Шинэ имэйл байна уу?' гэж асуугаарай.",
+                            close=True)
+
+    @app.get("/api/v1/profile")
+    async def get_profile(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """The account's profile (profile.py); `briefing` is null until the user chooses."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        p = profiles.clean(await request.app.state.profiles.get(account))
+        return {"name": p.get("name"), "city": p.get("city"), "briefing": p.get("briefing"),
+                "parts": list(profiles.BRIEFING_PARTS), "default_briefing": profiles.DEFAULT_BRIEFING}
+
+    @app.post("/api/v1/profile")
+    async def post_profile(body: ProfileRequest, request: Request, x_bekhi_sync: str | None = Header(None),
+                           x_bekhi_device: str | None = Header(None)):
+        """Changes the given fields: a name or city ("" drops it), the briefing's parts."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        p = await profiles.update(request.app.state.profiles, account, body.model_dump(exclude_unset=True))
+        return {"name": p.get("name"), "city": p.get("city"), "briefing": p.get("briefing")}
+
+    @app.get("/api/v1/auth/google")
+    async def google_status(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        google = request.app.state.google
+        return {"available": google is not None, **(await google.status(account) if google else {"linked": False, "email": None})}
+
+    @app.post("/api/v1/auth/google/unlink")
+    async def google_unlink(request: Request, x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        await google_or_404(request).unlink(account)
+        return {"ok": True}
+
+    @app.post("/api/v1/google/drafts/{draft_id}/{what}")
+    async def google_draft(draft_id: str, what: Literal["send", "delete"], request: Request,
+                           x_bekhi_sync: str | None = Header(None), x_bekhi_device: str | None = Header(None)):
+        """The draft card's buttons: send the draft BEKHI wrote, or throw it away."""
+        account, _ = sync_identity(x_bekhi_sync, x_bekhi_device)
+        google = google_or_404(request)
+        if not re.fullmatch(r"[0-9A-Za-z_-]{1,64}", draft_id):
+            raise ApiException(422, "invalid_request", MN_INVALID)
+        try:
+            await (google.send_draft if what == "send" else google.delete_draft)(account, draft_id)
+        except (LookupError, PermissionError, google_link.NoSendPermission) as e:
+            code = "GMAIL_NO_SEND" if isinstance(e, google_link.NoSendPermission) else "GOOGLE_RELINK"
+            raise ApiException(403, "unauthorized", FAILED_BY_CODE[code]) from e
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 404:
+                raise ApiException(404, "invalid_request", FAILED_BY_CODE["EMAIL_NO_DRAFT"]) from e
+            raise ApiException(502, "internal", FAILED_BY_CODE["GMAIL_UNAVAILABLE"]) from e
+        except httpx.HTTPError as e:
+            raise ApiException(502, "internal", FAILED_BY_CODE["GMAIL_UNAVAILABLE"]) from e
+        return {"ok": True}
+
     @app.post("/api/v1/assistant/actions/results", response_model=ActionResultsResponse)
     async def action_results(body: ActionResultsRequest, request: Request):
         # Outcome codes only (never names, numbers or text): what happened on the device.
@@ -475,6 +739,8 @@ def create_app() -> FastAPI:
             status, message = MN_DIRECTIONS["MAPS_FAILED"]
             raise ApiException(status, "maps_failed", message) from e
 
+    if settings.web_dir and (settings.web_dir / "index.html").is_file():
+        app.mount("/", _AppFiles(directory=settings.web_dir, html=True), name="web")
     return app
 
 

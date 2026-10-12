@@ -28,9 +28,12 @@ def test_example_round_trips(path):
 
 
 def test_every_tool_is_offered_to_the_llm():
-    names = {f.name for f in function_specs()}
+    names = {f.name for f in function_specs(on_pc=True)}
     assert set(tool_manifest()) <= names
     assert {"reply", "ask_clarification", "explain_limitation"} <= names
+    # The user's files only when the API runs on their computer.
+    away = {f.name for f in function_specs()}
+    assert not {"find_files", "open_file", "read_file"} & away and "read_webpage" in away
 
 
 def test_confirm_tools_require_a_question():

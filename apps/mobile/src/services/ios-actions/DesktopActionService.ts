@@ -20,6 +20,14 @@ export class DesktopActionService extends LinkingIOSActionService {
   listReminders = (args: ToolArguments<"list_reminders">) => this.onPc("list_reminders", args);
   cancelReminder = (args: ToolArguments<"cancel_reminder">) => this.onPc("cancel_reminder", args);
   computerControl = (args: ToolArguments<"computer_control">) => this.onPc("computer_control", args);
+  typeText = (args: ToolArguments<"type_text">) => this.onPc("type_text", args);
+
+  /** The PC's player window, where it starts with sound; without the PC, a browser tab. */
+  playVideo = async (args: ToolArguments<"play_video">): Promise<ActionOutcome> => {
+    const onPc = await this.onPc("play_video", args);
+    if (onPc.status === "succeeded" || !args.url) return onPc;
+    return this.openUrl({ url: args.url });
+  };
 
   openMaps = (args: ToolArguments<"open_maps">) => this.openUrl({ url: googleMapsUrl(args) });
 

@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { ActionStatus } from "./actions";
 import { IsoDateTime, Uuid } from "./common";
+import { ExecutionTarget, ToolName } from "./tools";
 
 /**
  * Alarms and timers shared by every device linked with one sync code.
@@ -53,3 +55,57 @@ export const SyncPullResponse = z.object({
   cancelled: z.array(Uuid),
 });
 export type SyncPullResponse = z.infer<typeof SyncPullResponse>;
+
+/**
+ * Commands between the user's linked devices: say it to the phone and the computer does it,
+ * or the other way round. The sender posts the command and waits for its outcome; the target
+ * device long-polls for commands, runs them as its own actions and reports back. Commands live
+ * a minute at most: one that nobody took in time is dropped, never run later by surprise.
+ */
+export const DeviceKind = z.enum(["computer", "phone"]);
+export type DeviceKind = z.infer<typeof DeviceKind>;
+
+/** What each kind of device may be asked to do. */
+export const RELAYED_TOOLS: Record<DeviceKind, readonly ToolName[]> = {
+  computer: ["open_app", "open_url", "computer_control", "type_text", "create_note", "play_video"],
+  phone: ["call_contact", "send_message", "open_app", "open_url", "play_video"],
+};
+
+/** POST /api/v1/sync/commands */
+export const SendCommandRequest = z.object({
+  target: DeviceKind,
+  tool: ToolName,
+  arguments: z.record(z.string(), z.unknown()),
+});
+
+/** `id` is null when no device of that kind is listening right now. */
+export const SendCommandResponse = z.object({ id: Uuid.nullable() });
+export type SendCommandResponse = z.infer<typeof SendCommandResponse>;
+
+/** What the target device did, as it reports any action of its own. */
+export const CommandOutcome = z.object({
+  status: ActionStatus,
+  executed_via: ExecutionTarget.nullable(),
+  error_code: z.string().max(64).nullable(),
+  data: z.record(z.string(), z.unknown()).nullable().optional(),
+});
+export type CommandOutcome = z.infer<typeof CommandOutcome>;
+
+/** GET /api/v1/sync/commands/{id}?wait=seconds — waits up to `wait` for the outcome. */
+export const CommandStateResponse = z.object({
+  state: z.enum(["pending", "taken", "done", "expired"]),
+  outcome: CommandOutcome.nullable(),
+});
+export type CommandStateResponse = z.infer<typeof CommandStateResponse>;
+
+export const DeviceCommand = z.object({
+  id: Uuid,
+  tool: ToolName,
+  arguments: z.record(z.string(), z.unknown()),
+  from: SyncPlatform,
+});
+export type DeviceCommand = z.infer<typeof DeviceCommand>;
+
+/** GET /api/v1/sync/commands?target=phone&wait=seconds — the commands for this kind of device. */
+export const TakeCommandsResponse = z.object({ commands: z.array(DeviceCommand) });
+export type TakeCommandsResponse = z.infer<typeof TakeCommandsResponse>;

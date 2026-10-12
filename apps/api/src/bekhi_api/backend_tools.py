@@ -85,7 +85,8 @@ async def get_weather(action_id: str, args: dict[str, Any], client_now: datetime
     tmax = round(daily["temperature_2m_max"][0])
     tmin = round(daily["temperature_2m_min"][0])
     rain = daily.get("precipitation_probability_max", [None])[0]
-    desc = _describe(daily["weather_code"][0])
+    code = daily["weather_code"][0]
+    desc = _describe(code)
     offset = (day - client_now.date()).days
     day_word = DAY_WORDS.get(offset, f"{day.month} сарын {day.day}-нд")
     verb = "байна" if offset == 0 else "байх төлөвтэй"
@@ -95,8 +96,9 @@ async def get_weather(action_id: str, args: dict[str, Any], client_now: datetime
     return _ok(
         action_id,
         "get_weather",
+        # weather_code and condition: the app draws the day's weather (WMO code) as a card.
         {"place": place["name"], "date": day.isoformat(), "temp_max_c": tmax, "temp_min_c": tmin,
-         "precipitation_probability": rain, "summary_mn": summary},
+         "precipitation_probability": rain, "weather_code": code, "condition": desc, "summary_mn": summary},
     )
 
 

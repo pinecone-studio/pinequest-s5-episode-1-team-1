@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import logging
 from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 
@@ -17,6 +18,10 @@ MAX_RESULTS = 5
 SNIPPET_CHARS = 600
 # BEKHI's users are in Mongolia: "Pinecone Academy" should find the one in Ulaanbaatar, not a namesake abroad.
 COUNTRY = "mongolia"
+# The day's briefing reads today's headlines from Mongolian news sites.
+NEWS_SITES = ["montsame.mn", "ikon.mn", "news.mn", "gogo.mn", "eguur.mn", "unuudur.mn"]
+NEWS_QUERY = "Монгол Улсын өнөөдрийн гол мэдээ"
+MAX_NEWS = 3
 
 # HTTP status -> web_search error code (compose.FAILED_BY_CODE has the Mongolian wording).
 ERRORS = {
@@ -59,3 +64,21 @@ class TavilyWebSearch:
             "results": results,
             "sources": [{"title": x["title"], "url": x["url"]} for x in results],
         }
+
+    async def news(self) -> list[dict[str, str]]:
+        """Today's headlines: [{title, url, source}]."""
+        r = await self._http.post(
+            URL,
+            headers={"Authorization": f"Bearer {self._key}"},
+            json={"query": NEWS_QUERY, "topic": "general", "time_range": "day", "max_results": 6,
+                  "include_domains": NEWS_SITES},
+            timeout=20,
+        )
+        if r.status_code != 200:
+            log.warning("tavily news failed: http=%s", r.status_code)
+            raise SearchError(ERRORS.get(r.status_code, "WEB_SEARCH_FAILED"))
+        return [
+            {"title": x["title"].strip(), "url": x["url"], "source": (urlparse(x["url"]).hostname or "").removeprefix("www.")}
+            for x in (r.json().get("results") or [])
+            if (x.get("title") or "").strip() and x.get("url")
+        ][:MAX_NEWS]
