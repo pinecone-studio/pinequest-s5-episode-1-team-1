@@ -247,6 +247,25 @@
       }
     },
     {
+      "name": "find_bus_stops",
+      "executor": "device",
+      "strategy": [
+        "react_native"
+      ],
+      "confirmation": "never",
+      "permissions": [
+        "location"
+      ],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The phone reads its own position, asks the backend for nearby stops (Google Places API) and opens BEKHI's map with them. Only stop names and distances go back in the result, never the position.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
       "name": "create_note",
       "executor": "device",
       "strategy": [

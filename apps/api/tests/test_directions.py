@@ -167,6 +167,72 @@ def test_a_destination_naming_the_city_is_not_retried(maps_client, sent):
     assert r.status_code == 404 and len(sent) == 1
 
 
+TRANSIT_ROUTE = {
+    **ROUTE,
+    "legs": [{
+        "endLocation": {"latLng": {"latitude": 47.91, "longitude": 106.93}},
+        "steps": [
+            {"distanceMeters": 300, "staticDuration": "240s", "navigationInstruction": {"instructions": "Өмнөд зүгт"}},
+            {
+                "distanceMeters": 4337,
+                "staticDuration": "773s",
+                "navigationInstruction": {"instructions": "Автобус Дүүхээ дэлгүүр зүг"},
+                "transitDetails": {
+                    "headsign": "Дүүхээ дэлгүүр",
+                    "stopCount": 6,
+                    "stopDetails": {
+                        "departureStop": {"name": "Баянгол зочид буудал", "location": {"latLng": {"latitude": 47.913, "longitude": 106.915}}},
+                        "departureTime": "2026-10-12T02:48:06.123456789Z",
+                        "arrivalStop": {"name": "ЗАЙСАН", "location": {"latLng": {"latitude": 47.877, "longitude": 106.911}}},
+                    },
+                    "transitLine": {"nameShort": "Ч:52", "name": "Дүүхээ - Зайсан", "color": "#f200cb", "textColor": "#000000", "vehicle": {"type": "BUS"}},
+                },
+            },
+            # A ride Google cannot name is kept as plain text.
+            {"distanceMeters": 900, "navigationInstruction": {"instructions": "Автобус"}, "transitDetails": {"transitLine": {}}},
+        ],
+    }],
+}
+
+
+def test_transit_steps_name_the_line_and_stops(maps_client, sent):
+    def routes(request: httpx.Request) -> httpx.Response:
+        sent.append(request)
+        return httpx.Response(200, json={"routes": [TRANSIT_ROUTE]})
+
+    r = maps_client(routes).post("/api/v1/maps/directions", json={"origin": ORIGIN, "destination": "Зайсан", "mode": "transit"})
+
+    assert r.status_code == 200
+    body = r.json()
+    assert validate_wire("DirectionsResponse", body) == []
+    walk, ride, unnamed = body["steps"]
+    assert walk == {"instruction": "Өмнөд зүгт", "distance_m": 300, "duration_s": 240, "transit": None}
+    assert unnamed["transit"] is None and unnamed["instruction"] == "Автобус"
+    assert ride["duration_s"] == 773
+    assert ride["transit"] == {
+        "vehicle": "bus",
+        "line": "Ч:52",
+        "color": "#F200CB",
+        "text_color": "#000000",
+        "headsign": "Дүүхээ дэлгүүр",
+        "departure_stop": {"name": "Баянгол зочид буудал", "location": {"latitude": 47.913, "longitude": 106.915}},
+        "arrival_stop": {"name": "ЗАЙСАН", "location": {"latitude": 47.877, "longitude": 106.911}},
+        "stop_count": 6,
+        "departure_time": "2026-10-12T02:48:06+00:00",
+    }
+    assert json.loads(sent[0].content)["travelMode"] == "TRANSIT"
+    mask = sent[0].headers["X-Goog-FieldMask"]
+    assert "routes.legs.steps.transitDetails.stopDetails" in mask and "routes.legs.steps.staticDuration" in mask
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [("2026-10-12T02:45:00Z", "2026-10-12T02:45:00+00:00"), ("2026-10-12T02:45:00", None), ("soon", None), (None, None)],
+)
+def test_departure_times_need_an_offset(raw, expected):
+    assert directions._time(raw) == expected
+
+
 def test_long_routes_are_thinned_but_keep_both_ends():
     points = [[i, i] for i in range(12_001)]
     thinned = directions._thin(points, directions.MAX_PATH_POINTS)

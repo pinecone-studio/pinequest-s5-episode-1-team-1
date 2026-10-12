@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import type { LatLng } from "@bekhi/contracts";
+import { NEARBY_STOP_COLOR, stopMarkers } from "@/services/maps/transit";
 import { colors } from "@/theme";
 import type { RouteMapProps } from "./RouteMap";
 
@@ -56,8 +57,37 @@ function loadGoogleMaps(key: string): Promise<GMaps> {
 
 const toG = (p: LatLng): GLatLng => ({ lat: p.latitude, lng: p.longitude });
 
+/** A small colored circle with a hover title: a bus stop. */
+function dot(
+  api: GMaps,
+  map: GMap,
+  at: LatLng,
+  color: string,
+  title: string,
+): GOverlay {
+  return new api.Marker({
+    map,
+    position: toG(at),
+    title,
+    icon: {
+      path: api.SymbolPath.CIRCLE,
+      scale: 6,
+      fillColor: color,
+      fillOpacity: 1,
+      strokeColor: "#FFFFFF",
+      strokeWeight: 2,
+    },
+  });
+}
+
 /** The same map in the browser, drawn with the Maps JavaScript API. */
-export function RouteMap({ location, route, inset }: RouteMapProps) {
+export function RouteMap({
+  location,
+  route,
+  stops,
+  focus,
+  inset,
+}: RouteMapProps) {
   const element = useRef<HTMLDivElement>(null);
   const [maps, setMaps] = useState<{ api: GMaps; map: GMap } | null>(null);
   const [failed, setFailed] = useState(false);
@@ -125,6 +155,9 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
       map: maps.map,
       position: toG(route.destination),
     });
+    const rideStops = stopMarkers(route).map((s) =>
+      dot(maps.api, maps.map, s.coordinate, s.color, `${s.title} · ${s.description}`),
+    );
     const bounds = new maps.api.LatLngBounds();
     route.path.forEach((p) => bounds.extend(toG(p)));
     if (location) bounds.extend(toG(location));
@@ -137,9 +170,24 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
     return () => {
       line.setMap(null);
       end.setMap(null);
+      rideStops.forEach((m) => m.setMap(null));
     };
     // Fitted once per route, not on every position update.
   }, [maps, route]);
+
+  useEffect(() => {
+    if (!maps || route) return;
+    const marks = stops.map((s) =>
+      dot(maps.api, maps.map, s.location, NEARBY_STOP_COLOR, s.name),
+    );
+    return () => marks.forEach((m) => m.setMap(null));
+  }, [maps, route, stops]);
+
+  useEffect(() => {
+    if (!maps || !focus) return;
+    maps.map.setCenter(toG(focus));
+    maps.map.setZoom(17);
+  }, [maps, focus]);
 
   if (!WEB_KEY || failed) {
     return (

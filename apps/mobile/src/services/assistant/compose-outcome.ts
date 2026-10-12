@@ -12,6 +12,7 @@ const ACTION_MN: Record<ToolName, { verb: string; dative: string }> = {
   create_alarm: { verb: "сэрүүлэг тавих", dative: "сэрүүлэг тавихад" },
   create_note: { verb: "тэмдэглэл хадгалах", dative: "тэмдэглэл хадгалахад" },
   open_maps: { verb: "газрын зураг нээх", dative: "газрын зураг нээхэд" },
+  find_bus_stops: { verb: "автобусны буудал хайх", dative: "автобусны буудал хайхад" },
   get_weather: { verb: "цаг агаар харах", dative: "цаг агаар харахад" },
   web_search: { verb: "хайлт хийх", dative: "хайлт хийхэд" },
   get_current_time: { verb: "цаг харах", dative: "цаг харахад" },
@@ -43,6 +44,7 @@ function sentenceFor(action: ActionRequest, r: ActionResult, nowIso: string): st
   const { verb, dative } = ACTION_MN[action.tool];
   switch (r.status) {
     case "succeeded":
+      if (action.tool === "find_bus_stops") return stopsSentence(r.data?.stops);
       return successSentence(action, nowIso);
     case "handed_off":
       return handedOffSentence(action);
@@ -89,11 +91,37 @@ function handedOffSentence(action: ActionRequest): string {
   switch (action.tool) {
     case "call_contact":
       return `За, ${toward(action.arguments.contact_name)} тань залгаж байна.`;
-    case "open_maps":
-      return `За, ${toward(action.arguments.destination)} замыг газрын зураг дээр нээлээ.`;
+    case "open_maps": {
+      const how = TRAVEL_MN[action.arguments.mode] ?? "";
+      return `За, ${toward(action.arguments.destination)} ${how}замыг газрын зураг дээр нээлээ.`;
+    }
     default:
       return "За, нээчихлээ.";
   }
+}
+
+const TRAVEL_MN: Partial<Record<string, string>> = {
+  transit: "автобусаар очих ",
+  walking: "алхаж очих ",
+};
+
+/** Same wording as the backend's compose.py. */
+function stopsSentence(stops: unknown): string {
+  const named = (Array.isArray(stops) ? stops : []).filter(
+    (s): s is { name: string; distance_m?: number } =>
+      typeof s === "object" && s !== null && typeof (s as { name?: unknown }).name === "string",
+  );
+  const [first, ...rest] = named;
+  if (!first) return "Ойролцоо автобусны буудал олдсонгүй.";
+  const metres = (s: { distance_m?: number }) => Math.max(10, Math.round((s.distance_m ?? 0) / 10) * 10);
+  let sentence = `Хамгийн ойрын буудал ${first.name}, ${metres(first)} метрийн зайтай.`;
+  if (rest.length > 0) {
+    sentence += ` Дараа нь ${rest
+      .slice(0, 2)
+      .map((s) => `${s.name} ${metres(s)} метр`)
+      .join(", ")}.`;
+  }
+  return `${sentence} Газрын зураг дээр харууллаа.`;
 }
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);

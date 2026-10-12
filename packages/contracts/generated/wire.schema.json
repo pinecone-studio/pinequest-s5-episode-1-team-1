@@ -651,6 +651,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -840,6 +841,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1042,6 +1044,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1238,6 +1241,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1412,6 +1416,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1594,6 +1599,172 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "find_bus_stops"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {}
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1771,6 +1942,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1951,6 +2123,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2124,6 +2297,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2294,6 +2468,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2471,6 +2646,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2644,6 +2820,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2839,6 +3016,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3003,6 +3181,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3181,6 +3360,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3377,6 +3557,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3555,6 +3736,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3733,6 +3915,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3906,6 +4089,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -4079,6 +4263,7 @@
                               "create_alarm",
                               "get_weather",
                               "open_maps",
+                              "find_bus_stops",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -4378,6 +4563,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -4567,6 +4753,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -4769,6 +4956,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -4965,6 +5153,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -5139,6 +5328,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -5321,6 +5511,172 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "find_bus_stops"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {}
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -5498,6 +5854,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -5678,6 +6035,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -5851,6 +6209,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -6021,6 +6380,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -6198,6 +6558,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -6371,6 +6732,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -6566,6 +6928,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -6730,6 +7093,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -6908,6 +7272,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -7104,6 +7469,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -7282,6 +7648,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -7460,6 +7827,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -7633,6 +8001,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -7806,6 +8175,7 @@
                         "create_alarm",
                         "get_weather",
                         "open_maps",
+                        "find_bus_stops",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -7932,6 +8302,7 @@
             "create_alarm",
             "get_weather",
             "open_maps",
+            "find_bus_stops",
             "create_note",
             "send_message",
             "web_search",
@@ -8059,6 +8430,7 @@
                   "create_alarm",
                   "get_weather",
                   "open_maps",
+                  "find_bus_stops",
                   "create_note",
                   "send_message",
                   "web_search",
@@ -8310,6 +8682,12 @@
                 "minimum": 0,
                 "maximum": 9007199254740991
               },
+              "duration_s": {
+                "default": 0,
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
               "transit": {
                 "anyOf": [
                   {
@@ -8490,6 +8868,97 @@
         "destination",
         "path",
         "steps"
+      ]
+    },
+    "NearbyStopsRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "origin": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          "required": [
+            "latitude",
+            "longitude"
+          ]
+        },
+        "radius_m": {
+          "default": 600,
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 2000
+        }
+      },
+      "required": [
+        "origin"
+      ]
+    },
+    "NearbyStopsResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "stops": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "location": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ]
+              },
+              "distance_m": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "location",
+              "distance_m"
+            ]
+          }
+        }
+      },
+      "required": [
+        "stops"
       ]
     },
     "ApiError": {

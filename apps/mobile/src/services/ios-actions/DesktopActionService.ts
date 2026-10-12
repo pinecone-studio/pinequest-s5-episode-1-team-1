@@ -2,7 +2,7 @@ import { ActionStatus, type ToolArguments, type ToolName } from "@bekhi/contract
 import { apiBaseUrl } from "@/services/assistant/connect";
 import type { ActionOutcome } from "./IOSActionService";
 import { LinkingIOSActionService } from "./LinkingIOSActionService";
-import { googleMapsUrl } from "./maps";
+import { findStopsOnMap, googleMapsUrl } from "./maps";
 
 /**
  * The web app on the Windows PC that runs the BEKHI API: reminders, alarms, event reminders
@@ -21,6 +21,8 @@ export class DesktopActionService extends LinkingIOSActionService {
   computerControl = (args: ToolArguments<"computer_control">) => this.onPc("computer_control", args);
 
   openMaps = (args: ToolArguments<"open_maps">) => this.openUrl({ url: googleMapsUrl(args) });
+  /** The browser's own position, on BEKHI's map page. */
+  findBusStops = () => findStopsOnMap();
 
   private async onPc(tool: ToolName, args: unknown): Promise<ActionOutcome> {
     let res: Response;
