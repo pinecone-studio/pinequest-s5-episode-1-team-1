@@ -20,7 +20,9 @@ const ULAANBAATAR = { latitude: 47.9185, longitude: 106.9177 };
  * (app.config.ts); otherwise, and in Expo Go, iOS draws the route on Apple Maps.
  */
 const provider =
-  Platform.OS === "android" || (!isRunningInExpoGo() && Constants.expoConfig?.extra?.googleMapsOnIos === true)
+  Platform.OS === "android" ||
+  (!isRunningInExpoGo() &&
+    Constants.expoConfig?.extra?.googleMapsOnIos === true)
     ? PROVIDER_GOOGLE
     : undefined;
 
@@ -30,17 +32,28 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
 
   useEffect(() => {
     if (!route) return;
-    map.current?.fitToCoordinates(location ? [location, ...route.path] : route.path, {
-      edgePadding: { top: inset.top + 24, right: 40, bottom: inset.bottom + 24, left: 40 },
-      animated: true,
-    });
+    map.current?.fitToCoordinates(
+      location ? [location, ...route.path] : route.path,
+      {
+        edgePadding: {
+          top: inset.top + 24,
+          right: 40,
+          bottom: inset.bottom + 24,
+          left: 40,
+        },
+        animated: true,
+      },
+    );
     // Fitted once per route, not on every position update; the map's own button follows the user.
   }, [route]);
 
   useEffect(() => {
     if (!location || route || centered.current) return;
     centered.current = true;
-    map.current?.animateCamera({ center: location, zoom: 15 }, { duration: 600 });
+    map.current?.animateCamera(
+      { center: location, zoom: 15 },
+      { duration: 600 },
+    );
   }, [location, route]);
 
   return (
@@ -48,14 +61,24 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
       ref={map}
       style={StyleSheet.absoluteFill}
       provider={provider}
-      initialRegion={{ ...ULAANBAATAR, latitudeDelta: 0.08, longitudeDelta: 0.08 }}
+      initialRegion={{
+        ...ULAANBAATAR,
+        latitudeDelta: 0.08,
+        longitudeDelta: 0.08,
+      }}
       showsUserLocation
       showsMyLocationButton
       toolbarEnabled={false}
       userInterfaceStyle="dark"
       mapPadding={{ top: inset.top, right: 0, bottom: inset.bottom, left: 0 }}
     >
-      {route && <Polyline coordinates={route.path} strokeWidth={6} strokeColor={colors.accent} />}
+      {route && (
+        <Polyline
+          coordinates={route.path}
+          strokeWidth={6}
+          strokeColor={colors.accent}
+        />
+      )}
       {route && <Marker coordinate={route.destination} />}
     </MapView>
   );

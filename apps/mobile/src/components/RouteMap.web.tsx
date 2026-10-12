@@ -14,10 +14,16 @@ type GLatLng = { lat: number; lng: number };
 type GMap = {
   setCenter(c: GLatLng): void;
   setZoom(z: number): void;
-  fitBounds(b: GBounds, padding: { top: number; right: number; bottom: number; left: number }): void;
+  fitBounds(
+    b: GBounds,
+    padding: { top: number; right: number; bottom: number; left: number },
+  ): void;
 };
 type GBounds = { extend(p: GLatLng): void };
-type GOverlay = { setMap(m: GMap | null): void; setPosition?(p: GLatLng): void };
+type GOverlay = {
+  setMap(m: GMap | null): void;
+  setPosition?(p: GLatLng): void;
+};
 type GMaps = {
   Map: new (el: HTMLElement, opts: object) => GMap;
   Polyline: new (opts: object) => GOverlay;
@@ -35,7 +41,10 @@ function loadGoogleMaps(key: string): Promise<GMaps> {
     const script = document.createElement("script");
     script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&language=mn&region=MN`;
     script.async = true;
-    script.onload = () => (w.google?.maps ? resolve(w.google.maps) : reject(new Error("maps script loaded without google.maps")));
+    script.onload = () =>
+      w.google?.maps
+        ? resolve(w.google.maps)
+        : reject(new Error("maps script loaded without google.maps"));
     script.onerror = () => {
       loading = null;
       reject(new Error("maps script failed"));
@@ -52,7 +61,9 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
   const element = useRef<HTMLDivElement>(null);
   const [maps, setMaps] = useState<{ api: GMaps; map: GMap } | null>(null);
   const [failed, setFailed] = useState(false);
-  const me = useRef<(GOverlay & { setPosition(p: GLatLng): void }) | null>(null);
+  const me = useRef<(GOverlay & { setPosition(p: GLatLng): void }) | null>(
+    null,
+  );
   const centered = useRef(false);
 
   useEffect(() => {
@@ -86,7 +97,14 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
       me.current = new maps.api.Marker({
         map: maps.map,
         position: toG(location),
-        icon: { path: maps.api.SymbolPath.CIRCLE, scale: 8, fillColor: "#3D7BFF", fillOpacity: 1, strokeColor: "#FFFFFF", strokeWeight: 2 },
+        icon: {
+          path: maps.api.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: "#3D7BFF",
+          fillOpacity: 1,
+          strokeColor: "#FFFFFF",
+          strokeWeight: 2,
+        },
       });
     if (!route && !centered.current) {
       centered.current = true;
@@ -97,12 +115,25 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
 
   useEffect(() => {
     if (!maps || !route) return;
-    const line = new maps.api.Polyline({ map: maps.map, path: route.path.map(toG), strokeColor: colors.accent, strokeWeight: 6 });
-    const end = new maps.api.Marker({ map: maps.map, position: toG(route.destination) });
+    const line = new maps.api.Polyline({
+      map: maps.map,
+      path: route.path.map(toG),
+      strokeColor: colors.accent,
+      strokeWeight: 6,
+    });
+    const end = new maps.api.Marker({
+      map: maps.map,
+      position: toG(route.destination),
+    });
     const bounds = new maps.api.LatLngBounds();
     route.path.forEach((p) => bounds.extend(toG(p)));
     if (location) bounds.extend(toG(location));
-    maps.map.fitBounds(bounds, { top: inset.top + 24, right: 40, bottom: inset.bottom + 24, left: 40 });
+    maps.map.fitBounds(bounds, {
+      top: inset.top + 24,
+      right: 40,
+      bottom: inset.bottom + 24,
+      left: 40,
+    });
     return () => {
       line.setMap(null);
       end.setMap(null);
@@ -125,6 +156,18 @@ export function RouteMap({ location, route, inset }: RouteMapProps) {
 }
 
 const styles = StyleSheet.create({
-  placeholder: { alignItems: "center", justifyContent: "center", padding: 32, paddingTop: 160, backgroundColor: colors.backgroundBottom },
-  placeholderText: { maxWidth: 420, fontSize: 14, lineHeight: 20, textAlign: "center", color: colors.secondaryLabel },
+  placeholder: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 32,
+    paddingTop: 160,
+    backgroundColor: colors.backgroundBottom,
+  },
+  placeholderText: {
+    maxWidth: 420,
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "center",
+    color: colors.secondaryLabel,
+  },
 });
