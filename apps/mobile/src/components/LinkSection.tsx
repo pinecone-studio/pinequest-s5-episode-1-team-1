@@ -164,6 +164,18 @@ export function LinkSection({ shown }: { shown: boolean }) {
         />
       )}
 
+      {google && !google.available && (
+        <>
+          <Text style={s.section}>Google (Gmail, Tasks)</Text>
+          <View style={s.card}>
+            <Text style={s.body}>Энэ BEKHI-ийн сервер дээр Google тохируулагдаагүй байна.</Text>
+            <Text style={[s.hint, { marginTop: 8 }]}>
+              Компьютер дээрх BEKHI бол apps/api/.env-д GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_TOKEN_KEY-г
+              нэмээд BEKHI-г дахин нээнэ (заавар нь apps/api/.env.example-д бий).
+            </Text>
+          </View>
+        </>
+      )}
       {google?.available && (
         <>
           <Text style={s.section}>Google (Gmail, Tasks)</Text>
@@ -187,7 +199,8 @@ export function LinkSection({ shown }: { shown: boolean }) {
               </Text>
             )}
             <Text style={[s.hint, { marginTop: 10 }]}>
-              Имэйлээ асуухад БЭХИ уншиж өгнө (зөвхөн уншина). Хийх зүйлс тань Google Tasks-тэй нэг жагсаалт болно.
+              Имэйлээ асуухад БЭХИ уншиж өгнө, хариуг таныг зөвшөөрсний дараа л илгээнэ. Хийх зүйлс тань Google
+              Tasks-тэй нэг жагсаалт болно.
             </Text>
           </View>
         </>
