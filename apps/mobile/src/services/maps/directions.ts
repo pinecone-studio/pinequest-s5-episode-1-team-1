@@ -1,8 +1,10 @@
 import {
   DirectionsResponse,
   NearbyStopsResponse,
+  RestaurantsResponse,
   type DirectionsRequest,
   type NearbyStopsRequest,
+  type RestaurantsRequest,
 } from "@bekhi/contracts";
 import { postMaps } from "./api";
 import { distanceM } from "./geo";
@@ -48,4 +50,16 @@ export async function fetchNearbyStops(
   );
   lastStops = { at: Date.now(), req, res };
   return res;
+}
+
+/** Places to eat around a point, for a dish or any, nearest first (Google Places API). */
+export function fetchRestaurants(
+  req: RestaurantsRequest,
+): Promise<RestaurantsResponse> {
+  return postMaps(
+    "/api/v1/maps/restaurants/nearby",
+    req,
+    RestaurantsResponse,
+    "Уучлаарай, ойрын хоолны газруудыг олоход алдаа гарлаа.",
+  );
 }

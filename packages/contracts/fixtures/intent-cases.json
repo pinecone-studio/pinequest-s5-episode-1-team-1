@@ -253,9 +253,50 @@
         "tools": ["check_email"],
         "requires_confirmation": false
       }
+    },
+    {
+      "id": "24_food_ideas",
+      "utterance": "Өнөөдөр юу идвэл дээр вэ?",
+      "variants": ["Хоол санал болгооч"],
+      "expected": {
+        "tools": ["suggest_food"],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "25_recipe",
+      "utterance": "Цуйван хийх аргыг хэлээд өгөөч",
+      "variants": ["Гэртээ бууз хийе гэж бодож байна, яаж хийдэг вэ?"],
+      "expected": {
+        "tools": ["show_recipe"],
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "26_restaurants_for_a_dish",
+      "utterance": "Ойролцоо хуушуур идэх газар байна уу?",
+      "expected": {
+        "tools": ["find_restaurants"],
+        "argument_contains": [{ "query": "хуушуур" }],
+        "requires_confirmation": false
+      }
     }
   ],
   "conversations": [
+    {
+      "id": "c3_food_idea_then_cook",
+      "$comment": "After dish ideas, 'гэртээ хийнэ' with a dish picks the recipe for it.",
+      "turns": [
+        {
+          "utterance": "Оройн хоолонд юу хийх вэ, санаа өгөөч",
+          "expected": { "tools": ["suggest_food"] }
+        },
+        {
+          "utterance": "Гэртээ гуляш хийе",
+          "expected": { "tools": ["show_recipe"], "argument_contains": [{ "dish": "гуляш" }] }
+        }
+      ]
+    },
     {
       "id": "c2_remembered_person",
       "$comment": "A fact remembered in turn 1 resolves 'эхнэр' in turn 2.",

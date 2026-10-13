@@ -276,6 +276,142 @@
       }
     },
     {
+      "name": "suggest_food",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The model's dish ideas, returned as they are: the app shows each with 'how to make it' and 'where nearby' buttons, and BEKHI asks whether the user eats in or out.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "ideas": {
+            "minItems": 1,
+            "maxItems": 4,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dish": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60,
+                  "description": "A dish, in Mongolian: 'Цуйван', 'Бууз', 'Гуляш'"
+                },
+                "note": {
+                  "description": "Why it fits now, a few words: 'хүйтэн өдөр дулаацуулна', 'хурдан хийгдэнэ'",
+                  "type": "string",
+                  "maxLength": 120
+                }
+              },
+              "required": [
+                "dish"
+              ]
+            }
+          }
+        },
+        "required": [
+          "ideas"
+        ]
+      }
+    },
+    {
+      "name": "show_recipe",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "A recipe the model writes (servings, time, ingredients, steps), shown as a card; BEKHI says the gist.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "dish": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60,
+            "description": "A dish, in Mongolian: 'Цуйван', 'Бууз', 'Гуляш'"
+          },
+          "servings": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "description": "How many people it feeds"
+          },
+          "minutes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 600,
+            "description": "Total time, preparation included"
+          },
+          "ingredients": {
+            "minItems": 1,
+            "maxItems": 25,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "description": "Each with its amount: '500 г үхрийн мах', '2 ширхэг сонгино'"
+          },
+          "steps": {
+            "minItems": 1,
+            "maxItems": 15,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 300
+            },
+            "description": "Short steps in order, one or two sentences each"
+          }
+        },
+        "required": [
+          "dish",
+          "servings",
+          "minutes",
+          "ingredients",
+          "steps"
+        ]
+      }
+    },
+    {
+      "name": "find_restaurants",
+      "executor": "device",
+      "strategy": [
+        "react_native"
+      ],
+      "confirmation": "never",
+      "permissions": [
+        "location"
+      ],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "The phone reads its own position and asks the backend for places to eat near it (Google Places Text Search), for the dish if one is given. The result lists names, addresses, distances, ratings and whether they are open, never the position; tapping one opens BEKHI's map with walking directions.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "The dish or kind of food the user wants: 'хуушуур', 'пицца', 'солонгос хоол'; omitted: any place to eat",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          }
+        }
+      }
+    },
+    {
       "name": "create_note",
       "executor": "device",
       "strategy": [

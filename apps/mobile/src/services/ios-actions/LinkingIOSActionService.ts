@@ -26,6 +26,8 @@ export class LinkingIOSActionService implements IOSActionService {
 
   findBusStops: IOSActionService["findBusStops"] = async () => unsupported(this.nativeUnavailableCode);
 
+  findRestaurants: IOSActionService["findRestaurants"] = async () => unsupported(this.nativeUnavailableCode);
+
   openUrl = async (args: ToolArguments<"open_url">): Promise<ActionOutcome> => {
     if (!/^https?:\/\//i.test(args.url)) return { status: "failed", executed_via: null, error_code: "URL_NOT_HTTP" };
     return openUrl(args.url);

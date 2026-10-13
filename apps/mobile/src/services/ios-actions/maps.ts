@@ -1,12 +1,16 @@
 import { router } from "expo-router";
 import * as Location from "expo-location";
-import type { ToolArguments } from "@bekhi/contracts";
-import { fetchNearbyStops, NEARBY_RADIUS_M } from "@/services/maps/directions";
+import type { LatLng, ToolArguments } from "@bekhi/contracts";
+import { fetchNearbyStops, fetchRestaurants, NEARBY_RADIUS_M } from "@/services/maps/directions";
 import { uniqueByName } from "@/services/maps/transit";
 import type { ActionOutcome } from "./IOSActionService";
 
 /** Stops read out by voice; the map shows them all. */
 const SPOKEN_STOPS = 3;
+/** Places to eat within a 15-20 minute walk. */
+const FOOD_RADIUS_M = 1500;
+/** Places to eat shown on the card (the first few are read out). */
+const LISTED_PLACES = 6;
 
 const TRAVEL_MODE = { driving: "driving", walking: "walking", transit: "transit" } as const;
 
@@ -37,12 +41,8 @@ export async function openInAppMap(args: ToolArguments<"open_maps">): Promise<Ac
  * returned by name and distance for the spoken answer. The position itself is not returned.
  */
 export async function findStopsOnMap(): Promise<ActionOutcome> {
-  const fail = (error_code: string): ActionOutcome => ({ status: "failed", executed_via: "react_native", error_code });
-  const { granted } = await Location.requestForegroundPermissionsAsync().catch(() => ({ granted: false }));
-  if (!granted) return { status: "permission_denied", executed_via: "react_native", error_code: "LOCATION_DENIED" };
-  const here = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }).catch(() => null);
-  if (!here) return fail("LOCATION_UNAVAILABLE");
-  const origin = { latitude: here.coords.latitude, longitude: here.coords.longitude };
+  const origin = await currentPosition();
+  if ("status" in origin) return origin;
   const found = await fetchNearbyStops({ origin, radius_m: NEARBY_RADIUS_M }).catch(() => null);
   if (!found) return fail("STOPS_FAILED");
   try {
@@ -54,4 +54,45 @@ export async function findStopsOnMap(): Promise<ActionOutcome> {
     .slice(0, SPOKEN_STOPS)
     .map(({ name, distance_m }) => ({ name, distance_m }));
   return { status: "succeeded", executed_via: "react_native", error_code: null, data: { stops } };
+}
+
+/**
+ * Places to eat near the phone, for a dish or any: shown as a card in the chat (tap one for the
+ * way there) and read out nearest first. The phone's own position is not returned.
+ */
+export async function findRestaurantsNearby(args: ToolArguments<"find_restaurants">): Promise<ActionOutcome> {
+  const origin = await currentPosition();
+  if ("status" in origin) return origin;
+  const found = await fetchRestaurants({ origin, query: args.query, radius_m: FOOD_RADIUS_M }).catch(() => null);
+  if (!found) return fail("RESTAURANTS_FAILED");
+  const restaurants = found.restaurants
+    .slice(0, LISTED_PLACES)
+    .map(({ name, address, distance_m, rating, rating_count, open_now, kind }) => ({
+      name,
+      address,
+      distance_m,
+      rating,
+      rating_count,
+      open_now,
+      kind,
+    }));
+  return {
+    status: "succeeded",
+    executed_via: "react_native",
+    error_code: null,
+    data: { query: args.query ?? null, restaurants },
+  };
+}
+
+function fail(error_code: string): ActionOutcome {
+  return { status: "failed", executed_via: "react_native", error_code };
+}
+
+/** The phone's position, or the outcome to report when it cannot be had. */
+async function currentPosition(): Promise<LatLng | ActionOutcome> {
+  const { granted } = await Location.requestForegroundPermissionsAsync().catch(() => ({ granted: false }));
+  if (!granted) return { status: "permission_denied", executed_via: "react_native", error_code: "LOCATION_DENIED" };
+  const here = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }).catch(() => null);
+  if (!here) return fail("LOCATION_UNAVAILABLE");
+  return { latitude: here.coords.latitude, longitude: here.coords.longitude };
 }

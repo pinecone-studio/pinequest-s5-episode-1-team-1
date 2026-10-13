@@ -18,7 +18,22 @@ export type Card =
   /** Which window BEKHI looked at to answer (look_at_screen). */
   | { kind: "screen"; window: string }
   /** The briefing asks what to tell from now on: the parts it told this time are picked. */
-  | { kind: "briefing_choice"; parts: BriefingPart[] };
+  | { kind: "briefing_choice"; parts: BriefingPart[] }
+  /** Dishes to pick from, each to cook at home or find nearby. */
+  | { kind: "food_ideas"; ideas: { dish: string; note: string }[] }
+  | { kind: "recipe"; dish: string; servings: number; minutes: number; ingredients: string[]; steps: string[] }
+  /** Places to eat near the user, nearest first; one tapped shows the way there. */
+  | { kind: "restaurants"; query: string | null; places: Place[] };
+
+export type Place = {
+  name: string;
+  address: string | null;
+  distance_m: number;
+  rating: number | null;
+  rating_count: number | null;
+  open_now: boolean | null;
+  kind: string | null;
+};
 
 type Data = Record<string, unknown>;
 
@@ -66,6 +81,39 @@ function news(v: unknown): Card | null {
   return items.length > 0 ? { kind: "news", items } : null;
 }
 
+const texts = (v: unknown): string[] => (Array.isArray(v) ? v.filter(isText) : []);
+const orNull = <T>(v: unknown, is: (x: unknown) => x is T): T | null => (is(v) ? v : null);
+const isBool = (v: unknown): v is boolean => typeof v === "boolean";
+
+function foodIdeas(d: Data): Card | null {
+  const ideas = list(d.ideas)
+    .filter((i) => isText(i.dish) && i.dish.trim())
+    .map((i) => ({ dish: i.dish as string, note: isText(i.note) ? i.note : "" }));
+  return ideas.length > 0 ? { kind: "food_ideas", ideas } : null;
+}
+
+function recipe(d: Data): Card | null {
+  const ingredients = texts(d.ingredients);
+  const steps = texts(d.steps);
+  if (!isText(d.dish) || !isNumber(d.servings) || !isNumber(d.minutes) || steps.length === 0) return null;
+  return { kind: "recipe", dish: d.dish, servings: d.servings, minutes: d.minutes, ingredients, steps };
+}
+
+function restaurants(d: Data): Card | null {
+  const places = list(d.restaurants)
+    .filter((p) => isText(p.name) && isNumber(p.distance_m))
+    .map((p) => ({
+      name: p.name as string,
+      address: orNull(p.address, isText),
+      distance_m: p.distance_m as number,
+      rating: orNull(p.rating, isNumber),
+      rating_count: orNull(p.rating_count, isNumber),
+      open_now: orNull(p.open_now, isBool),
+      kind: orNull(p.kind, isText),
+    }));
+  return places.length > 0 ? { kind: "restaurants", query: isText(d.query) ? d.query : null, places } : null;
+}
+
 /** The parts a briefing told (its `parts`), or null when it does not say. */
 function briefingParts(d: Data): BriefingPart[] | null {
   const parsed = BriefingPart.array().safeParse(d.parts);
@@ -100,6 +148,12 @@ function cardsOf(r: ActionResult, briefing: BriefingPart[] | "none"): Card[] {
             body: d.body,
           }]
         : [];
+    case "suggest_food":
+      return [foodIdeas(d)].filter(present);
+    case "show_recipe":
+      return [recipe(d)].filter(present);
+    case "find_restaurants":
+      return [restaurants(d)].filter(present);
     case "look_at_screen":
       return isText(d.window) && d.window ? [{ kind: "screen", window: d.window }] : [];
     case "read_email":

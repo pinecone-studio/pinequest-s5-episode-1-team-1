@@ -329,6 +329,42 @@ export const NearbyStopsResponse = z.object({
 export type NearbyStopsResponse = z.infer<typeof NearbyStopsResponse>;
 
 // ---------------------------------------------------------------------------
+// POST /api/v1/maps/restaurants/nearby — places to eat around the phone (Google Places API)
+// ---------------------------------------------------------------------------
+
+export const RestaurantsRequest = z.object({
+  origin: LatLng,
+  /** A dish or kind of food ("хуушуур", "пицца"); omitted: any place to eat. */
+  query: z.string().trim().min(1).max(60).optional(),
+  radius_m: z.number().int().min(300).max(5000).default(1500),
+});
+export type RestaurantsRequest = z.infer<typeof RestaurantsRequest>;
+
+export const Restaurant = z.object({
+  /** Google place id. */
+  id: z.string().min(1).max(300),
+  name: z.string().max(200),
+  location: LatLng,
+  /** Straight-line distance from `origin`. */
+  distance_m: z.number().int().min(0),
+  address: z.string().max(300).nullable(),
+  /** Google rating, 1-5, and how many people gave one. */
+  rating: z.number().min(0).max(5).nullable(),
+  rating_count: z.number().int().min(0).nullable(),
+  /** Null when Google does not know the opening hours. */
+  open_now: z.boolean().nullable(),
+  /** "Солонгос ресторан", "Кафе", in Mongolian where Google has it. */
+  kind: z.string().max(100).nullable(),
+});
+export type Restaurant = z.infer<typeof Restaurant>;
+
+export const RestaurantsResponse = z.object({
+  /** Nearest first, within `radius_m`. */
+  restaurants: z.array(Restaurant).max(20),
+});
+export type RestaurantsResponse = z.infer<typeof RestaurantsResponse>;
+
+// ---------------------------------------------------------------------------
 // Errors
 // ---------------------------------------------------------------------------
 
