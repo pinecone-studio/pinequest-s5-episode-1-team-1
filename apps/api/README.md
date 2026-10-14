@@ -59,6 +59,7 @@ uv run pytest -m live -v
 | POST | `/api/v1/assistant/chat` | `{text, context}` → AssistantTurn |
 | POST | `/api/v1/assistant/voice` | multipart `audio` (16 kHz mono WAV) + `context` JSON → AssistantTurn |
 | POST | `/api/v1/assistant/transcribe` | multipart `audio` → `{transcript}` |
+| POST | `/api/v1/assistant/document` | multipart `files` (one PDF or .docx, or up to 10 page photos, 15 MB in all) + `context` JSON → AssistantTurn whose `check_document` result lists the contract's findings (`documents.py`: fixed legal/number rules + one Gemini review) |
 | GET | `/api/v1/assistant/voices` | ElevenLabs voices the app can pick (`config.ELEVENLABS_VOICES`) and the default |
 | POST | `/api/v1/assistant/tts` | `{text, voice?}` → MP3 (ElevenLabs) or WAV (Gemini fallback). A voice that needs a paid plan is read in the default voice, with `X-Bekhi-Voice-Fallback: paid_plan_required` |
 | POST | `/api/v1/assistant/actions/results` | device outcomes → final Mongolian answer |

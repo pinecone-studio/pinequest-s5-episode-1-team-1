@@ -37,6 +37,24 @@ export const AUDIO_UPLOAD = {
   max_seconds: 30,
 } as const;
 
+/**
+ * Upload limits for POST /assistant/document: one PDF or Word file, or photos of the pages.
+ * Gemini takes up to 20 MB in one request.
+ */
+export const DOCUMENT_UPLOAD = {
+  mime_types: [
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/heic",
+    "image/heif",
+  ],
+  max_files: 10,
+  max_total_bytes: 15_000_000,
+} as const;
+
 /** The two curated OronTTS voices. Arbitrary reference audio is never accepted. */
 export const TtsVoice = z.enum(["female", "male"]);
 export type TtsVoice = z.infer<typeof TtsVoice>;

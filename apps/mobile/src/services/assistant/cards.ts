@@ -18,7 +18,17 @@ export type Card =
   /** Which window BEKHI looked at to answer (look_at_screen). */
   | { kind: "screen"; window: string }
   /** The briefing asks what to tell from now on: the parts it told this time are picked. */
-  | { kind: "briefing_choice"; parts: BriefingPart[] };
+  | { kind: "briefing_choice"; parts: BriefingPart[] }
+  /** A contract checked before signing (check_document): errors first, then warnings. */
+  | { kind: "document_check"; title: string; name: string; findings: DocumentFinding[] };
+
+export interface DocumentFinding {
+  severity: "error" | "warning";
+  text: string;
+  clause: string;
+  /** Every place it is about (all the blanks left unfilled); the text names the first few. */
+  items: string[];
+}
 
 type Data = Record<string, unknown>;
 
@@ -66,6 +76,23 @@ function news(v: unknown): Card | null {
   return items.length > 0 ? { kind: "news", items } : null;
 }
 
+function documentCheck(d: Data): Card {
+  const findings = list(d.findings)
+    .filter((f) => isText(f.text) && f.text.trim())
+    .map((f) => ({
+      severity: f.severity === "error" ? ("error" as const) : ("warning" as const),
+      text: f.text as string,
+      clause: isText(f.clause) ? f.clause : "",
+      items: Array.isArray(f.items) ? f.items.filter((i): i is string => isText(i) && i.trim() !== "") : [],
+    }));
+  return {
+    kind: "document_check",
+    title: isText(d.title) && d.title ? d.title : "Баримт",
+    name: isText(d.name) ? d.name : "",
+    findings,
+  };
+}
+
 /** The parts a briefing told (its `parts`), or null when it does not say. */
 function briefingParts(d: Data): BriefingPart[] | null {
   const parsed = BriefingPart.array().safeParse(d.parts);
@@ -100,6 +127,8 @@ function cardsOf(r: ActionResult, briefing: BriefingPart[] | "none"): Card[] {
             body: d.body,
           }]
         : [];
+    case "check_document":
+      return [documentCheck(d)];
     case "look_at_screen":
       return isText(d.window) && d.window ? [{ kind: "screen", window: d.window }] : [];
     case "read_email":

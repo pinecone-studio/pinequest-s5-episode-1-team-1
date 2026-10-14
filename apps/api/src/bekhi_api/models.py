@@ -47,6 +47,7 @@ ToolName = Literal[
     "read_email",
     "draft_email",
     "send_email",
+    "check_document",
 ]
 ExecutionTarget = Literal["backend", "react_native", "native_swift", "app_intent", "shortcut", "url_scheme"]
 ActionStatus = Literal[

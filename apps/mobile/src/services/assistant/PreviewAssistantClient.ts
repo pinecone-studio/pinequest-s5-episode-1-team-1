@@ -150,6 +150,13 @@ export class PreviewAssistantClient implements AssistantClient {
     );
   }
 
+  async checkDocument(): Promise<AssistantTurn> {
+    throw new AssistantError(
+      "Backend асаагүй байгаа тул баримт шалгах боломжгүй. Backend-ээ асаагаад дахин оролдоорой.",
+      "preview",
+    );
+  }
+
   async reportResults(req: ActionResultsRequest): Promise<ActionResultsResponse> {
     const turn = this.turns.get(req.turn_id);
     this.turns.delete(req.turn_id);

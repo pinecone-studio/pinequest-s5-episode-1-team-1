@@ -7,10 +7,14 @@ import {
   type AssistantContext,
 } from "@bekhi/contracts";
 import { appendAudio } from "@/services/audio/audio-upload";
+import type { PickedFile } from "@/services/documents/pick";
+import { appendDocuments } from "@/services/documents/upload";
 import { syncHeaders } from "@/services/sync/identity";
 import { AssistantError, type AssistantClient } from "./AssistantClient";
 
 const TIMEOUT_MS = 30_000;
+/** Uploading photos and reading a whole contract; the API gives up after 85 s. */
+const DOCUMENT_TIMEOUT_MS = 90_000;
 
 /** FastAPI client. Every response is validated with the shared contract before use. */
 export class HttpAssistantClient implements AssistantClient {
@@ -35,6 +39,14 @@ export class HttpAssistantClient implements AssistantClient {
     return transcript.trim();
   }
 
+  async checkDocument(files: PickedFile[], context: AssistantContext) {
+    const form = new FormData();
+    await appendDocuments(form, files);
+    form.append("context", JSON.stringify(context));
+    const body = await this.post("/api/v1/assistant/document", { body: form }, DOCUMENT_TIMEOUT_MS);
+    return parseOrThrow(AssistantTurn, body);
+  }
+
   async reportResults(req: ActionResultsRequest) {
     const body = await this.post("/api/v1/assistant/actions/results", {
       headers: { "content-type": "application/json" },
@@ -43,9 +55,9 @@ export class HttpAssistantClient implements AssistantClient {
     return parseOrThrow(ActionResultsResponse, body);
   }
 
-  private async post(path: string, init: RequestInit): Promise<unknown> {
+  private async post(path: string, init: RequestInit, timeoutMs = TIMEOUT_MS): Promise<unknown> {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     let res: Response;
     try {
       // The sync code tells the API whose to-do list this is (apps/api todos.py).

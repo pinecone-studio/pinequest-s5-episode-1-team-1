@@ -136,7 +136,8 @@ def get_reader() -> Reader | None:
         return None
     from .gemini import GeminiReader
 
-    return GeminiReader(_gemini_client(), [s.gemini_model, *s.gemini_fallback_models])
+    models = [s.gemini_model, *s.gemini_fallback_models]
+    return GeminiReader(_gemini_client(), models, [s.gemini_document_model, *(m for m in models if m != s.gemini_document_model)])
 
 
 def get_search(http: httpx.AsyncClient) -> WebSearch | None:

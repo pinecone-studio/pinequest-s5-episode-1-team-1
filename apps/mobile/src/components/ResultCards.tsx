@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { BriefingPart } from "@bekhi/contracts";
-import { type Card, isOverdue, shortWhen } from "@/services/assistant/cards";
+import { type Card, type DocumentFinding, isOverdue, shortWhen } from "@/services/assistant/cards";
 import { finishDraft } from "@/services/google";
 import { BRIEFING_PARTS, DEFAULT_BRIEFING, saveProfile } from "@/services/profile";
 import { colors, radius } from "@/theme";
@@ -157,6 +157,8 @@ function ResultCard({ card }: { card: Card }) {
       return <BriefingChoice told={card.parts} />;
     case "email_draft":
       return <EmailDraft card={card} />;
+    case "document_check":
+      return <DocumentCheck card={card} />;
     case "screen":
       return (
         <View style={[styles.card, styles.row]}>
@@ -227,6 +229,65 @@ function EmailDraft({ card }: { card: Extract<Card, { kind: "email_draft" }> }) 
           </Pressable>
         </View>
       )}
+    </View>
+  );
+}
+
+/** What the check found in a contract, errors first. A finding about many blanks opens to list them all. */
+function DocumentCheck({ card }: { card: Extract<Card, { kind: "document_check" }> }) {
+  const errors = card.findings.filter((f) => f.severity === "error").length;
+  const warnings = card.findings.length - errors;
+  const verdict =
+    card.findings.length === 0
+      ? "Алдаа олдсонгүй"
+      : [errors > 0 && `${errors} алдаа`, warnings > 0 && `${warnings} анхаарах зүйл`].filter(Boolean).join(", ");
+  return (
+    <View style={styles.card}>
+      <Header icon="document-text-outline" title={card.title} />
+      {card.name !== "" && (
+        <Text style={styles.secondary} numberOfLines={1}>
+          {card.name}
+        </Text>
+      )}
+      <View style={styles.row}>
+        <Ionicons
+          name={errors > 0 ? "close-circle" : warnings > 0 ? "alert-circle" : "checkmark-circle"}
+          size={20}
+          color={errors > 0 ? colors.danger : warnings > 0 ? colors.warning : colors.success}
+        />
+        <Text style={styles.rowTitle}>{verdict}</Text>
+      </View>
+      {card.findings.map((finding, i) => (
+        <Finding key={i} finding={finding} />
+      ))}
+      <Text style={styles.more}>БЭХИ хуульч биш. Чухал гэрээг хуульчаар хянуулаарай.</Text>
+    </View>
+  );
+}
+
+function Finding({ finding }: { finding: DocumentFinding }) {
+  const [open, setOpen] = useState(false);
+  const error = finding.severity === "error";
+  return (
+    <View style={styles.finding}>
+      <View style={[styles.severity, { backgroundColor: error ? colors.danger : colors.warning }]} />
+      <View style={styles.flex}>
+        <Text selectable style={styles.findingText}>
+          {finding.clause !== "" && <Text style={styles.clause}>{finding.clause}. </Text>}
+          {finding.text}
+        </Text>
+        {finding.items.length > 1 && (
+          <Pressable accessibilityRole="button" onPress={() => setOpen(!open)} hitSlop={6}>
+            <Text style={styles.toggle}>{open ? "Хураах" : `Бүгдийг харах (${finding.items.length})`}</Text>
+          </Pressable>
+        )}
+        {open &&
+          finding.items.map((item, i) => (
+            <Text key={i} selectable style={styles.secondary}>
+              • {item}
+            </Text>
+          ))}
+      </View>
     </View>
   );
 }
@@ -355,4 +416,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   quietText: { fontSize: 14, fontWeight: "600", color: colors.secondaryLabel },
+  finding: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
+  severity: { width: 3, alignSelf: "stretch", borderRadius: 2 },
+  findingText: { fontSize: 15, lineHeight: 21, color: colors.label },
+  clause: { fontWeight: "700", color: colors.secondaryLabel },
+  toggle: { fontSize: 13, fontWeight: "600", color: colors.accent, marginTop: 4 },
 });

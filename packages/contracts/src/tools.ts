@@ -39,6 +39,7 @@ export const TOOL_NAMES = [
   "read_email",
   "draft_email",
   "send_email",
+  "check_document",
 ] as const;
 
 export const ToolName = z.enum(TOOL_NAMES);
@@ -362,6 +363,13 @@ export const ReadFileArgs = z.object({
     .describe("What the user wants from it, in their words: 'гол санааг хэл', 'төлбөрийн нөхцөл юу вэ?'"),
 });
 
+/** A contract or official document to check: a file find_files found, or one the user attached in the app. */
+export const CheckDocumentArgs = z.object({
+  file: FoundFile.optional(),
+  /** Set by the backend: the attached file's name (POST /assistant/document). */
+  name: z.string().max(200).optional(),
+});
+
 export const LookAtScreenArgs = z.object({
   question: z
     .string()
@@ -473,6 +481,7 @@ export const TOOL_ARGUMENT_SCHEMAS = {
   read_email: ReadEmailArgs,
   draft_email: DraftEmailArgs,
   send_email: SendEmailArgs,
+  check_document: CheckDocumentArgs,
 } as const satisfies Record<ToolName, z.ZodType>;
 
 export type ToolArguments<T extends ToolName> = z.output<(typeof TOOL_ARGUMENT_SCHEMAS)[T]>;
@@ -886,6 +895,19 @@ export const TOOL_MANIFEST = {
     notes:
       "Sends the draft BEKHI showed in an earlier turn, after the user said yes. Refused in the same turn as the " +
       "draft, so a draft is never sent unseen.",
+  },
+  check_document: {
+    executor: "backend",
+    strategy: ["backend"],
+    confirmation: "never",
+    permissions: [],
+    min_ios: MIN_IOS,
+    app_intent: null,
+    notes:
+      "Checks a Mongolian contract (PDF, Word or a photo of the pages): blanks and choices left unfilled, amounts in " +
+      "figures and words, penalty limits, dates, register numbers, the parts its kind of contract needs, the law's " +
+      "rules for it, consistency and spelling. Fixed rules in code, plus a Gemini review. On the computer by voice " +
+      "(a file find_files found); in the app with the document button (POST /assistant/document). Nothing is kept.",
   },
 } as const satisfies Record<ToolName, ToolManifestEntry>;
 

@@ -43,7 +43,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, Field, ValidationError
 
-from . import commands, desktop, directions, google_link, hotkey, memory, stops, sync, system, todos
+from . import commands, desktop, directions, documents, google_link, hotkey, memory, stops, sync, system, todos
 from . import profile as profiles
 from .config import ELEVENLABS_VOICES, get_settings
 from .contracts import apply_defaults, tool_manifest, validate_tool_args
@@ -66,7 +66,7 @@ from .models import (
     SyncPullResponse,
 )
 from .compose import FAILED_BY_CODE, speakable
-from .pipeline import ContractViolation, Deps, UnknownTurn, plan_turn, report_results
+from .pipeline import ContractViolation, Deps, UnknownTurn, document_turn, plan_turn, report_results
 from .providers import (ProviderNotConfigured, ProviderUserError, VoiceNeedsPaidPlan, get_llm, get_reader, get_search,
                         get_stt, get_tts)
 from .store import MemoryStore
@@ -79,6 +79,8 @@ MN_AI_FAILED = "Уучлаарай, одоогоор ойлгоход асууд
 MN_AI_BUSY = "Одоо хэт олон хүсэлт ирж байна. Түр хүлээгээд дахин асуугаарай."
 # The app waits 30 s for an answer; a turn that would take longer is stopped first, with a clear reply.
 PLAN_TIMEOUT_SECONDS = 27
+# Checking an attached document reads all its pages: the app waits 90 s for it.
+DOCUMENT_TIMEOUT_SECONDS = 85
 MN_NOT_CONFIGURED = "Gemini API key тохируулаагүй байна (apps/api/.env)."
 MN_KEY_MISSING = "{} API key тохируулаагүй байна (apps/api/.env)."
 PROVIDER_NAMES = {"gemini": "Gemini", "duudlaga": "Duudlaga", "elevenlabs": "ElevenLabs"}
@@ -434,6 +436,39 @@ def create_app() -> FastAPI:
     @app.post("/api/v1/assistant/transcribe")
     async def transcribe_only(request: Request, audio: UploadFile = File(...)):
         return {"transcript": await transcribe(audio, request)}
+
+    @app.post("/api/v1/assistant/document", response_model=AssistantTurn)
+    async def check_document(request: Request, files: list[UploadFile] = File(...), context: str = Form(...)):
+        """A contract the user attached in the app (a PDF or Word file, or photos of its pages), checked
+        and answered as a turn. The files are read into memory, checked and dropped; never stored or logged."""
+        try:
+            ctx = AssistantContext.model_validate_json(context)
+        except ValidationError as e:
+            raise ApiException(422, "invalid_request", MN_INVALID) from e
+        if len(files) > documents.MAX_FILES:
+            raise ApiException(413, "invalid_request", FAILED_BY_CODE["DOCUMENT_ONE_FILE"])
+        uploads: list[tuple[bytes, str, str]] = []
+        room = documents.MAX_BYTES
+        for f in files:
+            mime = documents.mime_for(f.content_type or "", f.filename or "")
+            if mime not in documents.ACCEPTED:
+                raise ApiException(415, "invalid_request", FAILED_BY_CODE["DOCUMENT_TYPE"])
+            data = await f.read(room + 1)
+            if len(data) > room:
+                raise ApiException(413, "invalid_request", FAILED_BY_CODE["FILE_TOO_LARGE"])
+            room -= len(data)
+            uploads.append((data, mime, (f.filename or "баримт")[:200]))
+        d = deps(request)
+        try:
+            async with asyncio.timeout(DOCUMENT_TIMEOUT_SECONDS):
+                return await document_turn(uploads, ctx, d)
+        except ContractViolation as e:
+            raise ApiException(500, "internal", MN_AI_FAILED) from e
+        except TimeoutError as e:
+            log.warning("document check timed out rid=%s", request.state.request_id)
+            raise ApiException(503, "llm_failed", MN_AI_BUSY) from e
+        finally:
+            del uploads
 
     tts_cache: dict[tuple[str | None, str], tuple[bytes, bool]] = {}
     voice_ids = {v.id for v in ELEVENLABS_VOICES}

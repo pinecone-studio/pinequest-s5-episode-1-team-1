@@ -56,6 +56,7 @@ class Settings:
     gemini_tts_models: list[str]
     gemini_tts_voice: str
     gemini_fallback_models: list[str]
+    gemini_document_model: str
     stt_provider: str
     stt_fallback_provider: str | None
     llm_provider: str
@@ -105,6 +106,8 @@ def get_settings() -> Settings:
         gemini_tts_models=_csv(os.getenv("GEMINI_TTS_MODELS")) or ["gemini-3.8-flash-lite-tts", "gemini-3.8-flash-tts"],
         gemini_tts_voice=os.getenv("GEMINI_TTS_VOICE") or "Kore",
         gemini_fallback_models=_csv(os.getenv("GEMINI_FALLBACK_MODELS")) or ["gemini-flash-lite-latest", "gemini-3.8-flash"],
+        # Checking a contract (check_document): spelling and the law's rules need a full Flash model.
+        gemini_document_model=os.getenv("GEMINI_DOCUMENT_MODEL") or "gemini-3.6-flash",
         stt_provider=os.getenv("STT_PROVIDER") or "gemini",
         stt_fallback_provider=os.getenv("STT_FALLBACK_PROVIDER") or None,
         llm_provider=os.getenv("LLM_PROVIDER") or "gemini",
