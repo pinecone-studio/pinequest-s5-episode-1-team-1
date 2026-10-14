@@ -14,6 +14,7 @@ import { cardsFor, type Card } from "@/services/assistant/cards";
 import { PreviewAssistantClient } from "@/services/assistant/PreviewAssistantClient";
 import { apiBaseUrl, connectAssistant } from "@/services/assistant/connect";
 import { buildContext } from "@/services/assistant/context";
+import type { PickedFile } from "@/services/documents/pick";
 import { executeDeviceAction, iosActions, type ChosenContact } from "@/services/ios-actions";
 import { findContacts, type ContactCandidate } from "@/services/ios-actions/contacts";
 import { speak, stopSpeaking } from "@/services/speech/speak";
@@ -82,6 +83,8 @@ interface AssistantState {
   submitText(text: string): Promise<void>;
   startListening(): void;
   submitVoice(audioUri: string | null): Promise<void>;
+  /** Check a contract (a file, or photos of its pages) before it is signed. */
+  submitDocument(files: PickedFile[]): Promise<void>;
   /** The microphone heard nobody: end the hands-free conversation (and say so if the mic gave no sound at all). */
   stopConversation(micSilent: boolean): void;
   /** Stop reading the reply aloud, and do not listen again afterwards. */
@@ -387,6 +390,15 @@ export const useAssistant = create<AssistantState>((set, get) => {
         }
         await handleTurn(turn);
       });
+    },
+
+    async submitDocument(files) {
+      const [first] = files;
+      if (!first) return;
+      stopSpeaking();
+      push(msg("user", `📄 ${files.length === 1 ? first.name : `${files.length} хуудас`}`));
+      set({ phase: "processing", pendingTurn: null, contactChoice: null, conversing: false });
+      await guarded(async () => handleTurn(await get().client.checkDocument(files, buildContext(get().conversationId))));
     },
 
     async answerConfirmation(yes) {

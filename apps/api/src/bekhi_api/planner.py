@@ -99,6 +99,12 @@ Tool choice:
   -> find_files, then open_file with the id it gave. "... файлд юу байгааг хэл/товчил", "гэрээгээ уншаад гол
   санааг хэл" -> find_files, then read_file (question: what they want from it), then reply in a few sentences; for a
   PDF say its answer_mn as it is. Several files fit: open the newest, say which; none: say so.
+- "Гэрээгээ шалгаад өг", "энэ гэрээнд алдаа байна уу", "хөдөлмөрийн гэрээгээ хянаарай", "баримт бичгээ зөв бөглөсөн
+  эсэхийг шалга" (check a contract or official document for mistakes) -> find_files (query: words of its name, e.g.
+  "гэрээ", "хөдөлмөр"), then check_document with the id. Its summary_mn is the whole answer: no reply after it. Only
+  what a contract says ("гол санааг хэл", "хэдэн төгрөг вэ") stays read_file. Without find_files (on a phone), reply
+  that they can tap the document button next to the microphone and choose the file or photograph the pages.
+  After a check, questions about its findings ("яаж засах вэ?") -> reply from the findings in the conversation.
 - "Энэ алдаа юу гэсэн үг вэ?", "энэ хуудсыг орчуулаад тайлбарла", "дэлгэц дээр юу байна?", "энийг юу гэж бичсэн бэ?"
   (about what is on their computer screen: "энэ" with nothing else it could mean) -> look_at_screen (question: their
   words), then say its answer_mn as it is.
@@ -228,6 +234,9 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "open_file": "Open a file find_files found (by its id) in its usual app on the computer.",
     "read_file": "Read a file find_files found (by its id), to answer about it. A PDF comes back answered already "
     "(answer_mn), for the question given.",
+    "check_document": "Check a contract or official document find_files found (by its id) before it is signed: blanks, "
+    "choices, amounts, the law's limits, missing parts, consistency, spelling. Its summary_mn is said to the user as it "
+    "is; the app lists every finding.",
     "look_at_screen": "Look at the window the user is working in on their computer and answer their question about "
     "it in Mongolian (explain an error, translate a page): answer_mn.",
     "draft_email": "Write a Gmail draft: a reply to a message check_email found (reply_to), or a new message to an "
@@ -256,6 +265,7 @@ BACKEND_FIELDS: dict[str, tuple[str, ...]] = {
     "create_alarm": ("sync_id",),
     "set_timer": ("sync_id", "fire_at"),
     "play_video": ("url", "title"),
+    "check_document": ("name",),
 }
 
 CONTROL_FUNCTIONS: list[FunctionSpec] = [
@@ -345,7 +355,7 @@ def _llm_parameters(tool: str, schema: dict[str, Any], confirm: bool) -> dict[st
 
 
 # The user's files and screen: only when this API runs on their computer (desktop.py).
-PC_ONLY_TOOLS = {"find_files", "open_file", "read_file", "look_at_screen"}
+PC_ONLY_TOOLS = {"find_files", "open_file", "read_file", "look_at_screen", "check_document"}
 
 
 def function_specs(on_pc: bool = False) -> list[FunctionSpec]:
@@ -365,8 +375,9 @@ def function_specs(on_pc: bool = False) -> list[FunctionSpec]:
 
 
 PC_LINE = (
-    "You run on the user's computer: find_files, open_file and read_file work on its files, look_at_screen sees "
-    "what is on its screen, read_webpage reads web pages. Use them in steps: find, then open or read, then answer.\n"
+    "You run on the user's computer: find_files, open_file and read_file work on its files, check_document checks a "
+    "contract among them, look_at_screen sees what is on its screen, read_webpage reads web pages. Use them in steps: "
+    "find, then open, read or check, then answer.\n"
 )
 
 DEVICE_LINES = {

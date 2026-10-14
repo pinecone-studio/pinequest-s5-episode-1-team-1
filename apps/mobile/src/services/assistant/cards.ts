@@ -19,21 +19,16 @@ export type Card =
   | { kind: "screen"; window: string }
   /** The briefing asks what to tell from now on: the parts it told this time are picked. */
   | { kind: "briefing_choice"; parts: BriefingPart[] }
-  /** Dishes to pick from, each to cook at home or find nearby. */
-  | { kind: "food_ideas"; ideas: { dish: string; note: string }[] }
-  | { kind: "recipe"; dish: string; servings: number; minutes: number; ingredients: string[]; steps: string[] }
-  /** Places to eat near the user, nearest first; one tapped shows the way there. */
-  | { kind: "restaurants"; query: string | null; places: Place[] };
+  /** A contract checked before signing (check_document): errors first, then warnings. */
+  | { kind: "document_check"; title: string; name: string; findings: DocumentFinding[] };
 
-export type Place = {
-  name: string;
-  address: string | null;
-  distance_m: number;
-  rating: number | null;
-  rating_count: number | null;
-  open_now: boolean | null;
-  kind: string | null;
-};
+export interface DocumentFinding {
+  severity: "error" | "warning";
+  text: string;
+  clause: string;
+  /** Every place it is about (all the blanks left unfilled); the text names the first few. */
+  items: string[];
+}
 
 type Data = Record<string, unknown>;
 
@@ -81,37 +76,21 @@ function news(v: unknown): Card | null {
   return items.length > 0 ? { kind: "news", items } : null;
 }
 
-const texts = (v: unknown): string[] => (Array.isArray(v) ? v.filter(isText) : []);
-const orNull = <T>(v: unknown, is: (x: unknown) => x is T): T | null => (is(v) ? v : null);
-const isBool = (v: unknown): v is boolean => typeof v === "boolean";
-
-function foodIdeas(d: Data): Card | null {
-  const ideas = list(d.ideas)
-    .filter((i) => isText(i.dish) && i.dish.trim())
-    .map((i) => ({ dish: i.dish as string, note: isText(i.note) ? i.note : "" }));
-  return ideas.length > 0 ? { kind: "food_ideas", ideas } : null;
-}
-
-function recipe(d: Data): Card | null {
-  const ingredients = texts(d.ingredients);
-  const steps = texts(d.steps);
-  if (!isText(d.dish) || !isNumber(d.servings) || !isNumber(d.minutes) || steps.length === 0) return null;
-  return { kind: "recipe", dish: d.dish, servings: d.servings, minutes: d.minutes, ingredients, steps };
-}
-
-function restaurants(d: Data): Card | null {
-  const places = list(d.restaurants)
-    .filter((p) => isText(p.name) && isNumber(p.distance_m))
-    .map((p) => ({
-      name: p.name as string,
-      address: orNull(p.address, isText),
-      distance_m: p.distance_m as number,
-      rating: orNull(p.rating, isNumber),
-      rating_count: orNull(p.rating_count, isNumber),
-      open_now: orNull(p.open_now, isBool),
-      kind: orNull(p.kind, isText),
+function documentCheck(d: Data): Card {
+  const findings = list(d.findings)
+    .filter((f) => isText(f.text) && f.text.trim())
+    .map((f) => ({
+      severity: f.severity === "error" ? ("error" as const) : ("warning" as const),
+      text: f.text as string,
+      clause: isText(f.clause) ? f.clause : "",
+      items: Array.isArray(f.items) ? f.items.filter((i): i is string => isText(i) && i.trim() !== "") : [],
     }));
-  return places.length > 0 ? { kind: "restaurants", query: isText(d.query) ? d.query : null, places } : null;
+  return {
+    kind: "document_check",
+    title: isText(d.title) && d.title ? d.title : "Баримт",
+    name: isText(d.name) ? d.name : "",
+    findings,
+  };
 }
 
 /** The parts a briefing told (its `parts`), or null when it does not say. */
@@ -148,12 +127,8 @@ function cardsOf(r: ActionResult, briefing: BriefingPart[] | "none"): Card[] {
             body: d.body,
           }]
         : [];
-    case "suggest_food":
-      return [foodIdeas(d)].filter(present);
-    case "show_recipe":
-      return [recipe(d)].filter(present);
-    case "find_restaurants":
-      return [restaurants(d)].filter(present);
+    case "check_document":
+      return [documentCheck(d)];
     case "look_at_screen":
       return isText(d.window) && d.window ? [{ kind: "screen", window: d.window }] : [];
     case "read_email":

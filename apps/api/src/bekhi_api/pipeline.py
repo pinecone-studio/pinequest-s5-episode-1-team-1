@@ -21,7 +21,7 @@ from uuid import UUID, uuid4
 
 import httpx
 
-from . import backend_tools, briefing, food, google_link, media, memory, pc_files, screen, todos, webpage
+from . import backend_tools, briefing, documents, google_link, media, memory, pc_files, screen, todos, webpage
 from . import profile as profiles
 from .compose import ACTION_MN, FAILED_BY_CODE, compose
 from .contracts import apply_defaults, tool_manifest, validate_tool_args, validate_wire
@@ -99,14 +99,14 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
         return await backend_tools.get_weather(action_id, args, ctx.client_now, deps.http)
     if tool == "get_current_time":
         return backend_tools.get_current_time(action_id, args, ctx.client_now)
-    if tool in SHOW_TOOLS:
-        return SHOW_TOOLS[tool](action_id, args)
-    if tool in pc_files.PC_TOOLS or tool == "look_at_screen":
+    if tool in pc_files.PC_TOOLS or tool in ("look_at_screen", "check_document"):
         if not deps.on_pc:
             return ActionResult(action_id=action_id, tool=tool, status="unsupported", executed_via=None,
                                 error_code="NOT_ON_COMPUTER", data=None)
         if tool == "look_at_screen":
             return await screen.look_at_screen(action_id, args, deps.reader)
+        if tool == "check_document":
+            return await pc_files.check_document(action_id, args, deps.reader, ctx.client_now.date())
         if tool == "read_file" and pc_files.is_pdf(args["file"]):
             return await pc_files.read_pdf(action_id, args, deps.reader)
         return await asyncio.to_thread(pc_files.PC_TOOLS[tool], action_id, args)
@@ -146,6 +146,8 @@ async def _run_backend_tool(action_id: str, tool: str, args: dict[str, Any], ctx
 
 
 TODO_TOOLS = ("add_todo", "list_todos", "complete_todo", "delete_todo")
+# Backend tools whose result is the answer: the model is not asked to go on after them.
+ANSWERING_TOOLS = {"check_document"}
 
 
 async def _run_todo_tool(action_id: str, tool: str, args: dict[str, Any], ctx: AssistantContext, deps: Deps) -> ActionResult:
@@ -262,7 +264,8 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
                 )
                 if entry["executor"] == "backend":
                     action.result = await _run_backend_tool(action.id, call.name, args, ctx, deps)
-                    ran_backend_tool = ran_backend_tool or call.name not in SHOW_TOOLS
+                    # A document check is the answer itself (its summary and the findings card).
+                    ran_backend_tool = ran_backend_tool or call.name not in ANSWERING_TOOLS
                     results.append((call, _tool_response(action.result)))
                 else:
                     results.append((call, {"status": "sent to the phone"}))
@@ -323,7 +326,8 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
         parts += replies
         # After the agent loop the model's reply already uses the tool results; do not repeat them.
         if actions and not (followed_up and replies):
-            parts.append(compose(actions, [a.result for a in actions if a.result], now_iso))
+            told = [a for a in actions if not _found_for_check(a, actions)]
+            parts.append(compose(told, [a.result for a in told if a.result], now_iso))
         stage, response = "final", " ".join(p for p in parts if p)
         intent = "unsupported" if limitations and not actions else ("multi" if len(actions) > 1 else actions[0].tool if actions else "chitchat")
 
@@ -349,10 +353,58 @@ async def plan_turn(text: str, ctx: AssistantContext, deps: Deps) -> AssistantTu
         raise ContractViolation("turn does not match contract")
 
     conv.history.append(HistoryMessage("user", text))
-    conv.history.append(HistoryMessage("assistant", response or _history_note(actions)))
+    conv.history.append(HistoryMessage("assistant", _checked(actions) or response or _history_note(actions)))
     if stage in ("awaiting_confirmation", "awaiting_device"):
         notes = [lim.message for lim in limitations]
         conv.pending[turn.turn_id] = PendingTurn(actions=actions, now_iso=now_iso, notes=notes)
+    return turn
+
+
+def _found_for_check(action: ActionRequest, actions: list[ActionRequest]) -> bool:
+    """find_files only led to the document check: "2 файл олдлоо" would be noise before its findings."""
+    return action.tool == "find_files" and any(a.tool == "check_document" for a in actions)
+
+
+def _checked(actions: list[ActionRequest]) -> str:
+    """A document check's findings, kept in the conversation so "how do I fix that?" can be answered."""
+    return "\n".join(documents.history_note(a.result.data) for a in actions
+                     if a.tool == "check_document" and a.result and a.result.status == "succeeded" and a.result.data)
+
+
+async def document_turn(uploads: list[tuple[bytes, str, str]], ctx: AssistantContext, deps: Deps) -> AssistantTurn:
+    """A document the user attached in the app (POST /assistant/document): checked like check_document,
+    and answered as a turn of the conversation, so they can ask about the findings next."""
+    conversation_id, conv = deps.store.get_or_create(ctx.conversation_id)
+    name = uploads[0][2] if len(uploads) == 1 else f"{len(uploads)} хуудас"
+    action = ActionRequest(
+        id="a1",
+        tool="check_document",
+        arguments={"name": name[:200]},
+        confirmation=Confirmation(required=False, prompt=None),
+    )
+    action.result = await documents.check(action.id, uploads, deps.reader, ctx.client_now.date())
+    response = compose([action], [action.result], ctx.client_now.isoformat())
+    turn = AssistantTurn(
+        conversation_id=conversation_id,
+        turn_id=uuid4(),
+        transcript=f"📄 {name}"[:2000],
+        summary=None,
+        intent="check_document",
+        stage="final",
+        response=response[:1000],
+        actions=[action],
+        requires_confirmation=False,
+        requires_clarification=False,
+        clarification=None,
+        limitations=[],
+        audio_url=None,
+    )
+    errors = validate_wire("AssistantTurn", turn.model_dump(mode="json"))
+    if errors:
+        log.error("outgoing turn violates contract: %s", errors)
+        raise ContractViolation("turn does not match contract")
+    conv.history.append(HistoryMessage("user", f"Энэ баримтыг шалгаад өгөөч: {name}"))
+    conv.history.append(HistoryMessage("assistant", _checked([action]) or response))
     return turn
 
 

@@ -106,5 +106,6 @@ export const ActionRequest = z.discriminatedUnion("tool", [
   actionRequest("read_email"),
   actionRequest("draft_email"),
   actionRequest("send_email"),
+  actionRequest("check_document"),
 ]);
 export type ActionRequest = z.infer<typeof ActionRequest>;

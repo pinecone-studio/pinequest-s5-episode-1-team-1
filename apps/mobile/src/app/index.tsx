@@ -14,6 +14,7 @@ import { notify, tap } from "@/lib/haptics";
 import { SAMPLE_PHRASES } from "@/services/assistant/PreviewAssistantClient";
 import { onWakeKey } from "@/services/assistant/wake";
 import { useVoiceInput } from "@/services/audio/useVoiceInput";
+import { chooseDocument } from "@/services/documents/pick";
 import { onRoutineOpened } from "@/services/ios-actions/notifications";
 import { type Phase, useAssistant } from "@/store/assistant";
 import { colors, MAX_CONTENT_WIDTH, radius } from "@/theme";
@@ -72,6 +73,7 @@ export default function Chat() {
     submitText,
     startListening,
     submitVoice,
+    submitDocument,
     stopConversation,
     stopReply,
     answerConfirmation,
@@ -172,6 +174,14 @@ export default function Chat() {
     tap();
     await voice.stop();
     stopConversation(false);
+  }
+
+  async function attachDocument() {
+    tap();
+    const picked = await chooseDocument();
+    if (!picked) return;
+    if ("problem" in picked) fail(picked.problem);
+    else await submitDocument(picked.files);
   }
 
   const suggestions = live ? LIVE_SUGGESTIONS : SAMPLE_PHRASES;
@@ -275,8 +285,10 @@ export default function Chat() {
                     <RoundButton icon="close" label="Болих" onPress={() => void cancelListening()} />
                   ) : speaking ? (
                     <RoundButton icon="stop" label="Уншихыг зогсоох" onPress={stopReply} />
-                  ) : (
+                  ) : busy || confirming ? (
                     <View style={styles.roundSpacer} />
+                  ) : (
+                    <RoundButton icon="document-attach-outline" label="Баримт шалгуулах" onPress={() => void attachDocument()} />
                   )}
                 </View>
               </View>

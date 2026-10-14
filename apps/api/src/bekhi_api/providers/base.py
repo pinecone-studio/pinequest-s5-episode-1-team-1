@@ -86,6 +86,11 @@ class Reader(Protocol):
         Raises ReaderError when the model cannot be reached."""
         ...
 
+    async def read_json(self, files: list[tuple[bytes, str]], text: str, system: str, schema: dict[str, Any]) -> dict[str, Any]:
+        """The files (PDF, photos; mime types given) and the text, answered as JSON matching `schema`
+        (check_document). Raises ReaderError when the model cannot be reached or answers no JSON."""
+        ...
+
 
 class WebSearch(Protocol):
     async def search(self, query: str) -> dict[str, Any]:

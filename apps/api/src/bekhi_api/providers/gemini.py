@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import io
+import json
 import logging
 import re
 import time
@@ -247,9 +248,35 @@ READER_PROMPT = (
 class GeminiReader:
     """Reads a screenshot or a PDF with the planner's models (they all take pictures and PDFs)."""
 
-    def __init__(self, client: Any, models: list[str]) -> None:
+    def __init__(self, client: Any, models: list[str], document_models: list[str] | None = None) -> None:
         self._client = client
         self._models = models
+        self._document_models = document_models or models
+
+    async def read_json(self, files: list[tuple[bytes, str]], text: str, system: str, schema: dict[str, Any]) -> dict[str, Any]:
+        parts: list[Any] = [types.Part.from_bytes(data=data, mime_type=mime) for data, mime in files]
+        try:
+            resp = await generate_with_fallback(
+                self._client,
+                self._document_models,
+                contents=[*parts, text],
+                config=types.GenerateContentConfig(
+                    system_instruction=system,
+                    temperature=0,
+                    max_output_tokens=8192,
+                    response_mime_type="application/json",
+                    response_json_schema=schema,
+                ),
+            )
+        except (errors.APIError, httpx.HTTPError) as e:
+            raise ReaderError(type(e).__name__) from e
+        try:
+            answer = json.loads(resp.text or "")
+        except ValueError as e:
+            raise ReaderError("not json") from e
+        if not isinstance(answer, dict):
+            raise ReaderError("not an object")
+        return answer
 
     async def read(self, data: bytes, mime_type: str, instruction: str) -> str:
         try:

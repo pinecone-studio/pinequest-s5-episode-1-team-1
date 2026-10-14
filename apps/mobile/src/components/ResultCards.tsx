@@ -3,8 +3,7 @@ import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import type { BriefingPart } from "@bekhi/contracts";
-import { tap } from "@/lib/haptics";
-import { type Card, isOverdue, type Place, shortWhen } from "@/services/assistant/cards";
+import { type Card, type DocumentFinding, isOverdue, shortWhen } from "@/services/assistant/cards";
 import { finishDraft } from "@/services/google";
 import { formatDistance, formatDuration } from "@/services/maps/geo";
 import { walkSeconds } from "@/services/maps/transit";
@@ -162,6 +161,8 @@ function ResultCard({ card }: { card: Card }) {
       return <BriefingChoice told={card.parts} />;
     case "email_draft":
       return <EmailDraft card={card} />;
+    case "document_check":
+      return <DocumentCheck card={card} />;
     case "screen":
       return (
         <View style={[styles.card, styles.row]}>
@@ -416,6 +417,65 @@ function EmailDraft({ card }: { card: Extract<Card, { kind: "email_draft" }> }) 
   );
 }
 
+/** What the check found in a contract, errors first. A finding about many blanks opens to list them all. */
+function DocumentCheck({ card }: { card: Extract<Card, { kind: "document_check" }> }) {
+  const errors = card.findings.filter((f) => f.severity === "error").length;
+  const warnings = card.findings.length - errors;
+  const verdict =
+    card.findings.length === 0
+      ? "Алдаа олдсонгүй"
+      : [errors > 0 && `${errors} алдаа`, warnings > 0 && `${warnings} анхаарах зүйл`].filter(Boolean).join(", ");
+  return (
+    <View style={styles.card}>
+      <Header icon="document-text-outline" title={card.title} />
+      {card.name !== "" && (
+        <Text style={styles.secondary} numberOfLines={1}>
+          {card.name}
+        </Text>
+      )}
+      <View style={styles.row}>
+        <Ionicons
+          name={errors > 0 ? "close-circle" : warnings > 0 ? "alert-circle" : "checkmark-circle"}
+          size={20}
+          color={errors > 0 ? colors.danger : warnings > 0 ? colors.warning : colors.success}
+        />
+        <Text style={styles.rowTitle}>{verdict}</Text>
+      </View>
+      {card.findings.map((finding, i) => (
+        <Finding key={i} finding={finding} />
+      ))}
+      <Text style={styles.more}>БЭХИ хуульч биш. Чухал гэрээг хуульчаар хянуулаарай.</Text>
+    </View>
+  );
+}
+
+function Finding({ finding }: { finding: DocumentFinding }) {
+  const [open, setOpen] = useState(false);
+  const error = finding.severity === "error";
+  return (
+    <View style={styles.finding}>
+      <View style={[styles.severity, { backgroundColor: error ? colors.danger : colors.warning }]} />
+      <View style={styles.flex}>
+        <Text selectable style={styles.findingText}>
+          {finding.clause !== "" && <Text style={styles.clause}>{finding.clause}. </Text>}
+          {finding.text}
+        </Text>
+        {finding.items.length > 1 && (
+          <Pressable accessibilityRole="button" onPress={() => setOpen(!open)} hitSlop={6}>
+            <Text style={styles.toggle}>{open ? "Хураах" : `Бүгдийг харах (${finding.items.length})`}</Text>
+          </Pressable>
+        )}
+        {open &&
+          finding.items.map((item, i) => (
+            <Text key={i} selectable style={styles.secondary}>
+              • {item}
+            </Text>
+          ))}
+      </View>
+    </View>
+  );
+}
+
 /** The briefing's question as buttons: pick what it tells every time, then save (or answer by voice). */
 function BriefingChoice({ told }: { told: BriefingPart[] }) {
   const [picked, setPicked] = useState<BriefingPart[]>(told.length > 0 ? told : DEFAULT_BRIEFING);
@@ -540,25 +600,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   quietText: { fontSize: 14, fontWeight: "600", color: colors.secondaryLabel },
-  divided: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: colors.border, paddingTop: 10 },
-  idea: { gap: 4 },
-  dish: { fontSize: 17, fontWeight: "700", color: colors.label },
-  ideaButtons: { flexDirection: "row", gap: 8, marginTop: 4 },
-  metaRow: { flexDirection: "row", gap: 14 },
-  meta: { flexDirection: "row", alignItems: "center", gap: 4 },
-  section: { fontSize: 13, fontWeight: "700", color: colors.secondaryLabel, marginTop: 6 },
-  step: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
-  stepNumber: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.accent,
-    marginTop: 1,
-  },
-  stepNumberText: { fontSize: 12, fontWeight: "800", color: colors.background },
-  place: { flexDirection: "row", alignItems: "center", gap: 10 },
-  placeSide: { alignItems: "flex-end", gap: 2 },
-  openNow: { fontSize: 12, fontWeight: "700" },
+  finding: { flexDirection: "row", gap: 10, alignItems: "flex-start" },
+  severity: { width: 3, alignSelf: "stretch", borderRadius: 2 },
+  findingText: { fontSize: 15, lineHeight: 21, color: colors.label },
+  clause: { fontWeight: "700", color: colors.secondaryLabel },
+  toggle: { fontSize: 13, fontWeight: "600", color: colors.accent, marginTop: 4 },
 });

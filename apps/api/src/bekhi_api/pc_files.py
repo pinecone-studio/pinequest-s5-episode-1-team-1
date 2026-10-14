@@ -11,15 +11,14 @@ about it ("гол санааг хэл") in Mongolian; other files give their tex
 from __future__ import annotations
 
 import asyncio
-import html
 import os
 import re
 import zipfile
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
-from . import system
+from . import documents, system
 from .models import ActionResult
 from .providers.base import ReaderError
 
@@ -161,10 +160,7 @@ def open_file(action_id: str, args: dict[str, Any]) -> ActionResult:
 
 
 def _docx_text(path: Path) -> str:
-    with zipfile.ZipFile(path) as z:
-        xml = z.read("word/document.xml").decode("utf-8", "replace")
-    xml = re.sub(r"</w:p>", "\n", xml)
-    return html.unescape(re.sub(r"<[^>]+>", "", xml))
+    return documents.docx_text(path.read_bytes())
 
 
 def read_file(action_id: str, args: dict[str, Any]) -> ActionResult:
@@ -216,6 +212,23 @@ async def read_pdf(action_id: str, args: dict[str, Any], reader: Any) -> ActionR
     if not answer:
         return _fail(action_id, "read_file", "FILE_UNREADABLE")
     return _ok(action_id, "read_file", answer, name=path.name, answer_mn=answer)
+
+
+async def check_document(action_id: str, args: dict[str, Any], reader: Any, today: date) -> ActionResult:
+    """A contract find_files found, checked before it is signed (documents.py)."""
+    path = _found.get(str(args.get("file") or ""))
+    if path is None or not path.is_file():
+        return _fail(action_id, "check_document", "FILE_NOT_FOUND")
+    mime = documents.MIME_BY_EXT.get(path.suffix.casefold())
+    if mime is None:
+        return _fail(action_id, "check_document", "DOCUMENT_TYPE")
+    if path.stat().st_size > documents.MAX_BYTES:
+        return _fail(action_id, "check_document", "FILE_TOO_LARGE")
+    try:
+        data = await asyncio.to_thread(path.read_bytes)
+    except OSError:
+        return _fail(action_id, "check_document", "FILE_UNREADABLE")
+    return await documents.check(action_id, [(data, mime, path.name)], reader, today)
 
 
 PC_TOOLS = {"find_files": find_files, "open_file": open_file, "read_file": read_file}

@@ -1421,6 +1421,33 @@
         "type": "object",
         "properties": {}
       }
+    },
+    {
+      "name": "check_document",
+      "executor": "backend",
+      "strategy": [
+        "backend"
+      ],
+      "confirmation": "never",
+      "permissions": [],
+      "min_ios": "17.0",
+      "app_intent": null,
+      "notes": "Checks a Mongolian contract (PDF, Word or a photo of the pages): blanks and choices left unfilled, amounts in figures and words, penalty limits, dates, register numbers, the parts its kind of contract needs, the law's rules for it, consistency and spelling. Fixed rules in code, plus a Gemini review. On the computer by voice (a file find_files found); in the app with the document button (POST /assistant/document). Nothing is kept.",
+      "parameters": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "pattern": "^f\\d{1,4}$",
+            "description": "The id find_files gave the file, e.g. 'f1'"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          }
+        }
+      }
     }
   ]
 }
