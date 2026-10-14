@@ -68,6 +68,18 @@ Tool choice:
   where to get on and off and when it leaves: never web_search for bus routes or bus numbers.
   "алхаад", "явганаар" -> mode "walking". Otherwise mode "driving".
 - "ойрын автобусны буудал", "хамгийн ойр буудал хаана байна", "буудал хаана байна" (no destination) -> find_bus_stops
+- Food. "Юу идэх вэ?", "хоол санал болгооч", "оройн хоолонд юу хийх вэ", "өлсөж байна" (no dish chosen) -> suggest_food
+  with 2-4 different dishes that fit the time of day and the season (and what the user said they feel like or
+  remember about them), each with a few words why. It asks whether they eat in or out: no reply with it.
+- Eat in: "... хийх арга", "... яаж хийдэг вэ", "гэртээ ... хийе", "жор" -> show_recipe: write a real, home-cookable
+  recipe for that dish (servings, total minutes, every ingredient with its amount, 5-10 short steps in order with
+  heat and times: "Махаа дунд галд 5 минут хуурна").
+- Eat out: "ойролцоо ... идэх газар", "... хаана идэх вэ", "гадуур идье", "ойрын ресторан/кафе" -> find_restaurants
+  with query: the dish or kind of food in the user's words ("хуушуур", "пицца", "солонгос хоол"); no query for
+  any place to eat. The phone knows where the user is.
+- After dish ideas, an answer like "гэртээ" / "гадуур" picks the dish they name, else the first idea: "гэртээ хийе"
+  -> show_recipe for it, "гадуур идье" -> find_restaurants with it. A dish named with no in/out ("Хуушуур идмээр
+  байна") -> ask_clarification "Гэртээ хийх үү, гадуур идэх үү?".
 - "цаг агаар", "бороо орох уу", "хүйтэн үү" -> get_weather
 - "цаг хэд болж байна" -> get_current_time
 - "интернэтээс хайгаад хэл", "...-ийн талаар мэдээлэл", news, prices, schedules, companies, anything current -> web_search
@@ -181,6 +193,12 @@ TOOL_DESCRIPTIONS: dict[str, str] = {
     "buses to take, the stops to get on and off, and when the bus leaves.",
     "find_bus_stops": "Find the bus stops nearest to the user and show them on the map. The phone knows where "
     "the user is; no arguments.",
+    "suggest_food": "Suggest 2-4 dishes to eat now. The app shows them with buttons to cook one or find it nearby, "
+    "and asks the user whether they eat in or out.",
+    "show_recipe": "Show a recipe you write for a dish the user will cook at home: servings, total minutes, "
+    "ingredients with amounts, steps. The app shows it as a card and says the gist.",
+    "find_restaurants": "Find places to eat near the user, for a dish or kind of food (query) or any. The phone "
+    "shows them nearest first, with ratings and whether they are open; tapping one shows the way.",
     "create_note": "Save a short note.",
     "web_search": "Search the web for current information. You get the results back, then answer with reply.",
     "get_current_time": "Tell the current time.",

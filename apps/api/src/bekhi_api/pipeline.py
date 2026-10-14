@@ -52,6 +52,8 @@ MAX_ACTIONS = 5
 # continues, e.g. search -> search again -> answer. Device actions end the loop: their
 # outcome only exists after the phone runs them.
 MAX_AGENT_STEPS = 4
+# Backend tools that only show what the model wrote: nothing new for it to read, so no further step.
+SHOW_TOOLS = {"suggest_food": food.suggest_food, "show_recipe": food.show_recipe}
 
 
 class ContractViolation(RuntimeError):

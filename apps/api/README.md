@@ -65,6 +65,7 @@ uv run pytest -m live -v
 | POST | `/api/v1/assistant/actions/results` | device outcomes → final Mongolian answer |
 | POST | `/api/v1/maps/directions` | `{origin: {latitude, longitude}, destination, mode}` → route to draw (Google Routes API, `GOOGLE_MAPS_API_KEY`): `distance_m`, `duration_s`, `path`, `steps`. With `mode: "transit"`, ride steps carry `transit`: line number, color, stops to get on and off, stop count, timetabled departure |
 | POST | `/api/v1/maps/stops/nearby` | `{origin, radius_m?}` → bus stops nearest first (Google Places API (New), same key; enable "Places API (New)" for it) |
+| POST | `/api/v1/maps/restaurants/nearby` | `{origin, query?, radius_m?}` → places to eat nearest first, for a dish or any, with rating and open now (Places Text Search, same key) |
 | POST | `/api/v1/desktop/actions` | `{tool, arguments}` → ActionResult, run on this Windows PC. Requests from localhost only; `DESKTOP_ACTIONS=false` turns it off |
 
 Agent loop (`pipeline.py`): when Gemini calls a backend tool (`web_search`, `get_weather`,

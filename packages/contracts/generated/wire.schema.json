@@ -662,6 +662,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -869,6 +872,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1089,6 +1095,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1303,6 +1312,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1495,6 +1507,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1695,6 +1710,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -1877,6 +1895,644 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "look_at_screen",
+                              "read_webpage",
+                              "check_email",
+                              "read_email",
+                              "draft_email",
+                              "send_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "suggest_food"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "ideas": {
+                        "minItems": 1,
+                        "maxItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "dish": {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 60,
+                              "description": "A dish, in Mongolian: 'Цуйван', 'Бууз', 'Гуляш'"
+                            },
+                            "note": {
+                              "description": "Why it fits now, a few words: 'хүйтэн өдөр дулаацуулна', 'хурдан хийгдэнэ'",
+                              "type": "string",
+                              "maxLength": 120
+                            }
+                          },
+                          "required": [
+                            "dish"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "ideas"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "look_at_screen",
+                              "read_webpage",
+                              "check_email",
+                              "read_email",
+                              "draft_email",
+                              "send_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "show_recipe"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "dish": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60,
+                        "description": "A dish, in Mongolian: 'Цуйван', 'Бууз', 'Гуляш'"
+                      },
+                      "servings": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 20,
+                        "description": "How many people it feeds"
+                      },
+                      "minutes": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 600,
+                        "description": "Total time, preparation included"
+                      },
+                      "ingredients": {
+                        "minItems": 1,
+                        "maxItems": 25,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "description": "Each with its amount: '500 г үхрийн мах', '2 ширхэг сонгино'"
+                      },
+                      "steps": {
+                        "minItems": 1,
+                        "maxItems": 15,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 300
+                        },
+                        "description": "Short steps in order, one or two sentences each"
+                      }
+                    },
+                    "required": [
+                      "dish",
+                      "servings",
+                      "minutes",
+                      "ingredients",
+                      "steps"
+                    ]
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
+                              "create_note",
+                              "send_message",
+                              "web_search",
+                              "get_current_time",
+                              "open_url",
+                              "open_app",
+                              "set_timer",
+                              "list_reminders",
+                              "cancel_reminder",
+                              "computer_control",
+                              "add_todo",
+                              "list_todos",
+                              "complete_todo",
+                              "delete_todo",
+                              "daily_briefing",
+                              "create_routine",
+                              "remember",
+                              "forget",
+                              "set_profile",
+                              "type_text",
+                              "play_video",
+                              "find_files",
+                              "open_file",
+                              "read_file",
+                              "look_at_screen",
+                              "read_webpage",
+                              "check_email",
+                              "read_email",
+                              "draft_email",
+                              "send_email"
+                            ]
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "succeeded",
+                              "handed_off",
+                              "cancelled",
+                              "permission_denied",
+                              "unsupported",
+                              "needs_clarification",
+                              "failed"
+                            ]
+                          },
+                          "executed_via": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "enum": [
+                                  "backend",
+                                  "react_native",
+                                  "native_swift",
+                                  "app_intent",
+                                  "shortcut",
+                                  "url_scheme"
+                                ]
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "error_code": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "maxLength": 64
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "match_count": {
+                            "anyOf": [
+                              {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 9007199254740991
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "data": {
+                            "anyOf": [
+                              {
+                                "type": "object",
+                                "propertyNames": {
+                                  "type": "string"
+                                },
+                                "additionalProperties": {}
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "action_id",
+                          "tool",
+                          "status",
+                          "executed_via",
+                          "error_code"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "tool",
+                  "arguments",
+                  "confirmation",
+                  "result"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 64
+                  },
+                  "tool": {
+                    "type": "string",
+                    "const": "find_restaurants"
+                  },
+                  "arguments": {
+                    "type": "object",
+                    "properties": {
+                      "query": {
+                        "description": "The dish or kind of food the user wants: 'хуушуур', 'пицца', 'солонгос хоол'; omitted: any place to eat",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                      }
+                    }
+                  },
+                  "confirmation": {
+                    "type": "object",
+                    "properties": {
+                      "required": {
+                        "type": "boolean"
+                      },
+                      "prompt": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "maxLength": 1000
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "required",
+                      "prompt"
+                    ]
+                  },
+                  "result": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "action_id": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 64
+                          },
+                          "tool": {
+                            "type": "string",
+                            "enum": [
+                              "call_contact",
+                              "create_reminder",
+                              "create_calendar_event",
+                              "create_alarm",
+                              "get_weather",
+                              "open_maps",
+                              "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2072,6 +2728,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2280,6 +2939,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2471,6 +3133,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2659,6 +3324,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -2862,6 +3530,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3068,6 +3739,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3281,6 +3955,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3463,6 +4140,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3659,6 +4339,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -3876,6 +4559,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -4072,6 +4758,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -4268,6 +4957,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -4459,6 +5151,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -4650,6 +5345,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -4837,6 +5535,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -5035,6 +5736,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -5227,6 +5931,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -5465,6 +6172,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -5656,6 +6366,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -5848,6 +6561,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -6057,6 +6773,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -6278,6 +6997,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -6469,6 +7191,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -6665,6 +7390,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -6857,6 +7585,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -7049,6 +7780,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -7243,6 +7977,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -7434,6 +8171,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -7643,6 +8383,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -7825,6 +8568,9 @@
                               "get_weather",
                               "open_maps",
                               "find_bus_stops",
+                              "suggest_food",
+                              "show_recipe",
+                              "find_restaurants",
                               "create_note",
                               "send_message",
                               "web_search",
@@ -8344,6 +9090,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -8551,6 +9300,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -8771,6 +9523,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -8985,6 +9740,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -9177,6 +9935,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -9377,6 +10138,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -9559,6 +10323,644 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "look_at_screen",
+                        "read_webpage",
+                        "check_email",
+                        "read_email",
+                        "draft_email",
+                        "send_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "suggest_food"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "ideas": {
+                  "minItems": 1,
+                  "maxItems": 4,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "dish": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60,
+                        "description": "A dish, in Mongolian: 'Цуйван', 'Бууз', 'Гуляш'"
+                      },
+                      "note": {
+                        "description": "Why it fits now, a few words: 'хүйтэн өдөр дулаацуулна', 'хурдан хийгдэнэ'",
+                        "type": "string",
+                        "maxLength": 120
+                      }
+                    },
+                    "required": [
+                      "dish"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "ideas"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "look_at_screen",
+                        "read_webpage",
+                        "check_email",
+                        "read_email",
+                        "draft_email",
+                        "send_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "show_recipe"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "dish": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60,
+                  "description": "A dish, in Mongolian: 'Цуйван', 'Бууз', 'Гуляш'"
+                },
+                "servings": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 20,
+                  "description": "How many people it feeds"
+                },
+                "minutes": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 600,
+                  "description": "Total time, preparation included"
+                },
+                "ingredients": {
+                  "minItems": 1,
+                  "maxItems": 25,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "description": "Each with its amount: '500 г үхрийн мах', '2 ширхэг сонгино'"
+                },
+                "steps": {
+                  "minItems": 1,
+                  "maxItems": 15,
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 300
+                  },
+                  "description": "Short steps in order, one or two sentences each"
+                }
+              },
+              "required": [
+                "dish",
+                "servings",
+                "minutes",
+                "ingredients",
+                "steps"
+              ]
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
+                        "create_note",
+                        "send_message",
+                        "web_search",
+                        "get_current_time",
+                        "open_url",
+                        "open_app",
+                        "set_timer",
+                        "list_reminders",
+                        "cancel_reminder",
+                        "computer_control",
+                        "add_todo",
+                        "list_todos",
+                        "complete_todo",
+                        "delete_todo",
+                        "daily_briefing",
+                        "create_routine",
+                        "remember",
+                        "forget",
+                        "set_profile",
+                        "type_text",
+                        "play_video",
+                        "find_files",
+                        "open_file",
+                        "read_file",
+                        "look_at_screen",
+                        "read_webpage",
+                        "check_email",
+                        "read_email",
+                        "draft_email",
+                        "send_email"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "succeeded",
+                        "handed_off",
+                        "cancelled",
+                        "permission_denied",
+                        "unsupported",
+                        "needs_clarification",
+                        "failed"
+                      ]
+                    },
+                    "executed_via": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "enum": [
+                            "backend",
+                            "react_native",
+                            "native_swift",
+                            "app_intent",
+                            "shortcut",
+                            "url_scheme"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "error_code": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "maxLength": 64
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "match_count": {
+                      "anyOf": [
+                        {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 9007199254740991
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "data": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {}
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "action_id",
+                    "tool",
+                    "status",
+                    "executed_via",
+                    "error_code"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "tool",
+            "arguments",
+            "confirmation",
+            "result"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "tool": {
+              "type": "string",
+              "const": "find_restaurants"
+            },
+            "arguments": {
+              "type": "object",
+              "properties": {
+                "query": {
+                  "description": "The dish or kind of food the user wants: 'хуушуур', 'пицца', 'солонгос хоол'; omitted: any place to eat",
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 60
+                }
+              }
+            },
+            "confirmation": {
+              "type": "object",
+              "properties": {
+                "required": {
+                  "type": "boolean"
+                },
+                "prompt": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 1000
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "required",
+                "prompt"
+              ]
+            },
+            "result": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "action_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64
+                    },
+                    "tool": {
+                      "type": "string",
+                      "enum": [
+                        "call_contact",
+                        "create_reminder",
+                        "create_calendar_event",
+                        "create_alarm",
+                        "get_weather",
+                        "open_maps",
+                        "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -9754,6 +11156,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -9962,6 +11367,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -10153,6 +11561,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -10341,6 +11752,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -10544,6 +11958,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -10750,6 +12167,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -10963,6 +12383,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -11145,6 +12568,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -11341,6 +12767,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -11558,6 +12987,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -11754,6 +13186,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -11950,6 +13385,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -12141,6 +13579,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -12332,6 +13773,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -12519,6 +13963,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -12717,6 +14164,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -12909,6 +14359,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -13147,6 +14600,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -13338,6 +14794,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -13530,6 +14989,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -13739,6 +15201,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -13960,6 +15425,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -14151,6 +15619,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -14347,6 +15818,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -14539,6 +16013,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -14731,6 +16208,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -14925,6 +16405,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -15116,6 +16599,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -15325,6 +16811,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -15507,6 +16996,9 @@
                         "get_weather",
                         "open_maps",
                         "find_bus_stops",
+                        "suggest_food",
+                        "show_recipe",
+                        "find_restaurants",
                         "create_note",
                         "send_message",
                         "web_search",
@@ -15843,6 +17335,9 @@
             "get_weather",
             "open_maps",
             "find_bus_stops",
+            "suggest_food",
+            "show_recipe",
+            "find_restaurants",
             "create_note",
             "send_message",
             "web_search",
@@ -15988,6 +17483,9 @@
                   "get_weather",
                   "open_maps",
                   "find_bus_stops",
+                  "suggest_food",
+                  "show_recipe",
+                  "find_restaurants",
                   "create_note",
                   "send_message",
                   "web_search",
@@ -16533,6 +18031,159 @@
       },
       "required": [
         "stops"
+      ]
+    },
+    "RestaurantsRequest": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "origin": {
+          "type": "object",
+          "properties": {
+            "latitude": {
+              "type": "number",
+              "minimum": -90,
+              "maximum": 90
+            },
+            "longitude": {
+              "type": "number",
+              "minimum": -180,
+              "maximum": 180
+            }
+          },
+          "required": [
+            "latitude",
+            "longitude"
+          ]
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "radius_m": {
+          "default": 1500,
+          "type": "integer",
+          "minimum": 300,
+          "maximum": 5000
+        }
+      },
+      "required": [
+        "origin"
+      ]
+    },
+    "RestaurantsResponse": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "type": "object",
+      "properties": {
+        "restaurants": {
+          "maxItems": 20,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 200
+              },
+              "location": {
+                "type": "object",
+                "properties": {
+                  "latitude": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "longitude": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                },
+                "required": [
+                  "latitude",
+                  "longitude"
+                ]
+              },
+              "distance_m": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "address": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 300
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "rating": {
+                "anyOf": [
+                  {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 5
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "rating_count": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "open_now": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "kind": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "location",
+              "distance_m",
+              "address",
+              "rating",
+              "rating_count",
+              "open_now",
+              "kind"
+            ]
+          }
+        }
+      },
+      "required": [
+        "restaurants"
       ]
     },
     "ApiError": {

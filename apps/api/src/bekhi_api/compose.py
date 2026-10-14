@@ -30,6 +30,9 @@ ACTION_MN: dict[str, tuple[str, str]] = {
     "create_note": ("тэмдэглэл хадгалах", "тэмдэглэл хадгалахад"),
     "open_maps": ("газрын зураг нээх", "газрын зураг нээхэд"),
     "find_bus_stops": ("автобусны буудал хайх", "автобусны буудал хайхад"),
+    "suggest_food": ("хоол санал болгох", "хоол санал болгоход"),
+    "show_recipe": ("хоолны жор харуулах", "хоолны жор харуулахад"),
+    "find_restaurants": ("хоолны газар хайх", "хоолны газар хайхад"),
     "get_weather": ("цаг агаар харах", "цаг агаар харахад"),
     "web_search": ("хайлт хийх", "хайлт хийхэд"),
     "get_current_time": ("цаг харах", "цаг харахад"),
@@ -99,7 +102,7 @@ UNSUPPORTED_BY_CODE = {
 PERMISSION_BY_CODE = {
     "CONTACTS_DENIED": "Контакт харах зөвшөөрөл хэрэгтэй байна. Утасныхаа Settings-ээс Expo Go-д Contacts зөвшөөрөл өгнө үү.",
     "NOTIFICATIONS_DENIED": "Мэдэгдэл илгээх зөвшөөрөл хэрэгтэй байна. Утасныхаа Settings-ээс Expo Go-д Notifications зөвшөөрөл өгнө үү.",
-    "LOCATION_DENIED": "Ойрын буудлыг олохын тулд байршлын зөвшөөрөл хэрэгтэй байна. Утасныхаа Settings-ээс Expo Go-д Location зөвшөөрөл өгнө үү.",
+    "LOCATION_DENIED": "Ойр хавийн газрыг олохын тулд байршлын зөвшөөрөл хэрэгтэй байна. Утасныхаа Settings-ээс Expo Go-д Location зөвшөөрөл өгнө үү.",
 }
 
 FAILED_BY_CODE = {
@@ -115,6 +118,7 @@ FAILED_BY_CODE = {
     "LOCATION_NOT_FOUND": "Тэр газрыг олсонгүй. Өөрөөр хэлээд өгөөч.",
     "LOCATION_UNAVAILABLE": "Байршлыг тодорхойлж чадсангүй. GPS асаалттай эсэхийг шалгана уу.",
     "STOPS_FAILED": "Ойрын буудлуудыг олж чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.",
+    "RESTAURANTS_FAILED": "Ойрын хоолны газруудыг олж чадсангүй. Интернэтээ шалгаад дахин оролдоно уу.",
     "CONTACT_NOT_FOUND": "{name} гэсэн контакт олдсонгүй.",
     "CONTACT_NO_PHONE": "{name} гэсэн контактад утасны дугаар алга.",
     "TIME_IN_PAST": "Тэр цаг аль хэдийн өнгөрсөн байна. Өөр цаг хэлээд өгөөч.",
@@ -222,6 +226,24 @@ def _stops_sentence(stops: list) -> str:
     if rest:
         sentence += " Дараа нь " + ", ".join(f"{s['name']} {_metres(s)} метр" for s in rest[:2]) + "."
     return sentence + " Газрын зураг дээр харууллаа."
+
+
+def _restaurants_sentence(query: str | None, places: list) -> str:
+    """Places to eat as the phone found them: [{"name", "distance_m", "rating", "open_now"}], nearest first."""
+    named = [p for p in places if isinstance(p, dict) and p.get("name")]
+    what = f"{query} идэх газар" if query else "хоолны газар"
+    if not named:
+        return f"Ойролцоо {what} олдсонгүй."
+    first, *rest = named
+    sentence = f"Хамгийн ойрын {what} {first['name']}, {_metres(first)} метрт."
+    rating = first.get("rating")
+    if isinstance(rating, (int, float)) and rating > 0:
+        sentence += f" Үнэлгээ нь {rating:.1f}."
+    if first.get("open_now") is False:
+        sentence += " Гэхдээ одоо хаалттай байна."
+    if rest:
+        sentence += " Бас " + ", ".join(f"{p['name']} {_metres(p)} метр" for p in rest[:2]) + "."
+    return sentence + " Аль нэгийг нь дарвал зам заая."
 
 
 def _metres(stop: dict) -> int:
@@ -333,6 +355,8 @@ def _sentence(action: ActionRequest, r: ActionResult, now_iso: str) -> str:
                 return _scheduled_list(list(data.get("items") or []), now_iso)
             case "find_bus_stops":
                 return _stops_sentence(list(data.get("stops") or []))
+            case "find_restaurants":
+                return _restaurants_sentence(a.get("query"), list(data.get("restaurants") or []))
             case "cancel_reminder":
                 cancelled = [str(t) for t in (data.get("cancelled") or [])]
                 return f"За, {', '.join(cancelled)} цуцаллаа." if cancelled else "За, цуцаллаа."

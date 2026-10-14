@@ -9,6 +9,7 @@ Endpoints (Phase 3/4):
   POST /api/v1/assistant/actions/results   device outcomes -> final Mongolian answer
   POST /api/v1/maps/directions             phone location + destination -> route (Google Routes API)
   POST /api/v1/maps/stops/nearby           phone location -> bus stops around it (Google Places API)
+  POST /api/v1/maps/restaurants/nearby     phone location (+ a dish) -> places to eat around it (Google Places API)
   POST /api/v1/sync/devices                this device is linked (sync code + device id headers)
   GET  /api/v1/sync/alarms                 alarms/timers to ring on every linked device
   POST /api/v1/sync/alarms                 publish one this device has set
@@ -59,6 +60,8 @@ from .models import (
     DirectionsResponse,
     NearbyStopsRequest,
     NearbyStopsResponse,
+    RestaurantsRequest,
+    RestaurantsResponse,
     SyncAlarm,
     SyncCancelRequest,
     SyncDeviceRequest,
@@ -96,6 +99,7 @@ MN_DIRECTIONS = {
     "PLACES_KEY_INVALID": (502, "Google Maps API key буруу, эсвэл Places API (New) идэвхжээгүй байна."),
 }
 MN_STOPS_FAILED = "Уучлаарай, ойрын буудлуудыг олоход алдаа гарлаа."
+MN_RESTAURANTS_FAILED = "Уучлаарай, ойрын хоолны газруудыг олоход алдаа гарлаа."
 # Billed per request, so these share the assistant's per-minute limit. Sync too: a sync code
 # must not be guessable by trying many.
 WAKE_WAIT_SECONDS = 25
@@ -794,6 +798,28 @@ def create_app() -> FastAPI:
             log.warning("places api unreachable: %s rid=%s", type(e).__name__, request.state.request_id)
             raise ApiException(502, "maps_failed", MN_STOPS_FAILED) from e
         return {"stops": found}
+
+    @app.post("/api/v1/maps/restaurants/nearby", response_model=RestaurantsResponse)
+    async def maps_nearby_restaurants(body: RestaurantsRequest, request: Request):
+        if not settings.google_maps_api_key:
+            raise ApiException(503, "maps_failed", MN_KEY_MISSING.format("Google Maps"))
+        try:
+            found = await food.nearby_restaurants(
+                request.app.state.http,
+                settings.google_maps_api_key,
+                body.origin.model_dump(),
+                (body.query or "").strip() or None,
+                body.radius_m,
+            )
+        except directions.DirectionsError as e:
+            status, message = (
+                MN_DIRECTIONS["PLACES_KEY_INVALID"] if e.code == "PLACES_KEY_INVALID" else (502, MN_RESTAURANTS_FAILED)
+            )
+            raise ApiException(status, "maps_failed", message) from e
+        except httpx.HTTPError as e:
+            log.warning("places api unreachable: %s rid=%s", type(e).__name__, request.state.request_id)
+            raise ApiException(502, "maps_failed", MN_RESTAURANTS_FAILED) from e
+        return {"restaurants": found[:food.MAX_PLACES]}
 
     # Last: the web app takes every path the API does not.
     if settings.web_dir and (settings.web_dir / "index.html").is_file():

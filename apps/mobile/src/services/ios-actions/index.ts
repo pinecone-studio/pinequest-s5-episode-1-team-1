@@ -127,6 +127,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
       return service.openMaps(action.arguments);
     case "find_bus_stops":
       return service.findBusStops(action.arguments);
+    case "find_restaurants":
+      return service.findRestaurants(action.arguments);
     case "open_url":
       return service.openUrl(action.arguments);
     case "open_app":
@@ -146,6 +148,8 @@ function dispatch(service: IOSActionService, action: ActionRequest, chosen?: Cho
     case "play_video":
       return service.playVideo(action.arguments);
     case "get_weather":
+    case "suggest_food":
+    case "show_recipe":
     case "web_search":
     case "get_current_time":
     case "add_todo":
